@@ -1,0 +1,73 @@
+{
+  "cli_version": "0.13.4",
+  "checkpoint_id": "01M7XZW2MJCS8YA24Z4R7PN2KY",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".specify/memory/constitution.md",
+    "CLAUDE.md",
+    "README.md",
+    "app/globals.css",
+    "app/page.tsx",
+    "auth0/uwo-only-action.js",
+    "components/DemoPanel.tsx",
+    "components/GameScreen.tsx",
+    "components/Hud.tsx",
+    "components/LocationPrompt.tsx",
+    "components/ProfilePanel.tsx",
+    "components/Sheet.tsx",
+    "components/TabBar.tsx",
+    "components/map/LoadingScreen.tsx",
+    "components/map/MapView.tsx",
+    "db/schema.sql",
+    "db/seed.sql",
+    "lib/auth0.ts",
+    "lib/fog.ts",
+    "lib/geo.ts",
+    "lib/location.ts",
+    "lib/mapStyle.ts",
+    "proxy.ts",
+    "scripts/db.mjs",
+    "specs/001-friday-foundation/checklists/requirements.md",
+    "specs/001-friday-foundation/contracts/db-scripts.md",
+    "specs/001-friday-foundation/contracts/demo-controls.md",
+    "specs/001-friday-foundation/contracts/http-routes.md",
+    "specs/001-friday-foundation/data-model.md",
+    "specs/001-friday-foundation/plan.md",
+    "specs/001-friday-foundation/quickstart.md",
+    "specs/001-friday-foundation/research.md",
+    "specs/001-friday-foundation/spec.md",
+    "specs/001-friday-foundation/tasks.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": "/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 162,
+    "cache_creation_tokens": 218879,
+    "cache_read_tokens": 12358929,
+    "output_tokens": 87135,
+    "api_call_count": 76
+  },
+  "redaction": {
+    "replacements": 19,
+    "layers": {
+      "betterleaks": 0,
+      "connection_string": 0,
+      "credential_key": 0,
+      "credential_value": 6,
+      "credentialed_uri": 0,
+      "entropy": 12,
+      "key_context": 1,
+      "provider_token": 0,
+      "shell_stdin": 0
+    }
+  }
+}
