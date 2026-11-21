@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import MapView, { type BuildingTap, type MapHandle } from "./map/MapView";
-import LoadingScreen from "./map/LoadingScreen";
+import Intro from "./Intro";
 import Hud from "./Hud";
 import TabBar, { type Tab } from "./TabBar";
 import Sheet from "./Sheet";
@@ -50,6 +50,8 @@ type Waypoint = { slug: string; distanceM: number; minutes: number };
 export default function GameScreen() {
   const map = useRef<MapHandle | null>(null);
   const [mapState, setMapState] = useState<"loading" | "ready" | "unavailable">("loading");
+  const [entered, setEntered] = useState(false);
+  const onEntered = useCallback(() => setEntered(true), []);
   const [reason, setReason] = useState<string>();
   const params = useSyncExternalStore(noopSubscribe, readParams, () => SERVER_PARAMS);
   const [chosenTab, setTab] = useState<Tab | null>(null);
@@ -166,8 +168,8 @@ export default function GameScreen() {
           setTagSheet(id);
         }}
       />
-      <Hud />
-      {mapState === "ready" && !sheetOpen && (
+      <Hud visible={entered} />
+      {mapState === "ready" && entered && !sheetOpen && (
         <>
           <LocationPrompt />
           <LocateButton map={map} />
@@ -225,6 +227,7 @@ export default function GameScreen() {
       </Sheet>
 
       <TabBar
+        visible={entered}
         active={tab}
         onChange={(t) => {
           closeDistrict();
@@ -234,7 +237,7 @@ export default function GameScreen() {
           setTab(t);
         }}
       />
-      <LoadingScreen state={mapState} reason={reason} />
+      <Intro map={map} mapState={mapState} reason={reason} onDone={onEntered} />
       <AreaBanner />
       <ReplayBar />
       <Celebrations paused={passed !== null} />

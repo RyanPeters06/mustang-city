@@ -25,7 +25,15 @@ import {
 } from "@/lib/geo";
 import { ATMOSPHERE, CAMPUS_PITCH, CAMPUS_ZOOM, CITY_PITCH, basemapConfig, currentLightPreset, subscribeLight } from "@/lib/mapStyle";
 
+export type IntroStep = "forest" | "mustang" | "done";
+
 export type MapHandle = {
+  /** Park the camera over the whole of Forest State, behind the title card. */
+  prepareIntro: () => void;
+  /** Cinematic flight: Forest State overview → swoop down into Mustang City. Resolves when it lands. */
+  playIntro: (onStep: (s: IntroStep) => void) => Promise<void>;
+  /** Jump straight to the end of the intro. */
+  skipIntro: () => void;
   flyToCampus: () => void;
   flyToCity: () => void;
   center: () => LngLat | null;
@@ -850,6 +858,7 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapboxMap | null>(null);
   const followRef = useRef(false);
+  const introRef = useRef<{ skip: () => void } | null>(null);
   const callbacks = useRef({ onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap, onDistrictTap });
 
   useEffect(() => {
@@ -857,6 +866,53 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
   });
 
   useImperativeHandle(ref, () => ({
+    prepareIntro: () => mapRef.current?.jumpTo({ center: LONDON_CENTER, zoom: 9.4, pitch: 0, bearing: 0, padding: NO_PAD }),
+    skipIntro: () => introRef.current?.skip(),
+    playIntro: (onStep) => {
+      const map = mapRef.current;
+      const end = { center: CAMPUS_CENTER, zoom: 16.2, pitch: CAMPUS_PITCH, bearing: -30, padding: NO_PAD };
+      if (!map || reducedMotion()) {
+        map?.jumpTo(end);
+        onStep("done");
+        return Promise.resolve();
+      }
+      followRef.current = false;
+      return new Promise<void>((resolve) => {
+        let finished = false;
+        const timers: ReturnType<typeof setTimeout>[] = [];
+        const finish = () => {
+          if (finished) return;
+          finished = true;
+          timers.forEach(clearTimeout);
+          map.off("moveend", onMoveEnd);
+          introRef.current = null;
+          onStep("done");
+          resolve();
+        };
+        const fly = (opts: Parameters<MapboxMap["flyTo"]>[0]) => map.flyTo({ ...opts, essential: true });
+        let leg = 0;
+        const onMoveEnd = () => {
+          if (finished) return;
+          leg++;
+          if (leg === 1) {
+            onStep("mustang");
+            fly({ ...end, duration: 4600, curve: 1.5 });
+          } else finish();
+        };
+        introRef.current = {
+          skip: () => {
+            map.stop();
+            map.jumpTo(end);
+            finish();
+          },
+        };
+        onStep("forest");
+        map.on("moveend", onMoveEnd);
+        // Leg 1: slow push-in and tilt over the whole island; leg 2 (on moveend): dive into campus.
+        fly({ center: LONDON_CENTER, zoom: 10.3, pitch: 40, bearing: -14, duration: 2800 });
+        timers.push(setTimeout(finish, 12_000)); // safety: never trap the player in the intro
+      });
+    },
     flyToCampus: () =>
       mapRef.current?.flyTo({ center: CAMPUS_CENTER, zoom: 16.2, pitch: CAMPUS_PITCH, bearing: -30, padding: NO_PAD, duration: dur(2200), essential: true }),
     flyToCity: () =>

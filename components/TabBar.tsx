@@ -25,10 +25,10 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   },
 ];
 
-export default function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
+export default function TabBar({ active, onChange, visible = true }: { active: Tab; onChange: (t: Tab) => void; visible?: boolean }) {
   return (
     <nav
-      className="absolute inset-x-0 bottom-0 z-40 px-3"
+      className={`absolute inset-x-0 bottom-0 z-40 px-3 transition-all duration-700 ${visible ? "" : "pointer-events-none translate-y-4 opacity-0"}`}
       style={{ paddingBottom: "calc(var(--safe-bottom) + 8px)" }}
       aria-label="Main"
     >

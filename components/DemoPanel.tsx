@@ -73,6 +73,7 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
       >
         Reveal here
       </button>
+      <button className={btn} onClick={() => window.dispatchEvent(new Event("mc:replay-intro"))}>Replay intro</button>
       <button className={btn} onClick={() => map.current?.flyToCampus()}>Fly to Mustang City</button>
       <button className={btn} onClick={() => map.current?.flyToCity()}>Fly to Forest State</button>
       <button

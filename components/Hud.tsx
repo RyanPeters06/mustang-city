@@ -3,12 +3,12 @@
 import { useSyncExternalStore } from "react";
 import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/progress";
 
-export default function Hud() {
+export default function Hud({ visible = true }: { visible?: boolean }) {
   const { rep, rank, pct } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   return (
     <header
-      className="ui-chrome pointer-events-none absolute inset-x-0 top-0 z-20 px-4"
+      className={`ui-chrome pointer-events-none absolute inset-x-0 top-0 z-20 px-4 transition-all duration-700 ${visible ? "" : "-translate-y-4 opacity-0"}`}
       style={{ paddingTop: "calc(var(--safe-top) + 8px)" }}
     >
       <div
