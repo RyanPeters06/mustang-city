@@ -5,7 +5,7 @@ export default function LoreCard({ m, compact = false }: { m: Mission; compact?:
   if (!m.category || !m.brief) return null;
   return (
     <article className="relative overflow-hidden rounded-2xl border border-gold/30 bg-gradient-to-br from-gold/12 via-purple/10 to-transparent p-4">
-      <p className="text-[11px] font-bold tracking-[0.16em] text-gold uppercase">
+      <p className="text-[12px] font-bold tracking-[0.14em] text-gold uppercase">
         {CATEGORY_LABEL[m.category]}
         {m.year ? ` · ${m.year}` : ""}
       </p>

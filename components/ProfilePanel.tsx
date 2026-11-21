@@ -73,7 +73,7 @@ export default function ProfilePanel({
   const toNext = nextRank ? Math.min(1, (rep - prevMin) / (nextRank.min - prevMin)) : 1;
 
   const cta = "flex min-h-[52px] w-full items-center justify-center rounded-full text-[16px] font-bold";
-  const h = "mb-2 text-[12px] font-bold tracking-[0.16em] text-ink/55 uppercase";
+  const h = "mb-2 text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase";
 
   return (
     <div className="space-y-6 pb-4">
@@ -91,28 +91,31 @@ export default function ProfilePanel({
         <div className="flex items-center gap-4">
           <Emblem id={profile.emblem} accent={profile.accent} size={64} />
           <div className="min-w-0 flex-1">
-            <p className="line-clamp-2 text-[19px] leading-tight font-bold break-words text-ink">{name}</p>
+            <p className="line-clamp-2 text-[20px] leading-tight font-bold break-words text-ink">{name}</p>
             {profile.title && badgeByCode(profile.title) && (
-              <p className="text-[11px] font-bold tracking-[0.14em] uppercase" style={{ color: badgeByCode(profile.title)!.color }}>
+              <p className="text-[12px] font-bold tracking-[0.14em] uppercase" style={{ color: badgeByCode(profile.title)!.color }}>
                 {badgeByCode(profile.title)!.name}
               </p>
             )}
-            <p className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-ink/60">
+            <p className="mt-0.5 line-clamp-2 text-[14px] leading-snug text-ink/60">
               {[profile.faculty || "No faculty yet", profile.year].filter(Boolean).join(" · ")}
             </p>
           </div>
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="min-h-[40px] rounded-full bg-white/10 px-4 text-[13px] font-bold text-ink"
+            aria-label="Edit profile"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10 text-ink"
           >
-            Edit
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+            </svg>
           </button>
         </div>
         <div className="mt-4">
-          <div className="flex items-baseline justify-between text-[12px] font-bold tracking-[0.12em] uppercase">
+          <div className="flex items-baseline justify-between text-[12px] font-bold tracking-[0.14em] uppercase">
             <span className="text-gold">{rank}</span>
-            <span className="text-ink/50">{nextRank ? `${(nextRank.min - rep).toLocaleString()} Rep to ${nextRank.name}` : "Max rank"}</span>
+            <span className="text-ink/60">{nextRank ? `${(nextRank.min - rep).toLocaleString()} Rep to ${nextRank.name}` : "Max rank"}</span>
           </div>
           <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/10">
             <div className="h-full rounded-full bg-gradient-to-r from-pink to-gold" style={{ width: `${toNext * 100}%` }} />
@@ -160,13 +163,13 @@ export default function ProfilePanel({
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={c.thumb} alt="" className="h-12 w-12 rounded-xl object-cover" />
                     ) : (
-                      <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange/20 text-[18px] text-orange">✓</span>
+                      <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange/20 text-[20px] text-orange">✓</span>
                     )}
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[15px] font-semibold text-ink">{m.title}</span>
-                      <span className="block text-[12px] text-ink/50">{new Date(c.at).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
+                      <span className="block truncate text-[16px] font-semibold text-ink">{m.title}</span>
+                      <span className="block text-[12px] text-ink/60">{new Date(c.at).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
                     </span>
-                    <span className="text-[13px] font-bold text-orange">+{c.rep}</span>
+                    <span className="text-[14px] font-bold text-orange">+{c.rep}</span>
                   </button>
                 </li>
               );
@@ -181,7 +184,7 @@ export default function ProfilePanel({
         className="hud-panel flex min-h-[64px] w-full items-center justify-between px-4 py-3 text-left"
       >
         <span>
-          <span className="block text-[11px] font-bold tracking-[0.3em] text-teal uppercase">Your year so far</span>
+          <span className="block text-[12px] font-bold tracking-[0.3em] text-teal uppercase">Your year so far</span>
           <span className="font-display block text-[26px] leading-none text-ink uppercase">Forest State Wrapped</span>
         </span>
         <span className="text-[22px] text-pink" aria-hidden>▶</span>
@@ -189,8 +192,8 @@ export default function ProfilePanel({
 
       <button type="button" onClick={onOpenSchedule} className="hud-panel flex min-h-[60px] w-full items-center justify-between px-4 py-3 text-left">
         <span>
-          <span className="block text-[11px] font-bold tracking-[0.3em] text-teal uppercase">Class Run · {Object.keys(snap.classRuns).length} on time</span>
-          <span className="block text-[15px] font-bold text-ink">Add your schedule, get waypoints to class</span>
+          <span className="block text-[12px] font-bold tracking-[0.3em] text-teal uppercase">Class Run · {Object.keys(snap.classRuns).length} on time</span>
+          <span className="block text-[16px] font-bold text-ink">Add your schedule, get waypoints to class</span>
         </span>
         <span className="text-[20px] text-teal" aria-hidden>›</span>
       </button>
@@ -241,7 +244,7 @@ export default function ProfilePanel({
         )}
       </section>
 
-      <p className="pb-2 text-[11px] leading-relaxed text-ink/40">
+      <p className="pb-2 text-[12px] leading-relaxed text-ink/60">
         Data: City of London Open Data (planning districts) · London Transit Commission open data (routes, buses) ·{" "}
         <a href="https://open-meteo.com/" target="_blank" rel="noreferrer" className="underline">
           Weather by Open-Meteo.com
@@ -256,7 +259,7 @@ function Stat({ value, label, color }: { value: string; label: string; color: st
   return (
     <div className="rounded-2xl bg-white/[0.05] px-3 py-3 text-center">
       <p className={`text-[20px] font-bold tabular-nums ${color}`}>{value}</p>
-      <p className="text-[10px] font-semibold tracking-[0.15em] text-ink/55 uppercase">{label}</p>
+      <p className="text-[12px] font-semibold tracking-[0.14em] text-ink/60 uppercase">{label}</p>
     </div>
   );
 }

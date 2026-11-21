@@ -24,7 +24,7 @@ function Chips<T extends string>({ value, options, onChange, label }: { value: T
           role="radio"
           aria-checked={value === v}
           onClick={() => onChange(v)}
-          className={`min-h-[34px] flex-1 rounded-full px-2.5 text-[12px] font-bold whitespace-nowrap ${value === v ? "bg-pink text-night" : "text-ink/60"}`}
+          className={`min-h-[44px] flex-1 rounded-full px-2.5 text-[12px] font-bold whitespace-nowrap ${value === v ? "bg-pink text-night" : "text-ink/60"}`}
         >
           {text}
         </button>
@@ -102,14 +102,14 @@ export default function Leaderboard() {
               key={`${r.handle}-${r.rank}`}
               className={`flex items-center gap-3 rounded-2xl px-3 py-2 ${r.me ? "bg-pink/12 ring-1 ring-pink/40" : "bg-white/[0.04]"}`}
             >
-              <span className={`w-7 text-center text-[15px] font-bold tabular-nums ${r.rank <= 3 ? "text-gold" : "text-ink/50"}`}>{r.rank}</span>
+              <span className={`w-7 text-center text-[16px] font-bold tabular-nums ${r.rank <= 3 ? "text-gold" : "text-ink/60"}`}>{r.rank}</span>
               <Emblem id={r.emblem as EmblemId} accent={r.accent} size={34} />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[14px] font-semibold text-ink">
                   {r.name}
-                  {r.me && <span className="ml-1 text-[11px] font-bold text-pink">YOU</span>}
+                  {r.me && <span className="ml-1 text-[12px] font-bold text-pink">YOU</span>}
                 </span>
-                <span className="block truncate text-[11px] text-ink/50">{r.faculty ?? "—"}</span>
+                <span className="block truncate text-[12px] text-ink/60">{r.faculty ?? "—"}</span>
               </span>
               <span className="text-right text-[14px] font-bold tabular-nums text-orange">
                 {metric === "rep"
@@ -121,9 +121,9 @@ export default function Leaderboard() {
         </ol>
       )}
       {live && mine && mine.rank > 50 && (
-        <p className="text-center text-[13px] text-ink/60">You&apos;re #{mine.rank} on this board.</p>
+        <p className="text-center text-[14px] text-ink/60">You&apos;re #{mine.rank} on this board.</p>
       )}
-      {!live && period === "week" && <p className="text-[11px] text-ink/40">Weekly totals need accounts; the demo shows all-time numbers.</p>}
+      {!live && period === "week" && <p className="text-[12px] text-ink/60">Weekly totals need accounts; the demo shows all-time numbers.</p>}
     </div>
   );
 }

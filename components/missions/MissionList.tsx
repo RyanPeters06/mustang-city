@@ -26,7 +26,7 @@ export default function MissionList({ onOpen, onPassed }: { onOpen: (slug: strin
 
   return (
     <div className="pb-4">
-      <p className="mb-3 text-[13px] text-ink/60">
+      <p className="mb-3 text-[14px] text-ink/60">
         {missionCount} of {MISSIONS.length} done{from ? " · nearest first" : " · turn on location to sort by distance"}
       </p>
       <ul className="space-y-2.5">
@@ -50,18 +50,18 @@ function MissionCard({ m, distance, done, onOpen }: { m: Mission; distance: stri
       className={`flex w-full items-center gap-3 rounded-2xl border border-white/8 bg-white/[0.04] p-3.5 text-left transition-colors active:bg-white/10 ${done ? "opacity-55" : ""}`}
     >
       <div className="min-w-0 flex-1">
-        <p className={`text-[11px] font-bold tracking-[0.14em] uppercase ${TYPE_COLOR[kind]}`}>
+        <p className={`text-[12px] font-bold tracking-[0.14em] uppercase ${TYPE_COLOR[kind]}`}>
           {m.category ? CATEGORY_LABEL[m.category] : TYPE_LABEL[m.type]}
           {m.category ? ` · ${TYPE_LABEL[m.type]}` : ""}
         </p>
         <p className="mt-0.5 truncate text-[16px] font-bold text-ink">{m.title}</p>
-        <p className="mt-0.5 text-[13px] text-ink/55">{done ? "Mission passed" : (distance ?? "Distance unknown")}</p>
+        <p className="mt-0.5 text-[14px] text-ink/60">{done ? "Mission passed" : (distance ?? "Distance unknown")}</p>
       </div>
       <div className="text-right">
         {done ? (
-          <span className="text-[13px] font-bold text-teal">✓ Done</span>
+          <span className="text-[14px] font-bold text-teal">✓ Done</span>
         ) : (
-          <span className="text-[15px] font-bold text-orange tabular-nums">+{m.rep}</span>
+          <span className="text-[16px] font-bold text-orange tabular-nums">+{m.rep}</span>
         )}
       </div>
     </button>

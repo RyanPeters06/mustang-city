@@ -3,6 +3,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { dismissCelebration, getCelebration, getServerCelebration, subscribeCelebrations } from "@/lib/celebrate";
+import { SPRING_HERO, SPRING_UI } from "@/lib/motion";
 
 function sting(rank: boolean) {
   try {
@@ -55,7 +56,7 @@ export default function Celebrations({ paused = false }: { paused?: boolean }) {
           exit={{ opacity: 0 }}
         >
           <motion.p
-            className="text-[13px] font-bold tracking-[0.4em] text-teal uppercase"
+            className="text-[14px] font-bold tracking-[0.3em] text-teal uppercase"
             initial={{ y: -10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
@@ -73,11 +74,11 @@ export default function Celebrations({ paused = false }: { paused?: boolean }) {
             }}
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 240, damping: 16 }}
+            transition={{ ...SPRING_HERO }}
           >
             {c.title}
           </motion.h2>
-          <motion.p className="mt-4 text-[15px] font-semibold text-ink/75" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
+          <motion.p className="mt-4 text-[16px] font-semibold text-ink/75" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
             {c.subtitle}
           </motion.p>
         </motion.button>
@@ -92,7 +93,7 @@ export default function Celebrations({ paused = false }: { paused?: boolean }) {
           initial={{ y: -30, opacity: 0, scale: 0.95 }}
           animate={{ y: 0, opacity: 1, scale: 1 }}
           exit={{ y: -30, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 380, damping: 28 }}
+          transition={{ ...SPRING_UI }}
         >
           <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-night/[0.96] p-3 text-left shadow-2xl backdrop-blur-xl">
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl" style={{ background: c.color, boxShadow: `0 6px 24px -6px ${c.color}` }}>
@@ -101,7 +102,7 @@ export default function Celebrations({ paused = false }: { paused?: boolean }) {
               </svg>
             </span>
             <span className="min-w-0">
-              <span className="block text-[11px] font-bold tracking-[0.18em] text-gold uppercase">
+              <span className="block text-[12px] font-bold tracking-[0.14em] text-gold uppercase">
                 {c.kind === "district" ? "Neighbourhood unlocked" : c.kind === "ride" ? "Ride logged" : c.kind === "collectible" ? "Collectible found" : c.kind === "class" ? "Class Run · on time" : "Badge unlocked"}
               </span>
               <span className="block truncate text-[16px] font-bold text-ink">{c.title}</span>

@@ -42,12 +42,12 @@ export default function TabBar({ active, onChange, visible = true }: { active: T
               onClick={() => onChange(t.id)}
               aria-current={on ? "page" : undefined}
               aria-label={t.label}
-              className={`relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-[20px] transition-colors duration-200 ${ on ? "bg-white/[0.09] text-pink" : "text-ink/55 active:text-ink" }`}
+              className={`relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-[20px] transition-colors duration-200 ${ on ? "bg-white/[0.09] text-pink" : "text-ink/60 active:text-ink" }`}
             >
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 {t.icon}
               </svg>
-              <span className="text-[11px] font-semibold">{t.label}</span>
+              <span className="text-[12px] font-semibold">{t.label}</span>
             </button>
           );
         })}

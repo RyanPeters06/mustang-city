@@ -56,7 +56,7 @@ export function Emblem({ size = 96, className = "" }: { size?: number; className
 export function Wordmark({ className = "" }: { className?: string }) {
   return (
     <div className={`text-center ${className}`}>
-      <p className="text-[11px] font-bold tracking-[0.5em] text-teal uppercase">Forest State</p>
+      <p className="text-[12px] font-bold tracking-[0.3em] text-teal uppercase">Forest State</p>
       <h1
         className="font-display mt-1 text-[64px] leading-[0.82] uppercase"
         style={{

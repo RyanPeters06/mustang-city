@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { SPRING_UI } from "@/lib/motion";
 
 const KEY = "mc.onboarded.v1";
 const STEPS = [
@@ -44,7 +45,7 @@ export default function Onboarding({ ready }: { ready: boolean }) {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 16 }}
-          transition={{ type: "spring", stiffness: 320, damping: 30 }}
+          transition={{ ...SPRING_UI }}
           role="dialog"
           aria-label="Getting started"
         >
@@ -55,18 +56,18 @@ export default function Onboarding({ ready }: { ready: boolean }) {
           </div>
           <AnimatePresence mode="wait">
             <motion.div key={step} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2 }}>
-              <p className="mt-3 text-[18px] font-bold text-ink">{STEPS[step].title}</p>
+              <p className="mt-3 text-[20px] font-bold text-ink">{STEPS[step].title}</p>
               <p className="mt-1 text-[14px] leading-snug text-ink/75">{STEPS[step].body}</p>
             </motion.div>
           </AnimatePresence>
           <div className="mt-4 flex items-center justify-between">
-            <button type="button" onClick={done} className="min-h-[44px] px-1 text-[14px] font-semibold text-ink/55">
+            <button type="button" onClick={done} className="min-h-[44px] px-1 text-[14px] font-semibold text-ink/60">
               Skip
             </button>
             <button
               type="button"
               onClick={() => (step < STEPS.length - 1 ? setStep(step + 1) : done())}
-              className="btn-sunset min-h-[44px] rounded-full px-6 text-[15px] font-bold"
+              className="btn-sunset min-h-[44px] rounded-full px-6 text-[16px] font-bold"
             >
               {step < STEPS.length - 1 ? "Next" : "Let's go"}
             </button>

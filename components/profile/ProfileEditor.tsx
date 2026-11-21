@@ -71,7 +71,7 @@ export default function ProfileEditor({ snap, onClose }: { snap: ProgressSnapsho
                 className={`flex flex-col items-center gap-1 rounded-2xl p-2 ${on ? "bg-white/10 ring-2 ring-pink" : ""}`}
               >
                 <Emblem id={e.id} accent={draft.accent} size={48} locked={!unlocked} />
-                <span className="text-[10px] font-semibold text-ink/60">{unlocked ? e.name : `🔒 ${unlockLabel(e.id)}`}</span>
+                <span className="text-[12px] font-semibold text-ink/60">{unlocked ? e.name : `🔒 ${unlockLabel(e.id)}`}</span>
               </button>
             );
           })}
@@ -128,7 +128,7 @@ export default function ProfileEditor({ snap, onClose }: { snap: ProgressSnapsho
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={c.thumb} alt="" className="h-full w-full object-cover" />
-                  {on && <span className="absolute top-1 right-1 rounded-full bg-gold px-1.5 text-[10px] font-bold text-night">★</span>}
+                  {on && <span className="absolute top-1 right-1 rounded-full bg-gold px-1.5 text-[12px] font-bold text-night">★</span>}
                 </button>
               );
             })}
@@ -137,7 +137,7 @@ export default function ProfileEditor({ snap, onClose }: { snap: ProgressSnapsho
       )}
 
       <div className="grid grid-cols-2 gap-2.5">
-        <button type="button" onClick={onClose} className="min-h-[52px] rounded-full bg-white/[0.06] text-[15px] font-bold text-ink">
+        <button type="button" onClick={onClose} className="min-h-[52px] rounded-full bg-white/[0.06] text-[16px] font-bold text-ink">
           Cancel
         </button>
         <button
@@ -147,7 +147,7 @@ export default function ProfileEditor({ snap, onClose }: { snap: ProgressSnapsho
             updateProfile({ ...draft, name: draft.name.trim() });
             onClose();
           }}
-          className="min-h-[52px] rounded-full btn-sunset text-[15px] font-bold text-night disabled:opacity-40"
+          className="min-h-[52px] rounded-full btn-sunset text-[16px] font-bold text-night disabled:opacity-40"
         >
           Save
         </button>

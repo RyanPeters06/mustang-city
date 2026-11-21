@@ -85,11 +85,11 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
     <div className="space-y-4 pb-4">
       <div className="flex items-center gap-2 text-[12px] font-bold tracking-[0.14em] uppercase">
         <span className={TYPE_COLOR[kind]}>{m.category ? CATEGORY_LABEL[m.category] : TYPE_LABEL[m.type]}</span>
-        <span className="text-ink/30">·</span>
+        <span className="text-ink/60">·</span>
         <span className="text-orange">+{m.rep} Rep</span>
         {distance !== null && !done && (
           <>
-            <span className="text-ink/30">·</span>
+            <span className="text-ink/60">·</span>
             <span className="text-ink/60">{formatDistance(distance)}</span>
           </>
         )}
@@ -99,8 +99,8 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
       <figure className="flex items-start gap-3 rounded-2xl bg-white/[0.05] p-3">
         <GoosePortrait size={60} className="shrink-0 rounded-2xl ring-1 ring-pink/50" />
         <blockquote className="min-w-0 pt-0.5">
-          <p className="text-[11px] font-bold tracking-[0.16em] text-pink uppercase">The Goose</p>
-          <p key={briefing} className="mt-1 animate-[fadein_300ms_ease-out] text-[15px] leading-snug text-ink/90">
+          <p className="text-[12px] font-bold tracking-[0.14em] text-pink uppercase">The Goose</p>
+          <p key={briefing} className="mt-1 animate-[fadein_300ms_ease-out] text-[16px] leading-snug text-ink/90">
             “{briefing}”
           </p>
         </blockquote>
@@ -115,7 +115,7 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
             )}
             <div>
               <p className="text-[14px] font-bold text-teal">Mission passed</p>
-              {done.reason && <p className="text-[13px] text-ink/70">{done.reason}</p>}
+              {done.reason && <p className="text-[14px] text-ink/70">{done.reason}</p>}
             </div>
           </div>
           {done.thumb && <PosterButton m={m} thumb={done.thumb} at={done.at} />}
@@ -123,7 +123,7 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
         </>
       ) : (
         <>
-          <p className="text-[13px] text-ink/60">
+          <p className="text-[14px] text-ink/60">
             <span className="font-semibold text-ink/80">Objective:</span>{" "}
             {m.type === "photo" ? m.criteria : m.type === "bus" ? "Arrive by bus." : m.type === "heist" ? "Get a crew of 3 inside the circle within 15 minutes." : "Get inside the circle and check in."}
           </p>

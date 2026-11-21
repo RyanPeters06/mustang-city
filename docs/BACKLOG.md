@@ -63,14 +63,14 @@ palette, control stack, building framing, postcard loading screen, unified butto
   stagger in with springs, no pop-in of labels/blips during the dive.
 - [x] **3D model day/night look** — window glow keyed to the light preset per material (separate emissive for
   night), softer roof colour by day, subtle ambient occlusion band at the base.
-- [ ] **Typography pass** — one condensed display face for titles + one UI face; fewer letter-spaced caps labels;
+- [x] **Typography pass** (Nov 21: body text on a 12/14/16/20 scale, two letter-spacing tokens, display titles unchanged) — one condensed display face for titles + one UI face; fewer letter-spaced caps labels;
   consistent sizes (12/14/16/20/30).
-- [ ] **Motion pass** — shared easing tokens; spring sheets with velocity; tab-switch cross-fade; reduced-motion audit.
+- [x] **Motion pass** (Nov 21: shared EASE_OUT + SPRING_UI/POP/HERO tokens in lib/motion.ts; MotionConfig reducedMotion="user") — shared easing tokens; spring sheets with velocity; tab-switch cross-fade; reduced-motion audit.
 - [x] **Empty/first-run states** (first-run cards done; more empty states welcome) — friendly first-run pointers, empty states with a next action, "Set your name"
   onboarding card.
 - [x] **Map legend + blip toggles** — brief §Map; one tidy panel instead of more floating chips.
-- [ ] **Accessibility audit** — contrast on glass, 44 pt targets, VoiceOver labels for map controls, Dynamic Type.
-- [ ] **Comic-panel cover art** — drop Ryan's panels into the loading screen when supplied (docs/COVER_ART.md).
+- [x] **Accessibility audit** (Nov 21: text floor ink/60 = 6.5:1; all controls ≥ 44 pt and named; Dynamic Type still open — px sizes don't scale with iOS text size) — contrast on glass, 44 pt targets, VoiceOver labels for map controls, Dynamic Type.
+- [ ] **Comic-panel cover art** — drop-in ready: `public/cover/cover.*` (collage) or `public/cover/panel-*` (cycled) replace the loading postcards; `public/brand/icon.png` regenerates every app icon size. Waiting on Ryan's art.
 
 ## Done
 - [x] Friday foundation (spec 001) · [x] Missions & profiles (spec 002) · [x] Friends & building cards (spec 003)

@@ -9,7 +9,7 @@ export default function TransitChip() {
   if (b.status !== "delayed") return null;
   return (
     <div
-      className="glass pointer-events-none absolute right-4 z-20 flex min-h-[28px] items-center gap-1.5 rounded-full px-3 text-[11px] font-medium text-ink/75"
+      className="glass pointer-events-none absolute right-4 z-20 flex min-h-[44px] items-center gap-1.5 rounded-full px-3 text-[12px] font-medium text-ink/75"
       style={{ top: "calc(var(--safe-top) + 182px)" }}
       role="status"
     >

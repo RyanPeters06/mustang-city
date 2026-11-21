@@ -62,11 +62,11 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
 
   if (!open) return null;
 
-  const btn = "w-full rounded-lg bg-white/10 px-3 py-2 text-left text-[13px] font-semibold text-white hover:bg-white/20";
+  const btn = "w-full rounded-lg bg-white/10 px-3 py-2 text-left text-[14px] font-semibold text-white hover:bg-white/20";
 
   return createPortal(
     <div className="fixed top-4 left-4 z-[100] w-56 space-y-1.5 rounded-xl border border-white/10 bg-black/85 p-3 font-sans shadow-2xl">
-      <p className="pb-1 text-[11px] font-bold tracking-[0.2em] text-pink uppercase">Demo controls</p>
+      <p className="pb-1 text-[12px] font-bold tracking-[0.14em] text-pink uppercase">Demo controls</p>
       <button className={btn} onClick={walk}>{walking ? "■ Stop walk" : "▶ Walk campus"}</button>
       <button
         className={btn}
@@ -124,7 +124,7 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
         {(["auto", "dawn", "day", "dusk", "night"] as const).map((p) => (
           <button
             key={p}
-            className={`rounded-md px-1 py-1.5 text-[10px] font-bold uppercase ${light === (p === "auto" ? null : p) ? "bg-pink text-black" : "bg-white/10 text-white"}`}
+            className={`rounded-md px-1 py-1.5 text-[12px] font-bold uppercase ${light === (p === "auto" ? null : p) ? "bg-pink text-black" : "bg-white/10 text-white"}`}
             onClick={() => {
               const next = p === "auto" ? null : p;
               setLightOverride(next);
@@ -144,7 +144,7 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
       <button className={btn} onClick={() => setHeistSim(!getHeistSim())}>Demo heist crew on/off</button>
       <button className={btn} onClick={() => addDemoRep(500)}>+500 Rep (demo)</button>
       <button className={btn} onClick={resetProgress}>Reset missions + demo Rep</button>
-      <p className="pt-1 text-[11px] text-white/50">Press D to hide</p>
+      <p className="pt-1 text-[12px] text-white/50">Press D to hide</p>
     </div>,
     document.body,
   );

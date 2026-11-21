@@ -9,7 +9,7 @@ export default function BadgeGrid({ snap }: { snap: ProgressSnapshot }) {
   const earnedCount = BADGES.filter((b) => snap.badges[b.code]).length;
   return (
     <section>
-      <h3 className="mb-2 text-[12px] font-bold tracking-[0.16em] text-ink/55 uppercase">
+      <h3 className="mb-2 text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">
         Badges · {earnedCount}/{BADGES.length}
       </h3>
       <ul className="grid grid-cols-3 gap-2.5">
@@ -26,8 +26,8 @@ export default function BadgeGrid({ snap }: { snap: ProgressSnapshot }) {
                   <path d={b.glyph} />
                 </svg>
               </span>
-              <span className={`mt-1.5 text-[12px] leading-tight font-bold ${at ? "text-ink" : "text-ink/55"}`}>{b.name}</span>
-              <span className="mt-0.5 text-[10px] leading-tight text-ink/45">
+              <span className={`mt-1.5 text-[12px] leading-tight font-bold ${at ? "text-ink" : "text-ink/60"}`}>{b.name}</span>
+              <span className="mt-0.5 text-[12px] leading-tight text-ink/60">
                 {at
                   ? new Date(at).toLocaleDateString("en-CA", { month: "short", day: "numeric" })
                   : (st.lockedNote ?? `${st.have}/${st.need}${b.code === "cartographer" ? "%" : ""}`)}

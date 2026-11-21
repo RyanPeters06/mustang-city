@@ -40,9 +40,9 @@ export default function LocationPrompt() {
     <div className="absolute inset-x-0 z-20 flex justify-center px-4" style={{ bottom: "calc(var(--safe-bottom) + 112px)" }}>
       <div className="glass flex items-center gap-3 rounded-full py-1.5 pr-1.5 pl-4" role="status">
         <span className={`h-2 w-2 shrink-0 rounded-full ${tone}`} />
-        <p className="py-1.5 text-[13px] text-ink/85">{text}</p>
+        <p className="py-1.5 text-[14px] text-ink/85">{text}</p>
         {action ? (
-          <button type="button" onClick={startWatching} className="min-h-[36px] rounded-full bg-teal px-4 text-[13px] font-bold text-night">
+          <button type="button" onClick={startWatching} className="min-h-[44px] rounded-full bg-teal px-4 text-[14px] font-bold text-night">
             {action}
           </button>
         ) : (

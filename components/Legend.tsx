@@ -72,7 +72,7 @@ export default function Legend({ map }: { map: React.RefObject<MapHandle | null>
           role="dialog"
           aria-label="Map legend"
         >
-          <p className="text-[13px] font-semibold text-ink">On the map</p>
+          <p className="text-[14px] font-semibold text-ink">On the map</p>
           <ul className="mt-2 space-y-1.5">
             {BLIPS.map((b) => (
               <li key={b.label} className="flex items-center gap-2.5 text-[12px] text-ink/75">
@@ -89,10 +89,10 @@ export default function Legend({ map }: { map: React.RefObject<MapHandle | null>
               Mustang City border (always explored)
             </li>
           </ul>
-          <p className="mt-4 text-[13px] font-semibold text-ink">Show</p>
+          <p className="mt-4 text-[14px] font-semibold text-ink">Show</p>
           <div className="mt-2 space-y-1">
             {TOGGLES.map((t) => (
-              <label key={t.group} className="flex min-h-[36px] items-center justify-between gap-2 text-[13px] text-ink/85">
+              <label key={t.group} className="flex min-h-[44px] items-center justify-between gap-2 text-[14px] text-ink/85">
                 {t.label}
                 <button
                   type="button"

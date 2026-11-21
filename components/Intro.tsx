@@ -4,12 +4,15 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Emblem } from "./brand/Logo";
 import type { MapHandle, IntroStep } from "./map/MapView";
+import type { CoverArt } from "@/lib/brandAssets";
+import { EASE_OUT } from "@/lib/motion";
 
 type Props = {
   map: React.RefObject<MapHandle | null>;
   mapState: "loading" | "ready" | "unavailable";
   reason?: string;
   onDone: () => void;
+  cover?: CoverArt;
 };
 
 const REASONS: Record<string, string> = {
@@ -46,7 +49,7 @@ const seenThisSession = () => {
  * of Forest State down into Mustang City, with establishing-shot captions. Once per session;
  * later loads just fade the loader. The tap also gives us the user gesture audio needs later.
  */
-export default function Intro({ map, mapState, reason, onDone }: Props) {
+export default function Intro({ map, mapState, reason, onDone, cover = null }: Props) {
   const seen = useSyncExternalStore(noopSubscribe, seenThisSession, () => false);
   const [chosen, setPhase] = useState<"title" | "flying" | "done" | null>(null);
   const phase = mapState !== "ready" ? "loader" : (chosen ?? (seen ? "done" : "title"));
@@ -96,19 +99,19 @@ export default function Intro({ map, mapState, reason, onDone }: Props) {
             className="absolute inset-0 z-[45] overflow-hidden bg-[#0c0618]"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 1.04 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.8, ease: EASE_OUT }}
           >
-            <Postcards />
+            {cover ? <CoverArtLayer cover={cover} /> : <Postcards />}
             {/* legibility: soft top + strong bottom gradient */}
             <div aria-hidden className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#0c0618]/70 to-transparent" />
             <div aria-hidden className="absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-[#0c0618] via-[#0c0618]/85 to-transparent" />
 
             <div className="absolute inset-x-6 flex flex-col" style={{ bottom: "calc(var(--safe-bottom) + 34px)" }}>
-              <motion.div initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}>
+              <motion.div initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.9, ease: EASE_OUT }}>
                 <div className="flex items-end gap-3">
                   <Emblem size={64} />
                   <div className="pb-1">
-                    <p className="text-[11px] font-semibold tracking-[0.32em] text-teal uppercase">Forest State</p>
+                    <p className="text-[12px] font-semibold tracking-[0.3em] text-teal uppercase">Forest State</p>
                     <p
                       className="font-display text-[54px] leading-[0.86] uppercase"
                       style={{
@@ -126,8 +129,8 @@ export default function Intro({ map, mapState, reason, onDone }: Props) {
 
               {mapState === "unavailable" ? (
                 <div className="glass mt-6 rounded-[20px] px-5 py-4">
-                  <p className="text-[15px] font-semibold text-ink">Map unavailable</p>
-                  <p className="mt-1 text-[13px] text-ink/70">{REASONS[reason ?? ""] ?? "Something went wrong loading the map."}</p>
+                  <p className="text-[16px] font-semibold text-ink">Map unavailable</p>
+                  <p className="mt-1 text-[14px] text-ink/70">{REASONS[reason ?? ""] ?? "Something went wrong loading the map."}</p>
                 </div>
               ) : phase === "title" ? (
                 <motion.button
@@ -135,14 +138,14 @@ export default function Intro({ map, mapState, reason, onDone }: Props) {
                   onClick={enter}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.5, ease: EASE_OUT }}
                   className="btn-sunset mt-7 flex min-h-[56px] w-full items-center justify-center rounded-full text-[16px] font-bold"
                 >
                   Tap to enter
                 </motion.button>
               ) : (
                 <div className="mt-7 flex min-h-[56px] items-center justify-between gap-4">
-                  <p key={tip} className="max-w-[78%] animate-[fadein_400ms_ease-out] text-[13px] leading-snug text-ink/75">
+                  <p key={tip} className="max-w-[78%] animate-[fadein_400ms_ease-out] text-[14px] leading-snug text-ink/75">
                     {TIPS[tip]}
                   </p>
                   <span className="h-6 w-6 shrink-0 animate-spin rounded-full border-2 border-white/15 border-t-gold" aria-label="Loading" />
@@ -174,7 +177,7 @@ export default function Intro({ map, mapState, reason, onDone }: Props) {
                   exit={{ opacity: 0, x: 16 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <p className="text-[12px] font-bold tracking-[0.4em] text-teal uppercase">{cap.kicker}</p>
+                  <p className="text-[12px] font-bold tracking-[0.3em] text-teal uppercase">{cap.kicker}</p>
                   <p className="font-display mt-1 text-[52px] leading-none text-ink uppercase drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)]">{cap.title}</p>
                   <div className="sunset-rule mt-2 w-40" />
                 </motion.div>
@@ -183,7 +186,7 @@ export default function Intro({ map, mapState, reason, onDone }: Props) {
             <button
               type="button"
               onClick={() => map.current?.skipIntro()}
-              className="absolute right-4 bottom-[3%] min-h-[44px] px-3 text-[12px] font-bold tracking-[0.2em] text-ink/70 rounded-full"
+              className="absolute right-4 bottom-[3%] min-h-[44px] min-w-[64px] px-3 text-[12px] font-bold tracking-[0.14em] text-ink/70 rounded-full"
             >
               Skip ›
             </button>
@@ -231,6 +234,32 @@ function Postcards() {
       >
         <span className="text-gold">Visit</span> {c.place} · {c.area}
       </motion.p>
+    </div>
+  );
+}
+
+/** Ryan's cover art: a full collage with a slow push-in, or comic panels cycled like the postcards. */
+function CoverArtLayer({ cover }: { cover: NonNullable<CoverArt> }) {
+  const srcs = cover.kind === "collage" ? [cover.src] : cover.srcs;
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (srcs.length < 2) return;
+    const t = setInterval(() => setI((n) => (n + 1) % srcs.length), 4200);
+    return () => clearInterval(t);
+  }, [srcs.length]);
+  return (
+    <div className="absolute inset-0" aria-hidden>
+      <AnimatePresence>
+        <motion.div
+          key={srcs[i]}
+          className="absolute inset-0 bg-cover bg-center motion-reduce:!transform-none"
+          style={{ backgroundImage: `url(${srcs[i]})` }}
+          initial={{ opacity: 0, scale: cover.kind === "collage" ? 1.08 : 1.14, rotate: cover.kind === "panels" ? (i % 2 ? -1.5 : 1.5) : 0 }}
+          animate={{ opacity: 1, scale: 1.0, rotate: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ opacity: { duration: 0.9 }, scale: { duration: cover.kind === "collage" ? 14 : 6, ease: "linear" }, rotate: { duration: 6 } }}
+        />
+      </AnimatePresence>
     </div>
   );
 }

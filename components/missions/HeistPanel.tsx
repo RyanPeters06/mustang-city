@@ -76,7 +76,7 @@ export default function HeistPanel({ m, fix, inRange, onComplete }: Props) {
     <div className="space-y-3">
       <div className="hud-panel px-4 py-3">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold tracking-[0.2em] text-purple uppercase">
+          <span className="text-[12px] font-bold tracking-[0.14em] text-purple uppercase">
             Crew {offline && sim ? "· demo" : ""}
           </span>
           {left !== null && <span className="text-[12px] text-ink/60">{left} min left</span>}

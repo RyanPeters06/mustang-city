@@ -42,7 +42,7 @@ export default function NextBus({ at }: { at: LngLat }) {
           <path d="M6 4h12a2 2 0 0 1 2 2v10H4V6a2 2 0 0 1 2-2z M4 11h16 M7 19v-3 M17 19v-3" />
         </svg>
       </span>
-      <span className="min-w-0 text-[13px] leading-snug">
+      <span className="min-w-0 text-[14px] leading-snug">
         {!res ? (
           <span className="text-ink/60">Checking buses…</span>
         ) : next ? (

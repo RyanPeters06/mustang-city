@@ -33,11 +33,11 @@ export default function PosterButton({ m, thumb, at }: { m: Mission; thumb?: str
           const r = await sharePoster(preview.blob, m.slug);
           if (r === "saved") setNote("Poster saved. Post it anywhere.");
         }}
-        className="flex min-h-[52px] w-full items-center justify-center btn-sunset text-[15px] font-bold tracking-[0.2em] text-night disabled:opacity-60 rounded-full"
+        className="flex min-h-[52px] w-full items-center justify-center btn-sunset text-[16px] font-bold tracking-[0.14em] text-night disabled:opacity-60 rounded-full"
       >
         {busy ? "Printing…" : preview ? "Share poster" : "Make a poster"}
       </button>
-      {note && <p className="text-center text-[13px] text-teal">{note}</p>}
+      {note && <p className="text-center text-[14px] text-teal">{note}</p>}
     </div>
   );
 }

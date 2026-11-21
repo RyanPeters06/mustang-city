@@ -15,10 +15,10 @@ export default function Hud({ visible = true }: { visible?: boolean }) {
     >
       <div className="glass pointer-events-auto relative flex items-center gap-3 overflow-hidden rounded-[22px] px-4 py-2.5">
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold tracking-[0.18em] text-gold uppercase">
+          <p className="truncate text-[12px] font-bold tracking-[0.14em] whitespace-nowrap text-gold uppercase">
             {rank}
             {w.status === "live" && w.tempC !== null && (
-              <span className="text-ink/55">
+              <span className="text-ink/60">
                 {" "}· {Math.round(w.tempC)}°C {w.label}
               </span>
             )}
@@ -36,8 +36,8 @@ export default function Hud({ visible = true }: { visible?: boolean }) {
 function Stat({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div className="text-right">
-      <p className={`text-[18px] leading-tight font-bold tabular-nums ${color}`}>{value}</p>
-      <p className="text-[10px] font-medium tracking-[0.08em] text-ink/55 uppercase">{label}</p>
+      <p className={`text-[20px] leading-tight font-bold tabular-nums ${color}`}>{value}</p>
+      <p className="text-[12px] font-medium tracking-[0.14em] text-ink/60 uppercase">{label}</p>
     </div>
   );
 }

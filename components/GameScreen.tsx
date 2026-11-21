@@ -1,5 +1,7 @@
 "use client";
 
+import type { CoverArt } from "@/lib/brandAssets";
+
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import MapView, { type BuildingTap, type MapHandle } from "./map/MapView";
 import Intro from "./Intro";
@@ -22,7 +24,7 @@ import TagButton from "./tags/TagButton";
 import RadioPill from "./RadioPill";
 import TransitChip from "./TransitChip";
 import Wrapped from "./wrapped/Wrapped";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, MotionConfig } from "motion/react";
 import TagDetail from "./tags/TagDetail";
 import TagComposer from "./tags/TagComposer";
 import DistrictDetail from "./districts/DistrictDetail";
@@ -63,7 +65,7 @@ const noopSubscribe = () => () => {};
 /** `key` is a mission slug or `bldg:<name>`. */
 type Waypoint = { slug: string; distanceM: number; minutes: number };
 
-export default function GameScreen() {
+export default function GameScreen({ cover = null }: { cover?: CoverArt }) {
   const map = useRef<MapHandle | null>(null);
   const [mapState, setMapState] = useState<"loading" | "ready" | "unavailable">("loading");
   const [entered, setEntered] = useState(false);
@@ -180,6 +182,7 @@ export default function GameScreen() {
   const buildingKey = building ? `bldg:${building.name ?? building.center.join(",")}` : null;
 
   return (
+    <MotionConfig reducedMotion="user">
     <main className="absolute inset-0">
       <MapView
         ref={map}
@@ -229,7 +232,7 @@ export default function GameScreen() {
                 map.current?.showFriendArea(null);
                 setFriendShown(null);
               }}
-              className="glass absolute left-4 z-20 min-h-[44px] rounded-full px-4 text-[13px] font-bold text-ink"
+              className="glass absolute left-4 z-20 min-h-[44px] rounded-full px-4 text-[14px] font-bold text-ink"
               style={{ bottom: "calc(var(--safe-bottom) + 170px)" }}
             >
               Hide {friendShown.replace(/^demo\./, "")}&apos;s map ✕
@@ -297,7 +300,7 @@ export default function GameScreen() {
           setTab(t);
         }}
       />
-      <Intro map={map} mapState={mapState} reason={reason} onDone={onEntered} />
+      <Intro map={map} mapState={mapState} reason={reason} onDone={onEntered} cover={cover} />
       <AreaBanner />
       <ReplayBar />
       <Onboarding ready={mapState === "ready" && entered} />
@@ -306,5 +309,6 @@ export default function GameScreen() {
       <AnimatePresence>{wrapped && <Wrapped key="wrapped" onClose={() => setWrapped(false)} />}</AnimatePresence>
       <DemoPanel map={map} selected={selected} onPassed={setPassed} />
     </main>
+    </MotionConfig>
   );
 }

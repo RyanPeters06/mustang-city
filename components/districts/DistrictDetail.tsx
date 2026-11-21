@@ -33,14 +33,14 @@ export default function DistrictDetail({ name, onOpenMission }: { name: string; 
 
       <div className="hud-panel p-4">
         <div className="flex items-baseline justify-between">
-          <span className="text-[13px] font-semibold text-ink/80">{unlocked ? "District claimed" : `Clear ${Math.round(UNLOCK_SHARE * 100)}% to claim it`}</span>
-          <span className="text-[13px] font-bold text-orange">+{DISTRICT_REP} Rep</span>
+          <span className="text-[14px] font-semibold text-ink/80">{unlocked ? "District claimed" : `Clear ${Math.round(UNLOCK_SHARE * 100)}% to claim it`}</span>
+          <span className="text-[14px] font-bold text-orange">+{DISTRICT_REP} Rep</span>
         </div>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
           <div className={`h-full ${unlocked ? "bg-gold" : "bg-gradient-to-r from-pink to-orange"}`} style={{ width: `${(unlocked ? 1 : toUnlock) * 100}%` }} />
         </div>
         {d?.info?.startsWith("http") && (
-          <a href={d.info} target="_blank" rel="noreferrer" className="mt-3 inline-block min-h-[44px] pt-3 text-[13px] font-semibold text-teal underline rounded-full">
+          <a href={d.info} target="_blank" rel="noreferrer" className="mt-3 inline-block min-h-[44px] pt-3 text-[14px] font-semibold text-teal underline rounded-full">
             City of London district profile
           </a>
         )}
@@ -48,8 +48,8 @@ export default function DistrictDetail({ name, onOpenMission }: { name: string; 
 
       <div className="hud-panel flex items-center gap-3 px-4 py-3">
         <span className="h-8 w-8 shrink-0" style={{ background: holder ? facultyColor(holder.faculty) : "rgba(255,255,255,0.08)" }} aria-hidden />
-        <span className="min-w-0 text-[13px] leading-snug">
-          <span className="block text-[11px] font-bold tracking-[0.18em] text-ink/55 uppercase">
+        <span className="min-w-0 text-[14px] leading-snug">
+          <span className="block text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">
             Faculty turf{turf.status === "sample" ? " · sample" : ""}
           </span>
           {holder ? (
@@ -77,10 +77,10 @@ export default function DistrictDetail({ name, onOpenMission }: { name: string; 
                   className="hud-panel flex min-h-[52px] w-full items-center justify-between gap-3 px-3 py-2.5 text-left"
                 >
                   <span className="min-w-0">
-                    <span className="block truncate text-[15px] font-semibold text-ink">{m.title}</span>
-                    <span className="block text-[12px] text-ink/50">{m.category ? CATEGORY_LABEL[m.category] : TYPE_LABEL[m.type]}</span>
+                    <span className="block truncate text-[16px] font-semibold text-ink">{m.title}</span>
+                    <span className="block text-[12px] text-ink/60">{m.category ? CATEGORY_LABEL[m.category] : TYPE_LABEL[m.type]}</span>
                   </span>
-                  <span className={`text-[13px] font-bold ${snap.completions[m.slug] ? "text-teal" : "text-orange"}`}>
+                  <span className={`text-[14px] font-bold ${snap.completions[m.slug] ? "text-teal" : "text-orange"}`}>
                     {snap.completions[m.slug] ? "✓" : `+${m.rep}`}
                   </span>
                 </button>

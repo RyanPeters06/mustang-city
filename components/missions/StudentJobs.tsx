@@ -76,8 +76,8 @@ export default function StudentJobs({ onPassed }: { onPassed: (info: { slug: str
   return (
     <section className="mt-6">
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-[12px] font-bold tracking-[0.16em] text-ink/60 uppercase">Student jobs {mode === "local" && <span className="text-gold">· samples</span>}</h3>
-        <button type="button" onClick={() => setWriting((w) => !w)} className="min-h-[44px] px-2 text-[13px] font-bold text-teal rounded-full">
+        <h3 className="text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">Student jobs {mode === "local" && <span className="text-gold">· samples</span>}</h3>
+        <button type="button" onClick={() => setWriting((w) => !w)} className="min-h-[44px] px-2 text-[14px] font-bold text-teal rounded-full">
           {writing ? "Cancel" : "+ Write a job"}
         </button>
       </div>
@@ -92,7 +92,7 @@ export default function StudentJobs({ onPassed }: { onPassed: (info: { slug: str
         />
       )}
       {msg && (
-        <p role="alert" className="mb-2 border border-pink/40 bg-pink/10 px-3 py-2 text-[13px] text-ink">
+        <p role="alert" className="mb-2 border border-pink/40 bg-pink/10 px-3 py-2 text-[14px] text-ink">
           {msg}
         </p>
       )}
@@ -106,18 +106,18 @@ export default function StudentJobs({ onPassed }: { onPassed: (info: { slug: str
             <li key={m.id} className="hud-panel">
               <div className="flex items-stretch">
                 <div className="flex w-12 shrink-0 flex-col items-center justify-center border-r border-white/8 py-1">
-                  <button type="button" aria-label="Vote up" aria-pressed={m.myVote === 1} onClick={() => vote(m, 1)} className={`h-8 w-10 text-[15px] ${m.myVote === 1 ? "text-teal" : "text-ink/50"}`}>
+                  <button type="button" aria-label="Vote up" aria-pressed={m.myVote === 1} onClick={() => vote(m, 1)} className={`h-11 w-11 text-[16px] ${m.myVote === 1 ? "text-teal" : "text-ink/60"}`}>
                     ▲
                   </button>
-                  <span className="text-[13px] font-bold text-ink tabular-nums">{m.score}</span>
-                  <button type="button" aria-label="Vote down" aria-pressed={m.myVote === -1} onClick={() => vote(m, -1)} className={`h-8 w-10 text-[15px] ${m.myVote === -1 ? "text-pink" : "text-ink/50"}`}>
+                  <span className="text-[14px] font-bold text-ink tabular-nums">{m.score}</span>
+                  <button type="button" aria-label="Vote down" aria-pressed={m.myVote === -1} onClick={() => vote(m, -1)} className={`h-11 w-11 text-[16px] ${m.myVote === -1 ? "text-pink" : "text-ink/60"}`}>
                     ▼
                   </button>
                 </div>
                 <button type="button" onClick={() => setOpen(open === m.id ? null : m.id)} className="min-w-0 flex-1 px-3 py-2.5 text-left">
-                  <span className="block text-[11px] font-bold tracking-[0.14em] text-orange uppercase">Check-in · +{m.rep} Rep</span>
-                  <span className={`block truncate text-[15px] font-bold ${done ? "text-ink/50" : "text-ink"}`}>{m.title}</span>
-                  <span className="block text-[12px] text-ink/55">
+                  <span className="block text-[12px] font-bold tracking-[0.14em] text-orange uppercase">Check-in · +{m.rep} Rep</span>
+                  <span className={`block truncate text-[16px] font-bold ${done ? "text-ink/60" : "text-ink"}`}>{m.title}</span>
+                  <span className="block text-[12px] text-ink/60">
                     @{m.author} · {done ? "done" : (formatDistance(d) ?? "distance unknown")}
                   </span>
                 </button>
@@ -126,9 +126,9 @@ export default function StudentJobs({ onPassed }: { onPassed: (info: { slug: str
                 <div className="space-y-2 border-t border-white/8 px-3 py-3">
                   <p className="text-[14px] leading-snug text-ink/85">“{m.briefing}”</p>
                   {done ? (
-                    <p className="text-[13px] font-bold text-teal">✓ Job done</p>
+                    <p className="text-[14px] font-bold text-teal">✓ Job done</p>
                   ) : m.mine ? (
-                    <p className="text-[13px] text-ink/60">Your job. Send your friends.</p>
+                    <p className="text-[14px] text-ink/60">Your job. Send your friends.</p>
                   ) : (
                     <button
                       type="button"
@@ -156,7 +156,7 @@ function Composer({ mode, fix, onPosted }: { mode: Mode; fix: { lngLat: [number,
   const [busy, setBusy] = useState(false);
 
   if (mode !== "server") {
-    return <p className="mb-3 bg-white/[0.05] px-3 py-3 text-[13px] text-ink/70">Writing jobs needs sign-in, so other players can find and vote on them.</p>;
+    return <p className="mb-3 bg-white/[0.05] px-3 py-3 text-[14px] text-ink/70">Writing jobs needs sign-in, so other players can find and vote on them.</p>;
   }
 
   async function post() {
@@ -179,9 +179,9 @@ function Composer({ mode, fix, onPosted }: { mode: Mode; fix: { lngLat: [number,
   return (
     <div className="hud-panel mb-3 space-y-2 p-3">
       <p className="text-[12px] text-ink/60">The job is pinned where you&apos;re standing. The Goose screens every job before it goes live.</p>
-      <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 50))} placeholder="Job title" className="w-full rounded-xl border border-white/12 bg-white/[0.05] px-3 py-2.5 text-[16px] text-ink placeholder:text-ink/35 focus:border-teal focus:outline-none" />
-      <textarea value={briefing} onChange={(e) => setBriefing(e.target.value.slice(0, 140))} rows={3} placeholder="What should they do here?" className="w-full resize-none rounded-xl border border-white/12 bg-white/[0.05] px-3 py-2.5 text-[16px] text-ink placeholder:text-ink/35 focus:border-teal focus:outline-none" />
-      {error && <p role="alert" className="text-[13px] text-pink">{error}</p>}
+      <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 50))} placeholder="Job title" className="w-full rounded-xl border border-white/12 bg-white/[0.05] px-3 py-2.5 text-[16px] text-ink placeholder:text-ink/60 focus:border-teal focus:outline-none" />
+      <textarea value={briefing} onChange={(e) => setBriefing(e.target.value.slice(0, 140))} rows={3} placeholder="What should they do here?" className="w-full resize-none rounded-xl border border-white/12 bg-white/[0.05] px-3 py-2.5 text-[16px] text-ink placeholder:text-ink/60 focus:border-teal focus:outline-none" />
+      {error && <p role="alert" className="text-[14px] text-pink">{error}</p>}
       <button type="button" disabled={busy} onClick={post} className="flex min-h-[48px] w-full items-center justify-center bg-teal text-[14px] font-bold text-night disabled:opacity-50 rounded-full">
         {busy ? "Screening…" : "Post job"}
       </button>

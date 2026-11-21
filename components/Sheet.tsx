@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
+import { SPRING_UI } from "@/lib/motion";
 
 type Props = { open: boolean; title: string; onClose: () => void; children: React.ReactNode };
 
@@ -27,7 +28,7 @@ export default function Sheet({ open, title, onClose, children }: Props) {
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", stiffness: 380, damping: 36 }}
+            transition={{ ...SPRING_UI }}
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.6 }}

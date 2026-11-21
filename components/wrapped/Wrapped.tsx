@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { buildWrapped, drawFog, type WrappedData } from "@/lib/wrapped";
 import { Emblem } from "../brand/Logo";
+import { EASE_OUT } from "@/lib/motion";
 
 const SLIDES = 5;
 const SLIDE_MS = 6000;
@@ -59,7 +60,7 @@ export default function Wrapped({ onClose }: { onClose: () => void }) {
         ))}
       </div>
       <div className="relative z-10 flex items-center justify-between px-4 pt-3">
-        <p className="text-[11px] font-bold tracking-[0.35em] text-ink/70 uppercase">Forest State Wrapped</p>
+        <p className="text-[12px] font-bold tracking-[0.3em] text-ink/70 uppercase">Forest State Wrapped</p>
         <button type="button" onClick={onClose} aria-label="Close Wrapped" className="flex h-11 w-11 items-center justify-center text-[22px] text-ink/80">
           ✕
         </button>
@@ -84,7 +85,7 @@ export default function Wrapped({ onClose }: { onClose: () => void }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.45, ease: EASE_OUT }}
           >
             {i === 0 && <Intro data={data} />}
             {i === 1 && <Timelapse data={data} />}
@@ -99,7 +100,7 @@ export default function Wrapped({ onClose }: { onClose: () => void }) {
 }
 
 function Kicker({ children }: { children: React.ReactNode }) {
-  return <p className="text-[12px] font-bold tracking-[0.35em] text-teal uppercase">{children}</p>;
+  return <p className="text-[12px] font-bold tracking-[0.3em] text-teal uppercase">{children}</p>;
 }
 
 function Intro({ data }: { data: WrappedData }) {
@@ -120,7 +121,7 @@ function Intro({ data }: { data: WrappedData }) {
         <br />
         Forest State
       </h2>
-      <p className="mt-4 text-[15px] text-ink/70">Tap to see what you uncovered.</p>
+      <p className="mt-4 text-[16px] text-ink/70">Tap to see what you uncovered.</p>
     </div>
   );
 }
@@ -157,10 +158,10 @@ function Timelapse({ data }: { data: WrappedData }) {
       <p className="font-display mt-1 text-[44px] leading-none text-ink uppercase">
         {data.km2 < 1 ? `${Math.round(data.km2 * 100) / 100}` : data.km2.toFixed(1)} km²
       </p>
-      <p className="text-[15px] text-ink/70">of fog cleared, in the order you cleared it.</p>
+      <p className="text-[16px] text-ink/70">of fog cleared, in the order you cleared it.</p>
       <canvas ref={ref} className="mt-5 aspect-square w-full border border-white/10" aria-label="Animated map of the fog you cleared" />
       {data.walks > 0 && (
-        <p className="mt-3 text-[13px] text-ink/60">
+        <p className="mt-3 text-[14px] text-ink/60">
           {data.walks} recorded walk{data.walks === 1 ? "" : "s"} · {data.walkedKm.toFixed(1)} km
         </p>
       )}
@@ -172,7 +173,7 @@ function Stat({ value, label, color }: { value: string; label: string; color: st
   return (
     <div className="hud-panel px-4 py-3">
       <p className={`font-display text-[40px] leading-none ${color}`}>{value}</p>
-      <p className="mt-1 text-[11px] font-bold tracking-[0.2em] text-ink/60 uppercase">{label}</p>
+      <p className="mt-1 text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">{label}</p>
     </div>
   );
 }
@@ -182,20 +183,20 @@ function Numbers({ data, percentile }: { data: WrappedData; percentile: number |
     <>
       <Kicker>By the numbers</Kicker>
       <p className="font-display mt-1 text-[40px] leading-none text-ink uppercase">{data.rank}</p>
-      <p className="text-[15px] text-ink/70">{data.rep.toLocaleString()} Rep earned</p>
+      <p className="text-[16px] text-ink/70">{data.rep.toLocaleString()} Rep earned</p>
       <div className="mt-6 grid grid-cols-2 gap-2.5">
         <Stat value={`${fmtPct(data.pct)}%`} label="of London explored" color="text-teal" />
         <Stat value={String(data.missions)} label="missions passed" color="text-orange" />
         <Stat value={String(data.districtsUnlocked)} label="districts claimed" color="text-gold" />
         <Stat value={String(data.badges)} label="badges" color="text-pink" />
       </div>
-      <p className="mt-5 text-[15px] text-ink/80">
+      <p className="mt-5 text-[16px] text-ink/80">
         {percentile !== null ? (
           <>
             You explored more than <span className="font-bold text-gold">{percentile}%</span> of Western players.
           </>
         ) : (
-          <span className="text-ink/55">Sign in to see how you rank against other Western players.</span>
+          <span className="text-ink/60">Sign in to see how you rank against other Western players.</span>
         )}
       </p>
     </>
@@ -217,7 +218,7 @@ function Places({ data }: { data: WrappedData }) {
       <div className="sunset-rule my-8 w-40" />
       <Kicker>Your kind of mission</Kicker>
       <p className="font-display mt-2 text-[40px] leading-none text-ink uppercase">{data.topCategory ?? (data.missions ? "Street jobs" : "None yet")}</p>
-      <p className="mt-2 text-[15px] text-ink/70">
+      <p className="mt-2 text-[16px] text-ink/70">
         {data.landmarks} landmark{data.landmarks === 1 ? "" : "s"} · {data.photoMissions} photo job{data.photoMissions === 1 ? "" : "s"}
       </p>
     </div>
@@ -335,17 +336,17 @@ function Share({ data, percentile, onClose }: { data: WrappedData; percentile: n
           <p className="animate-pulse text-ink/60">Printing your card…</p>
         )}
       </div>
-      {msg && <p className="mt-2 text-[13px] text-teal">{msg}</p>}
+      {msg && <p className="mt-2 text-[14px] text-teal">{msg}</p>}
       <div className="mt-4 grid w-full gap-2.5">
         <button
           type="button"
           disabled={!blob}
           onClick={share}
-          className="min-h-[52px] bg-ink text-[15px] font-bold tracking-[0.25em] text-night disabled:opacity-50 rounded-full"
+          className="min-h-[52px] bg-ink text-[16px] font-bold tracking-[0.3em] text-night disabled:opacity-50 rounded-full"
         >
           Share
         </button>
-        <button type="button" onClick={onClose} className="min-h-[48px] text-[14px] font-bold tracking-[0.2em] text-ink/70 rounded-full">
+        <button type="button" onClick={onClose} className="min-h-[48px] text-[14px] font-bold tracking-[0.14em] text-ink/70 rounded-full">
           Back to the map
         </button>
       </div>

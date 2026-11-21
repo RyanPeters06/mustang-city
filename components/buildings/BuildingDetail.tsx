@@ -40,7 +40,7 @@ export default function BuildingDetail({ building, routed, onWaypoint, onOpenMis
 
   const explored = isRevealedAt(building.center[1], building.center[0]);
   const here = MISSIONS.filter((m) => distanceM(m.lngLat, building.center) <= 90);
-  const h = "mb-2 text-[12px] font-semibold tracking-[0.1em] text-ink/55 uppercase";
+  const h = "mb-2 text-[12px] font-semibold tracking-[0.14em] text-ink/60 uppercase";
 
   return (
     <div className="space-y-5 pb-4">
@@ -56,7 +56,7 @@ export default function BuildingDetail({ building, routed, onWaypoint, onOpenMis
       {history === "loading" && <div className="h-24 animate-pulse rounded-2xl bg-white/5" />}
       {history && history !== "loading" && (
         <section className="hud-panel p-4">
-          <p className="text-[11px] font-bold tracking-[0.16em] text-gold uppercase">{history.note ?? "History"}</p>
+          <p className="text-[12px] font-bold tracking-[0.14em] text-gold uppercase">{history.note ?? "History"}</p>
           <p className="mt-1.5 text-[14px] leading-snug text-ink/85">{history.extract}</p>
           {history.url && (
             <a href={history.url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-[12px] font-semibold text-teal underline">
@@ -78,12 +78,12 @@ export default function BuildingDetail({ building, routed, onWaypoint, onOpenMis
                 <li key={m.slug}>
                   <button type="button" onClick={() => onOpenMission(m.slug)} className="hud-panel flex min-h-[60px] w-full items-center gap-3 p-3 text-left active:bg-white/10">
                     <span className="min-w-0 flex-1">
-                      <span className={`block text-[11px] font-bold tracking-[0.14em] uppercase ${TYPE_COLOR[kind]}`}>
+                      <span className={`block text-[12px] font-bold tracking-[0.14em] uppercase ${TYPE_COLOR[kind]}`}>
                         {m.category ? CATEGORY_LABEL[m.category] : TYPE_LABEL[m.type]}
                       </span>
-                      <span className="block truncate text-[15px] font-bold text-ink">{m.title}</span>
+                      <span className="block truncate text-[16px] font-bold text-ink">{m.title}</span>
                     </span>
-                    <span className={`text-[13px] font-bold ${completions[m.slug] ? "text-teal" : "text-orange"}`}>
+                    <span className={`text-[14px] font-bold ${completions[m.slug] ? "text-teal" : "text-orange"}`}>
                       {completions[m.slug] ? "✓ Done" : `+${m.rep}`}
                     </span>
                   </button>
@@ -101,8 +101,8 @@ export default function BuildingDetail({ building, routed, onWaypoint, onOpenMis
             {classes.map((c) => (
               <li key={c.id} className="hud-panel flex items-center justify-between px-3.5 py-3">
                 <span className="min-w-0">
-                  <span className="block truncate text-[15px] font-semibold text-ink">{c.course}</span>
-                  <span className="block text-[12px] text-ink/55">
+                  <span className="block truncate text-[16px] font-semibold text-ink">{c.course}</span>
+                  <span className="block text-[12px] text-ink/60">
                     {c.days.map((d) => DAYS[d]).join(", ")} · {c.start}
                     {c.room ? ` · ${c.room}` : ""}
                   </span>
@@ -113,7 +113,7 @@ export default function BuildingDetail({ building, routed, onWaypoint, onOpenMis
         ) : (
           <button type="button" onClick={onOpenSchedule} className="hud-panel flex min-h-[56px] w-full items-center justify-between px-4 text-left">
             <span className="text-[14px] text-ink/75">Add your schedule to see classes here</span>
-            <span className="text-[18px] text-teal" aria-hidden>›</span>
+            <span className="text-[20px] text-teal" aria-hidden>›</span>
           </button>
         )}
       </section>
@@ -121,7 +121,7 @@ export default function BuildingDetail({ building, routed, onWaypoint, onOpenMis
       <button
         type="button"
         onClick={() => onWaypoint(!routed)}
-        className={`flex min-h-[52px] w-full items-center justify-center rounded-full text-[15px] font-bold ${routed ? "border border-white/12 bg-white/[0.06] text-ink" : "btn-sunset"}`}
+        className={`flex min-h-[52px] w-full items-center justify-center rounded-full text-[16px] font-bold ${routed ? "border border-white/12 bg-white/[0.06] text-ink" : "btn-sunset"}`}
       >
         {routed ? `Clear waypoint · ${Math.round(routed.distanceM / 10) * 10} m · ${routed.minutes} min` : "Set waypoint"}
       </button>

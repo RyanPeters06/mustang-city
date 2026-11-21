@@ -36,11 +36,11 @@ export default function RadioPill() {
           style={{ bottom: "calc(var(--safe-bottom) + 168px)" }}
           aria-live="polite"
         >
-          <p className="text-[11px] font-semibold text-gold">
+          <p className="text-[12px] font-semibold text-gold">
             {STATION}
-            {r.scriptDistrict && <span className="text-ink/55"> · {r.scriptDistrict}</span>}
+            {r.scriptDistrict && <span className="text-ink/60"> · {r.scriptDistrict}</span>}
           </p>
-          <p className="mt-0.5 text-[13px] leading-snug text-ink/85">{r.script}</p>
+          <p className="mt-0.5 text-[14px] leading-snug text-ink/85">{r.script}</p>
         </div>
       )}
     </>

@@ -30,14 +30,14 @@ export default function NextClassCard({ onWaypoint, routed }: { onWaypoint: (key
       className="glass pointer-events-auto absolute left-4 z-20 max-w-[calc(100%-132px)] px-3 py-2.5"
       style={{ top: "calc(var(--safe-top) + 84px)" }}
     >
-      <p className="text-[10px] font-bold tracking-[0.2em] text-teal uppercase">{n.done ? "Class Run ✓ on time" : mins >= 0 ? `Next class · ${mins} min` : "Class started"}</p>
-      <p className="truncate text-[15px] font-bold text-ink">{n.meeting.course}</p>
+      <p className="text-[12px] font-bold tracking-[0.14em] text-teal uppercase">{n.done ? "Class Run ✓ on time" : mins >= 0 ? `Next class · ${mins} min` : "Class started"}</p>
+      <p className="truncate text-[16px] font-bold text-ink">{n.meeting.course}</p>
       <p className="truncate text-[12px] text-ink/65">
         {n.meeting.building || n.meeting.room || "Building not set"} · {n.meeting.start}
         {walk !== null && ` · ${walk} min walk`}
       </p>
       {where && !n.done && (
-        <button type="button" onClick={() => onWaypoint(on ? null : key, where)} className="mt-1.5 min-h-[36px] text-[12px] font-bold tracking-[0.14em] text-gold uppercase">
+        <button type="button" onClick={() => onWaypoint(on ? null : key, where)} className="mt-1.5 min-h-[44px] text-[12px] font-bold tracking-[0.14em] text-gold uppercase">
           {on ? "Clear waypoint" : "Set waypoint ›"}
         </button>
       )}

@@ -1,10 +1,22 @@
 import { ImageResponse } from "next/og";
+import { iconSource } from "./brandAssets";
 
 /**
  * App icon (original art): the Mustang City emblem — striped sunset disc setting behind a pine
  * skyline ("Forest City"), inside a horseshoe — on night purple.
  */
 export function brandIcon(size: number) {
+  // Ryan's icon art (public/brand/icon.png) wins when present; iOS/Android apply their own corner mask.
+  const art = iconSource();
+  if (art) {
+    return new ImageResponse(
+      (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={art} width={size} height={size} alt="" style={{ width: size, height: size, objectFit: "cover" }} />
+      ),
+      { width: size, height: size },
+    );
+  }
   const stripes = [58, 64, 69, 73, 76.5];
   return new ImageResponse(
     (

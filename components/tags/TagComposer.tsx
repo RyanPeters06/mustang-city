@@ -44,9 +44,9 @@ export default function TagComposer({ onDone }: { onDone: (id: string) => void }
           onChange={(e) => setNote(e.target.value.slice(0, TAG_MAX_CHARS))}
           rows={3}
           placeholder="Best study spot nobody knows about…"
-          className="w-full resize-none rounded-2xl border border-white/12 bg-white/[0.05] p-4 text-[16px] text-ink placeholder:text-ink/35 focus:border-teal focus:outline-none"
+          className="w-full resize-none rounded-2xl border border-white/12 bg-white/[0.05] p-4 text-[16px] text-ink placeholder:text-ink/60 focus:border-teal focus:outline-none"
         />
-        <span className="mt-1 block text-right text-[12px] text-ink/45">
+        <span className="mt-1 block text-right text-[12px] text-ink/60">
           {note.length}/{TAG_MAX_CHARS}
         </span>
       </label>

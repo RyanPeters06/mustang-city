@@ -89,7 +89,7 @@ function CrewList({ prefill, shownFriend, onToggleMap }: Props) {
   }
 
   const mine = { rep: me.rep, pct: me.pct, missions: me.missionCount };
-  const h = "mb-2 text-[12px] font-bold tracking-[0.16em] text-ink/55 uppercase";
+  const h = "mb-2 text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase";
   const field = "min-w-0 flex-1 rounded-xl border border-white/12 bg-white/[0.06] px-3.5 py-3 text-[16px] text-ink outline-none focus:border-pink";
 
   return (
@@ -97,11 +97,11 @@ function CrewList({ prefill, shownFriend, onToggleMap }: Props) {
       {live ? (
         <>
           <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-4">
-            <p className="text-[12px] font-bold tracking-[0.16em] text-ink/55 uppercase">Your handle</p>
+            <p className="text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">Your handle</p>
             <div className="mt-1 flex items-center gap-3">
               <p className="min-w-0 flex-1 truncate text-[22px] font-bold text-ink">{account.handle ? `@${account.handle}` : "Claiming…"}</p>
               {account.handle && (
-                <button type="button" onClick={toggleQr} className="min-h-[40px] rounded-full bg-white/10 px-4 text-[13px] font-bold text-ink">
+                <button type="button" onClick={toggleQr} className="min-h-[44px] rounded-full bg-white/10 px-4 text-[14px] font-bold text-ink">
                   {qr ? "Hide QR" : "QR code"}
                 </button>
               )}
@@ -132,11 +132,11 @@ function CrewList({ prefill, shownFriend, onToggleMap }: Props) {
                 autoCorrect="off"
                 spellCheck={false}
               />
-              <button type="submit" disabled={busy || !input.trim()} className="min-h-[50px] rounded-full btn-sunset px-5 text-[15px] font-bold text-night disabled:opacity-40">
+              <button type="submit" disabled={busy || !input.trim()} className="min-h-[50px] rounded-full btn-sunset px-5 text-[16px] font-bold text-night disabled:opacity-40">
                 Add
               </button>
             </form>
-            {msg && <p className={`mt-2 text-[13px] ${msg.tone === "ok" ? "text-teal" : "text-pink"}`} role="status">{msg.text}</p>}
+            {msg && <p className={`mt-2 text-[14px] ${msg.tone === "ok" ? "text-teal" : "text-pink"}`} role="status">{msg.text}</p>}
           </section>
 
           {lists && lists.incoming.length > 0 && (
@@ -147,13 +147,13 @@ function CrewList({ prefill, shownFriend, onToggleMap }: Props) {
                   <li key={f.handle} className="flex items-center gap-3 rounded-2xl bg-white/[0.05] p-3">
                     <Emblem id={f.emblem as EmblemId} accent={f.accent} size={40} />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[15px] font-bold text-ink">{f.name}</p>
-                      <p className="truncate text-[12px] text-ink/55">@{f.handle}</p>
+                      <p className="truncate text-[16px] font-bold text-ink">{f.name}</p>
+                      <p className="truncate text-[12px] text-ink/60">@{f.handle}</p>
                     </div>
-                    <button type="button" onClick={() => act(f.handle, "accept")} className="min-h-[40px] rounded-full bg-teal px-4 text-[13px] font-bold text-night">
+                    <button type="button" onClick={() => act(f.handle, "accept")} className="min-h-[44px] rounded-full bg-teal px-4 text-[14px] font-bold text-night">
                       Accept
                     </button>
-                    <button type="button" onClick={() => act(f.handle, "decline")} aria-label={`Decline ${f.name}`} className="min-h-[40px] min-w-[40px] rounded-full bg-white/10 text-[15px] text-ink/70">
+                    <button type="button" onClick={() => act(f.handle, "decline")} aria-label={`Decline ${f.name}`} className="min-h-[44px] min-w-[40px] rounded-full bg-white/10 text-[16px] text-ink/70">
                       ✕
                     </button>
                   </li>
@@ -183,26 +183,26 @@ function CrewList({ prefill, shownFriend, onToggleMap }: Props) {
       ) : (
         <>
           <section className="rounded-3xl border border-pink/30 bg-pink/10 p-4">
-            <p className="text-[15px] font-bold text-ink">
+            <p className="text-[16px] font-bold text-ink">
               {account.auth === "loading" ? "Checking your account…" : account.auth === "signed-out" ? "Sign in to build your crew" : "Crews aren't switched on yet"}
             </p>
-            <p className="mt-1 text-[13px] leading-snug text-ink/70">
+            <p className="mt-1 text-[14px] leading-snug text-ink/70">
               Add Western friends by handle or QR, compare Rep and % explored, and see the parts of Forest State they&apos;ve uncovered.
             </p>
             {account.auth === "signed-out" && (
-              <a href="/auth/login" className="mt-3 flex min-h-[48px] items-center justify-center rounded-full btn-sunset text-[15px] font-bold text-night">
+              <a href="/auth/login" className="mt-3 flex min-h-[48px] items-center justify-center rounded-full btn-sunset text-[16px] font-bold text-night">
                 Sign in with @uwo.ca
               </a>
             )}
             {account.auth === "signed-in" && account.sync === "db-unavailable" && (
-              <button type="button" onClick={() => void syncNow()} className="mt-3 text-[13px] font-semibold text-teal underline">
+              <button type="button" onClick={() => void syncNow()} className="mt-3 text-[14px] font-semibold text-teal underline">
                 Retry
               </button>
             )}
           </section>
           <section>
             <h3 className={h}>Demo crew</h3>
-            <p className="-mt-1 mb-2 text-[12px] text-ink/50">Sample players so you can try comparing. Not real accounts.</p>
+            <p className="-mt-1 mb-2 text-[12px] text-ink/60">Sample players so you can try comparing. Not real accounts.</p>
             <ul className="space-y-3">
               {demoFriends().map((f) => (
                 <FriendCard key={f.handle} f={f} mine={mine} shown={shownFriend === f.handle} onMap={() => toggleMap(f, true)} demo />
@@ -244,20 +244,20 @@ function FriendCard({
         <Emblem id={f.emblem as EmblemId} accent={f.accent} size={48} />
         <div className="min-w-0 flex-1">
           <p className="truncate text-[16px] font-bold text-ink">{f.name}</p>
-          <p className="truncate text-[12px] text-ink/55">
+          <p className="truncate text-[12px] text-ink/60">
             {rankFor(theirs.rep).rank}
             {f.faculty ? ` · ${f.faculty}` : ""}
           </p>
         </div>
         {onRemove && (
-          <button type="button" onClick={onRemove} className="text-[12px] font-semibold text-ink/40 underline">
+          <button type="button" onClick={onRemove} className="text-[12px] font-semibold text-ink/60 underline">
             Remove
           </button>
         )}
       </div>
 
       <div className="mt-3 space-y-2">
-        <div className="flex justify-between text-[11px] font-bold tracking-[0.12em] text-ink/45 uppercase">
+        <div className="flex justify-between text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">
           <span>You</span>
           <span>{f.name.split(" ")[0]}</span>
         </div>
@@ -265,9 +265,9 @@ function FriendCard({
           const total = r.you + r.them || 1;
           return (
             <div key={r.label}>
-              <div className="flex justify-between text-[13px] tabular-nums">
+              <div className="flex justify-between text-[14px] tabular-nums">
                 <span className={r.you >= r.them ? "font-bold text-ink" : "text-ink/60"}>{r.fmt(r.you)}</span>
-                <span className="text-[11px] text-ink/45 uppercase">{r.label}</span>
+                <span className="text-[12px] text-ink/60 uppercase">{r.label}</span>
                 <span className={r.them > r.you ? "font-bold text-ink" : "text-ink/60"}>{r.fmt(r.them)}</span>
               </div>
               <div className="mt-1 flex h-1.5 overflow-hidden rounded-full bg-white/10">
@@ -309,7 +309,7 @@ export default function CrewPanel(props: Props) {
             role="tab"
             aria-selected={view === v}
             onClick={() => setView(v)}
-            className={`min-h-[40px] flex-1 rounded-xl text-[14px] font-bold ${view === v ? "bg-white/12 text-ink" : "text-ink/55"}`}
+            className={`min-h-[44px] flex-1 rounded-xl text-[14px] font-bold ${view === v ? "bg-white/12 text-ink" : "text-ink/60"}`}
           >
             {label}
           </button>

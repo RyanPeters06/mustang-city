@@ -18,7 +18,7 @@ export default function Replays({ onPlay }: { onPlay: () => void }) {
   return (
     <section>
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-[12px] font-bold tracking-[0.16em] text-ink/55 uppercase">Replays</h3>
+        <h3 className="text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">Replays</h3>
         <div className="flex gap-1 rounded-full bg-white/[0.06] p-1" role="radiogroup" aria-label="Replay speed">
           {SPEEDS.map((s) => (
             <button
@@ -27,7 +27,7 @@ export default function Replays({ onPlay }: { onPlay: () => void }) {
               role="radio"
               aria-checked={speed === s}
               onClick={() => setSpeed(s)}
-              className={`min-h-[32px] min-w-[40px] rounded-full text-[12px] font-bold ${speed === s ? "bg-pink text-night" : "text-ink/60"}`}
+              className={`min-h-[44px] min-w-[40px] rounded-full text-[12px] font-bold ${speed === s ? "bg-pink text-night" : "text-ink/60"}`}
             >
               {s}×
             </button>
@@ -49,8 +49,8 @@ export default function Replays({ onPlay }: { onPlay: () => void }) {
                 ▶
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[15px] font-semibold text-ink">{t.label}</span>
-                <span className="block text-[12px] text-ink/55">
+                <span className="block truncate text-[16px] font-semibold text-ink">{t.label}</span>
+                <span className="block text-[12px] text-ink/60">
                   {fmtDuration(t.durationMs)} · {t.distanceM < 1000 ? `${Math.round(t.distanceM)} m` : `${(t.distanceM / 1000).toFixed(1)} km`}
                 </span>
               </span>
@@ -59,7 +59,7 @@ export default function Replays({ onPlay }: { onPlay: () => void }) {
         ))}
       </ul>
       {list.length === 1 && (
-        <p className="mt-2 text-[12px] text-ink/50">Your walks are recorded automatically while location is on.</p>
+        <p className="mt-2 text-[12px] text-ink/60">Your walks are recorded automatically while location is on.</p>
       )}
     </section>
   );

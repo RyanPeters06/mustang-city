@@ -36,21 +36,21 @@ export default function ScheduleManager() {
   const ics = useRef<HTMLInputElement>(null);
   const shot = useRef<HTMLInputElement>(null);
 
-  const field = "w-full rounded-xl border border-white/12 bg-white/[0.05] px-3 py-2.5 text-[16px] text-ink placeholder:text-ink/35 focus:border-teal focus:outline-none";
+  const field = "w-full rounded-xl border border-white/12 bg-white/[0.05] px-3 py-2.5 text-[16px] text-ink placeholder:text-ink/60 focus:border-teal focus:outline-none";
   const valid = (d: Draft) => d.course.trim() && d.building && d.days.length && /^\d{2}:\d{2}$/.test(d.start);
 
   return (
     <div className="space-y-5 pb-4">
-      <p className="text-[13px] leading-snug text-ink/70">
+      <p className="text-[14px] leading-snug text-ink/70">
         Your schedule stays on this phone. About 25 minutes before class you get a waypoint; arrive before it starts for{" "}
         <span className="font-bold text-orange">+{CLASS_RUN_REP} Rep</span>. Missed classes never cost anything.
       </p>
 
-      {msg && <p className="border border-teal/40 bg-teal/10 px-3 py-2 text-[13px] text-ink">{msg}</p>}
+      {msg && <p className="border border-teal/40 bg-teal/10 px-3 py-2 text-[14px] text-ink">{msg}</p>}
 
       {pending && (
         <section className="hud-panel space-y-2 p-3">
-          <h3 className="text-[12px] font-bold tracking-[0.16em] text-gold uppercase">Check these before saving</h3>
+          <h3 className="text-[12px] font-bold tracking-[0.14em] text-gold uppercase">Check these before saving</h3>
           {pending.map((p, i) => (
             <div key={i} className="space-y-1.5 border-b border-white/8 pb-2">
               <p className="text-[14px] font-bold text-ink">
@@ -67,7 +67,7 @@ export default function ScheduleManager() {
                   <option key={b}>{b}</option>
                 ))}
               </select>
-              {p.room && <p className="text-[12px] text-ink/50">From the file: {p.room}</p>}
+              {p.room && <p className="text-[12px] text-ink/60">From the file: {p.room}</p>}
             </div>
           ))}
           <div className="flex gap-2">
@@ -91,7 +91,7 @@ export default function ScheduleManager() {
       )}
 
       <section>
-        <h3 className="mb-2 text-[12px] font-bold tracking-[0.16em] text-ink/60 uppercase">Your classes · {meetings.length}</h3>
+        <h3 className="mb-2 text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">Your classes · {meetings.length}</h3>
         {meetings.length === 0 ? (
           <p className="text-[14px] text-ink/60">No classes yet.</p>
         ) : (
@@ -99,13 +99,13 @@ export default function ScheduleManager() {
             {meetings.map((m) => (
               <li key={m.id} className="hud-panel flex items-center gap-3 px-3 py-2.5">
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[15px] font-bold text-ink">{m.course}</span>
+                  <span className="block truncate text-[16px] font-bold text-ink">{m.course}</span>
                   <span className="block truncate text-[12px] text-ink/60">
                     {daysLabel(m.days)} · {m.start}–{m.end} · {m.building}
                     {m.room ? ` ${m.room}` : ""}
                   </span>
                 </span>
-                <button type="button" onClick={() => removeMeeting(m.id)} aria-label={`Remove ${m.course}`} className="h-11 w-11 text-[18px] text-ink/50">
+                <button type="button" onClick={() => removeMeeting(m.id)} aria-label={`Remove ${m.course}`} className="h-11 w-11 text-[20px] text-ink/60">
                   ✕
                 </button>
               </li>
@@ -115,7 +115,7 @@ export default function ScheduleManager() {
       </section>
 
       <section className="hud-panel space-y-2 p-3">
-        <h3 className="text-[12px] font-bold tracking-[0.16em] text-ink/60 uppercase">Add a class</h3>
+        <h3 className="text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">Add a class</h3>
         <input value={draft.course} onChange={(e) => setDraft({ ...draft, course: e.target.value.slice(0, 40) })} placeholder="Course (e.g. CS 1026)" className={field} />
         <select value={draft.building} onChange={(e) => setDraft({ ...draft, building: e.target.value })} className={field} aria-label="Building">
           <option value="">Building…</option>
@@ -133,7 +133,7 @@ export default function ScheduleManager() {
                 type="button"
                 aria-pressed={on}
                 onClick={() => setDraft({ ...draft, days: on ? draft.days.filter((x) => x !== i) : [...draft.days, i].sort() })}
-                className={`min-h-[44px] flex-1 text-[13px] font-bold ${on ? "btn-sunset" : "bg-white/[0.06] text-ink/70"} rounded-full`}
+                className={`min-h-[44px] flex-1 text-[14px] font-bold ${on ? "btn-sunset" : "bg-white/[0.06] text-ink/70"} rounded-full`}
               >
                 {d}
               </button>
@@ -141,11 +141,11 @@ export default function ScheduleManager() {
           })}
         </div>
         <div className="flex gap-2">
-          <label className="flex-1 text-[11px] font-bold tracking-[0.14em] text-ink/55 uppercase">
+          <label className="flex-1 text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">
             Start
             <input type="time" value={draft.start} onChange={(e) => setDraft({ ...draft, start: e.target.value })} className={`${field} mt-1`} />
           </label>
-          <label className="flex-1 text-[11px] font-bold tracking-[0.14em] text-ink/55 uppercase">
+          <label className="flex-1 text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">
             End
             <input type="time" value={draft.end} onChange={(e) => setDraft({ ...draft, end: e.target.value })} className={`${field} mt-1`} />
           </label>
@@ -165,10 +165,10 @@ export default function ScheduleManager() {
       </section>
 
       <section className="grid grid-cols-2 gap-2">
-        <button type="button" onClick={() => ics.current?.click()} className="min-h-[48px] border border-white/12 bg-white/[0.04] text-[13px] font-bold text-ink rounded-full">
+        <button type="button" onClick={() => ics.current?.click()} className="min-h-[48px] border border-white/12 bg-white/[0.04] text-[14px] font-bold text-ink rounded-full">
           Import .ics
         </button>
-        <button type="button" disabled={busy} onClick={() => shot.current?.click()} className="min-h-[48px] border border-white/12 bg-white/[0.04] text-[13px] font-bold text-ink disabled:opacity-50 rounded-full">
+        <button type="button" disabled={busy} onClick={() => shot.current?.click()} className="min-h-[48px] border border-white/12 bg-white/[0.04] text-[14px] font-bold text-ink disabled:opacity-50 rounded-full">
           {busy ? "Reading…" : "From screenshot"}
         </button>
         <input
@@ -224,7 +224,7 @@ export default function ScheduleManager() {
             clearSchedule();
             setMsg("Schedule deleted from this phone.");
           }}
-          className="min-h-[48px] w-full text-[13px] font-bold tracking-[0.14em] text-pink rounded-full"
+          className="min-h-[48px] w-full text-[14px] font-bold tracking-[0.14em] text-pink rounded-full"
         >
           Delete my schedule
         </button>

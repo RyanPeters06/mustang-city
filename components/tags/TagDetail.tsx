@@ -32,7 +32,7 @@ export default function TagDetail({ id, onClose }: { id: string; onClose: () => 
           // eslint-disable-next-line @next/next/no-img-element
           <img src={tag.photo} alt="Photo pinned with this tag" className="mb-3 max-h-64 w-full rounded-xl object-cover" />
         )}
-        <blockquote className="text-[17px] leading-snug text-ink">“{tag.note}”</blockquote>
+        <blockquote className="text-[16px] leading-snug text-ink">“{tag.note}”</blockquote>
       </figure>
 
       {error && (
@@ -54,7 +54,7 @@ export default function TagDetail({ id, onClose }: { id: string; onClose: () => 
               if (err) setError(err);
               else onClose();
             }}
-            className="flex min-h-[48px] w-full items-center justify-center rounded-full border border-white/12 bg-white/[0.06] text-[15px] font-bold text-ink/80"
+            className="flex min-h-[48px] w-full items-center justify-center rounded-full border border-white/12 bg-white/[0.06] text-[16px] font-bold text-ink/80"
           >
             Delete tag
           </button>
@@ -70,7 +70,7 @@ export default function TagDetail({ id, onClose }: { id: string; onClose: () => 
         </button>
       )}
       {!tag.mine && tag.kind === "server" && (
-        <p className="text-center text-[12px] text-ink/50">Upvotes give @{tag.author} +{TAG_VOTE_REP} Rep.</p>
+        <p className="text-center text-[12px] text-ink/60">Upvotes give @{tag.author} +{TAG_VOTE_REP} Rep.</p>
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { missionBySlug } from "@/lib/missions";
 import type { PassedInfo } from "./MissionDetail";
+import { SPRING_HERO, SPRING_POP } from "@/lib/motion";
 
 /** Short synth sting via Web Audio (no audio assets; plays because it follows a user tap). */
 function playSting() {
@@ -71,7 +72,7 @@ export default function MissionPassed({ info, onDone }: { info: PassedInfo | nul
               className="mb-6 h-36 w-36 rounded-2xl object-cover shadow-2xl ring-4 ring-gold"
               initial={{ scale: 0.6, rotate: -8, opacity: 0 }}
               animate={{ scale: 1, rotate: -4, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 260, damping: 18, delay: 0.1 }}
+              transition={{ ...SPRING_POP, delay: 0.1 }}
             />
           )}
           <motion.h2
@@ -85,14 +86,14 @@ export default function MissionPassed({ info, onDone }: { info: PassedInfo | nul
             }}
             initial={{ scale: 1.6, opacity: 0, letterSpacing: "0.2em" }}
             animate={{ scale: 1, opacity: 1, letterSpacing: "0em" }}
-            transition={{ type: "spring", stiffness: 220, damping: 20 }}
+            transition={{ ...SPRING_HERO }}
           >
             Mission
             <br />
             Passed
           </motion.h2>
           <motion.p
-            className="mt-4 text-[15px] font-semibold tracking-wide text-ink/85"
+            className="mt-4 text-[16px] font-semibold tracking-wide text-ink/85"
             initial={{ y: 12, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.35 }}
@@ -103,12 +104,12 @@ export default function MissionPassed({ info, onDone }: { info: PassedInfo | nul
             className="mt-2 text-[34px] font-bold text-orange tabular-nums"
             initial={{ y: 16, opacity: 0, scale: 0.8 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
-            transition={{ delay: 0.5, type: "spring", stiffness: 300, damping: 16 }}
+            transition={{ delay: 0.5, ...SPRING_POP }}
           >
             +{info.rep} REP
           </motion.p>
           {info.reason && (
-            <motion.p className="mt-3 max-w-[30ch] text-[13px] text-ink/60" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}>
+            <motion.p className="mt-3 max-w-[30ch] text-[14px] text-ink/60" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}>
               {info.reason}
             </motion.p>
           )}

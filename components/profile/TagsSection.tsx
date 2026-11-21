@@ -23,12 +23,12 @@ export default function TagsSection({ onOpen }: { onOpen: (id: string) => void }
         )}
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[14px] text-ink">{t.note}</span>
-          <span className="block text-[12px] text-ink/50">
+          <span className="block text-[12px] text-ink/60">
             {t.mine ? "You" : `@${t.author}`}
             {t.kind === "demo" ? " · sample" : ""}
           </span>
         </span>
-        <span className="text-[13px] font-bold text-teal">▲ {t.votes}</span>
+        <span className="text-[14px] font-bold text-teal">▲ {t.votes}</span>
       </button>
     </li>
   );
@@ -43,7 +43,7 @@ export default function TagsSection({ onOpen }: { onOpen: (id: string) => void }
           {mine.length > 0 && <ul className="space-y-2">{mine.map(row)}</ul>}
           {found.length > 0 && (
             <>
-              <p className="text-[12px] text-ink/50">Found under the fog · {found.length}</p>
+              <p className="text-[12px] text-ink/60">Found under the fog · {found.length}</p>
               <ul className="space-y-2">{found.map(row)}</ul>
             </>
           )}
