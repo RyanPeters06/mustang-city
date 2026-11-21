@@ -12,6 +12,7 @@ import { addDemoRep, resetProgress } from "@/lib/progress";
 import { getLightOverride, setLightOverride, type LightPreset } from "@/lib/mapStyle";
 import { isSampleTurf, setSampleTurf } from "@/lib/turf";
 import { getHeistSim, setHeistSim } from "@/lib/heistDemo";
+import { ageAllCells } from "@/lib/fogAge";
 import type { MapHandle } from "./map/MapView";
 import type { PassedInfo } from "./missions/MissionDetail";
 
@@ -133,6 +134,8 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
           </button>
         ))}
       </div>
+      <button className={btn} onClick={() => ageAllCells(200)}>Age fog 200 days (decay)</button>
+      <button className={btn} onClick={() => ageAllCells(0)}>Refresh fog (no decay)</button>
       <button className={btn} onClick={() => setSampleTurf(!isSampleTurf())}>Sample faculty turf on/off</button>
       <button className={btn} onClick={() => setHeistSim(!getHeistSim())}>Demo heist crew on/off</button>
       <button className={btn} onClick={() => addDemoRep(500)}>+500 Rep (demo)</button>

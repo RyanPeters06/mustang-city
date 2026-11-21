@@ -14,6 +14,7 @@ import { getTags, subscribeTags } from "@/lib/tags";
 import { onBusFrame, subscribeBuses } from "@/lib/buses";
 import { getTurf, subscribeTurf } from "@/lib/turf";
 import { COLLECTIBLES } from "@/lib/collectibles";
+import { getStaleCells, subscribeFogAge } from "@/lib/fogAge";
 import { facultyColor } from "@/lib/faculty";
 import { LTC, routeById } from "@/lib/ltcData";
 import type { Vehicle } from "@/lib/ltc";
@@ -182,6 +183,16 @@ function addGameLayers(map: MapboxMap) {
       "line-blur": ["interpolate", ["exponential", 2], ["zoom"], 11, 4, 16, 48],
       "line-emissive-strength": 1,
     },
+  });
+
+  // --- Fog decay: ground not revisited in 6 months fades under a haze (still explored) -----
+  map.addSource("fog-stale", { type: "geojson", data: staleData() });
+  map.addLayer({
+    id: "fog-stale",
+    type: "fill",
+    source: "fog-stale",
+    slot: "top",
+    paint: { "fill-color": "#140a2e", "fill-opacity": 0.6, "fill-emissive-strength": 1 },
   });
 
   // --- Ghost city under the fog: major roads + the Thames, faint at overview zoom ---------
@@ -856,6 +867,15 @@ function turfData(): FeatureCollection {
   };
 }
 
+function staleData(): FeatureCollection {
+  const stale = getStaleCells();
+  if (!stale.length) return EMPTY;
+  return {
+    type: "FeatureCollection",
+    features: [{ type: "Feature", properties: {}, geometry: { type: "MultiPolygon", coordinates: cellsToMultiPolygon(stale, true) as LngLat[][][] } }],
+  };
+}
+
 function districtShapes(): FeatureCollection {
   const unlocked = getProgress().districts;
   return {
@@ -1202,6 +1222,7 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
           }
         }),
       );
+      cleanups.push(subscribeFogAge(() => (map.getSource("fog-stale") as GeoJSONSource | undefined)?.setData(staleData())));
       cleanups.push(subscribeTurf(() => (map.getSource("turf") as GeoJSONSource | undefined)?.setData(turfData())));
       // Buses: glide every frame between 15 s updates.
       cleanups.push(onBusFrame((vs) => (map.getSource("buses") as GeoJSONSource | undefined)?.setData(busData(vs))));
