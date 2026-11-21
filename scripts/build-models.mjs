@@ -190,16 +190,16 @@ const centroid = (ring) => {
 
 // ---------- materials ----------
 const PALETTE = {
-  mcStone: { color: "#d8cbb0", rough: 0.92 },
-  ucStone: { color: "#cdb48c", rough: 0.92 },
-  trim: { color: "#efe4cc", rough: 0.8 },
-  roof: { color: "#5d566b", rough: 0.95 },
+  mcStone: { color: "#e6cfae", rough: 0.92 },
+  ucStone: { color: "#dcc29c", rough: 0.92 },
+  trim: { color: "#f4e5cb", rough: 0.8 },
+  roof: { color: "#4a4166", rough: 0.95 },
   window: { color: "#24183f", rough: 0.35, emissive: "#ffcf7a" },
   belfry: { color: "#120a24", rough: 0.9 },
   copper: { color: "#5fa58f", rough: 0.6, metal: 0.3 },
   clock: { color: "#f6efff", rough: 0.5, emissive: "#fff6dc" },
-  sandstone: { color: "#d4c19c", rough: 0.92 },
-  concrete: { color: "#a9a3a6", rough: 0.95 },
+  sandstone: { color: "#e2c8a3", rough: 0.92 },
+  concrete: { color: "#aaa2b4", rough: 0.95 },
   glassWall: { color: "#3b4a6e", rough: 0.15, metal: 0.4, emissive: "#3a6fa8" },
   frame: { color: "#c9cdd6", rough: 0.6, metal: 0.2 },
 };
@@ -324,7 +324,7 @@ const manifest = [];
   const builders = [];
   const footprint = [];
   const heights = [];
-  for (const [name, b] of core) {
+  for (const [, b] of core) {
     const B = new Builder(anchor);
     const outer = ccw(b.rings[0]);
     const holes = b.rings.slice(1).map((r) => [...ccw(r)].reverse());

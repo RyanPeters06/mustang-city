@@ -33,8 +33,7 @@ export default function PosterButton({ m, thumb, at }: { m: Mission; thumb?: str
           const r = await sharePoster(preview.blob, m.slug);
           if (r === "saved") setNote("Poster saved. Post it anywhere.");
         }}
-        className="flex min-h-[52px] w-full items-center justify-center bg-gradient-to-r from-gold via-orange to-pink text-[15px] font-bold tracking-[0.2em] text-night uppercase disabled:opacity-60"
-        style={{ clipPath: "polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%)" }}
+        className="flex min-h-[52px] w-full items-center justify-center btn-sunset text-[15px] font-bold tracking-[0.2em] text-night disabled:opacity-60 rounded-full"
       >
         {busy ? "Printing…" : preview ? "Share poster" : "Make a poster"}
       </button>

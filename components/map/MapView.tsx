@@ -124,6 +124,27 @@ function replacedByModel(g: Feature["geometry"]) {
 /** Windows glow at night, barely by day. */
 const modelGlow = (preset: string) => (preset === "night" ? 1 : preset === "dusk" || preset === "dawn" ? 0.7 : 0.12);
 
+/** Ease so a tapped building sits in the visible map above the bottom sheet. */
+function frameBuilding(map: MapboxMap, ring: LngLat[]) {
+  let [w, s2, e2, n] = [180, 90, -180, -90];
+  for (const [x, y] of ring) [w, s2, e2, n] = [Math.min(w, x), Math.min(s2, y), Math.max(e2, x), Math.max(n, y)];
+  const h = map.getContainer().clientHeight;
+  map.fitBounds(
+    [
+      [w, s2],
+      [e2, n],
+    ],
+    {
+      padding: { top: 110, bottom: h * 0.55, left: 60, right: 60 },
+      pitch: Math.max(map.getPitch(), 50),
+      bearing: map.getBearing(),
+      maxZoom: 17.6,
+      duration: dur(900),
+      essential: true,
+    },
+  );
+}
+
 function collectCampusBuildings(map: MapboxMap) {
   const campus = new Map<string, Feature>();
   const mission = new Map<string, Feature>();
@@ -171,15 +192,15 @@ function addGameLayers(map: MapboxMap) {
     paint: {
       "fill-extrusion-color": [
         "interpolate", ["linear"], ["coalesce", ["get", "height"], 10],
-        0, "#7b2ff7",
-        20, "#c13dd6",
-        45, "#ff4f8b",
+        0, "#5c4d93",
+        20, "#8173bf",
+        45, "#a996dd",
       ],
       "fill-extrusion-height": ["+", ["coalesce", ["get", "height"], 10], 1.5],
       "fill-extrusion-base": ["coalesce", ["get", "min_height"], 0],
       "fill-extrusion-opacity": ["interpolate", ["linear"], ["zoom"], 14.5, 0, 15.5, 0.92],
       "fill-extrusion-vertical-gradient": true,
-      "fill-extrusion-emissive-strength": 0.7,
+      "fill-extrusion-emissive-strength": 0.35,
     },
   });
   map.addLayer({
@@ -189,11 +210,12 @@ function addGameLayers(map: MapboxMap) {
     slot: "middle",
     minzoom: 14.5,
     paint: {
-      "fill-extrusion-color": "#ffc857",
+      "fill-extrusion-color": "#efb86a",
       "fill-extrusion-height": ["+", ["coalesce", ["get", "height"], 12], 3],
       "fill-extrusion-base": ["coalesce", ["get", "min_height"], 0],
-      "fill-extrusion-opacity": ["interpolate", ["linear"], ["zoom"], 14.5, 0, 15.5, 1],
-      "fill-extrusion-emissive-strength": 1,
+      "fill-extrusion-opacity": ["interpolate", ["linear"], ["zoom"], 14.5, 0, 15.5, 0.96],
+      "fill-extrusion-vertical-gradient": true,
+      "fill-extrusion-emissive-strength": 0.55,
     },
   });
 
@@ -250,8 +272,8 @@ function addGameLayers(map: MapboxMap) {
     paint: {
       "line-color": "#000000",
       "line-opacity": 0.85,
-      "line-width": ["interpolate", ["exponential", 2], ["zoom"], 11, 4, 16, 48],
-      "line-blur": ["interpolate", ["exponential", 2], ["zoom"], 11, 4, 16, 48],
+      "line-width": ["interpolate", ["exponential", 2], ["zoom"], 11, 6, 16, 70, 18, 240],
+      "line-blur": ["interpolate", ["exponential", 2], ["zoom"], 11, 6, 16, 70, 18, 240],
       "line-emissive-strength": 1,
     },
   });
@@ -299,17 +321,35 @@ function addGameLayers(map: MapboxMap) {
   });
 
   // --- Selected region (tap a neighbourhood at city zoom): it rises out of the map ---
+  // (outline glow layers are added with the source below)
   map.addSource("district-selected", { type: "geojson", data: EMPTY });
+  map.addLayer({
+    id: "district-selected-glow",
+    type: "line",
+    source: "district-selected",
+    slot: "top",
+    layout: { "line-join": "round" },
+    paint: { "line-color": "#ff7aa8", "line-width": 10, "line-blur": 8, "line-opacity": 0.7, "line-emissive-strength": 1 },
+  });
+  map.addLayer({
+    id: "district-selected-line",
+    type: "line",
+    source: "district-selected",
+    slot: "top",
+    layout: { "line-join": "round" },
+    paint: { "line-color": "#ffe1ec", "line-width": 1.6, "line-emissive-strength": 1 },
+  });
   map.addLayer({
     id: "district-selected-fill",
     type: "fill-extrusion",
     source: "district-selected",
     slot: "top",
     paint: {
-      "fill-extrusion-color": "#ff4f8b",
+      "fill-extrusion-color": "#ff7aa8",
       "fill-extrusion-height": 0,
-      "fill-extrusion-height-transition": { duration: 700, delay: 0 },
-      "fill-extrusion-opacity": 0.55,
+      "fill-extrusion-height-transition": { duration: 800, delay: 0 },
+      "fill-extrusion-opacity": 0.32,
+      "fill-extrusion-vertical-gradient": true,
       "fill-extrusion-emissive-strength": 1,
     },
   });
@@ -433,7 +473,8 @@ function addGameLayers(map: MapboxMap) {
       "symbol-sort-key": ["case", ["get", "revealed"], 0, 1],
     },
     paint: {
-      "text-color": ["case", ["get", "revealed"], "#fff1c9", "rgba(246,239,255,0.4)"],
+      "text-color": "#fff1c9",
+      "text-opacity": ["case", ["get", "revealed"], 0.92, 0],
       "text-halo-color": "#140a2e",
       "text-halo-width": 1.6,
       "text-emissive-strength": 1,
@@ -448,10 +489,10 @@ function addGameLayers(map: MapboxMap) {
     source: "building-selected",
     slot: "middle",
     paint: {
-      "fill-extrusion-color": "#2ee6d6",
-      "fill-extrusion-height": ["+", ["coalesce", ["get", "height"], 12], 4],
+      "fill-extrusion-color": "#7ff3e8",
+      "fill-extrusion-height": ["+", ["coalesce", ["get", "height"], 12], 3],
       "fill-extrusion-base": ["coalesce", ["get", "min_height"], 0],
-      "fill-extrusion-opacity": 0.95,
+      "fill-extrusion-opacity": 0.42,
       "fill-extrusion-emissive-strength": 1,
     },
   });
@@ -924,7 +965,7 @@ function raiseDistrict(map: MapboxMap, index: number) {
   const d = DISTRICTS[index];
   map.setPaintProperty("district-selected-fill", "fill-extrusion-height", 0);
   src.setData({ type: "Feature", properties: { name: d.name }, geometry: { type: "MultiPolygon", coordinates: d.polygons } });
-  requestAnimationFrame(() => map.setPaintProperty("district-selected-fill", "fill-extrusion-height", 450));
+  requestAnimationFrame(() => map.setPaintProperty("district-selected-fill", "fill-extrusion-height", 220));
 }
 
 function turfData(): FeatureCollection {
@@ -1345,12 +1386,16 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
         if (part) {
           const geometry: Polygon = { type: "Polygon", coordinates: [part.ring] };
           (map.getSource("building-selected") as GeoJSONSource).setData({ type: "Feature", properties: { height: part.height + 2 }, geometry });
+          followRef.current = false;
+          frameBuilding(map, part.ring);
           return callbacks.current.onBuildingTap(buildingInfo(geometry, [e.lngLat.lng, e.lngLat.lat]));
         }
         const building = map.queryRenderedFeatures(e.point, { layers: ["building-selected", "mission-buildings", "campus-buildings"] })[0];
         if (building && (building.geometry.type === "Polygon" || building.geometry.type === "MultiPolygon")) {
           const geometry = building.geometry;
           (map.getSource("building-selected") as GeoJSONSource).setData({ type: "Feature", properties: building.properties ?? {}, geometry });
+          followRef.current = false;
+          frameBuilding(map, (geometry.type === "Polygon" ? geometry.coordinates[0] : geometry.coordinates[0][0]) as LngLat[]);
           callbacks.current.onBuildingTap(buildingInfo(geometry, [e.lngLat.lng, e.lngLat.lat]));
         }
       });

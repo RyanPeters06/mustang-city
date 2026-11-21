@@ -132,7 +132,7 @@ function CrewList({ prefill, shownFriend, onToggleMap }: Props) {
                 autoCorrect="off"
                 spellCheck={false}
               />
-              <button type="submit" disabled={busy || !input.trim()} className="min-h-[50px] rounded-xl bg-pink px-5 text-[15px] font-bold text-night disabled:opacity-40">
+              <button type="submit" disabled={busy || !input.trim()} className="min-h-[50px] rounded-full btn-sunset px-5 text-[15px] font-bold text-night disabled:opacity-40">
                 Add
               </button>
             </form>
@@ -190,7 +190,7 @@ function CrewList({ prefill, shownFriend, onToggleMap }: Props) {
               Add Western friends by handle or QR, compare Rep and % explored, and see the parts of Forest State they&apos;ve uncovered.
             </p>
             {account.auth === "signed-out" && (
-              <a href="/auth/login" className="mt-3 flex min-h-[48px] items-center justify-center rounded-2xl bg-pink text-[15px] font-bold text-night uppercase">
+              <a href="/auth/login" className="mt-3 flex min-h-[48px] items-center justify-center rounded-full btn-sunset text-[15px] font-bold text-night">
                 Sign in with @uwo.ca
               </a>
             )}
@@ -282,7 +282,7 @@ function FriendCard({
       <button
         type="button"
         onClick={onMap}
-        className="mt-3 flex min-h-[44px] w-full items-center justify-center rounded-2xl text-[14px] font-bold"
+        className="mt-3 flex min-h-[44px] w-full items-center justify-center rounded-full text-[14px] font-bold"
         style={shown ? { background: f.accent, color: "#140A2E" } : { background: "rgba(255,255,255,0.07)", color: "#F6EFFF" }}
       >
         {shown ? "Hide their map" : "Show their map"}

@@ -7,6 +7,7 @@ import { isRevealedAt } from "@/lib/fog";
 import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/progress";
 import type { BuildingTap } from "../map/MapView";
 import { TYPE_COLOR } from "../missions/MissionList";
+import { getSchedule, getServerSchedule, subscribeSchedule } from "@/lib/schedule";
 
 type History = { title: string; extract: string; url: string; note?: string };
 
@@ -15,10 +16,14 @@ type Props = {
   routed: { distanceM: number; minutes: number } | null;
   onWaypoint: (on: boolean) => void;
   onOpenMission: (slug: string) => void;
+  onOpenSchedule: () => void;
 };
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-export default function BuildingDetail({ building, routed, onWaypoint, onOpenMission }: Props) {
+export default function BuildingDetail({ building, routed, onWaypoint, onOpenMission, onOpenSchedule }: Props) {
   const { completions } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const { meetings } = useSyncExternalStore(subscribeSchedule, getSchedule, getServerSchedule);
+  const classes = building.name ? meetings.filter((m) => m.building === building.name) : [];
   const [history, setHistory] = useState<History | null | "loading">(building.name ? "loading" : null);
 
   useEffect(() => {
@@ -35,21 +40,22 @@ export default function BuildingDetail({ building, routed, onWaypoint, onOpenMis
 
   const explored = isRevealedAt(building.center[1], building.center[0]);
   const here = MISSIONS.filter((m) => distanceM(m.lngLat, building.center) <= 90);
-  const h = "mb-2 text-[12px] font-bold tracking-[0.16em] text-ink/55 uppercase";
+  const h = "mb-2 text-[12px] font-semibold tracking-[0.1em] text-ink/55 uppercase";
 
   return (
     <div className="space-y-5 pb-4">
-      <div className="flex items-center gap-2 text-[12px] font-bold tracking-[0.14em] uppercase">
-        <span className="text-teal">Mustang City</span>
-        <span className="text-ink/30">·</span>
-        <span className={explored ? "text-gold" : "text-ink/50"}>{explored ? "Explored" : "Still in the fog"}</span>
+      <div className="flex items-center gap-2">
+        <span className="rounded-full bg-teal/15 px-2.5 py-1 text-[12px] font-semibold text-teal">Mustang City</span>
+        <span className={`rounded-full px-2.5 py-1 text-[12px] font-semibold ${explored ? "bg-gold/15 text-gold" : "bg-white/[0.07] text-ink/60"}`}>
+          {explored ? "Explored" : "Not explored yet"}
+        </span>
       </div>
 
       {!building.name && <p className="text-[14px] text-ink/60">This building isn&apos;t named on the map yet.</p>}
 
       {history === "loading" && <div className="h-24 animate-pulse rounded-2xl bg-white/5" />}
       {history && history !== "loading" && (
-        <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+        <section className="hud-panel p-4">
           <p className="text-[11px] font-bold tracking-[0.16em] text-gold uppercase">{history.note ?? "History"}</p>
           <p className="mt-1.5 text-[14px] leading-snug text-ink/85">{history.extract}</p>
           {history.url && (
@@ -70,7 +76,7 @@ export default function BuildingDetail({ building, routed, onWaypoint, onOpenMis
               const kind = m.category ? "landmark" : m.type;
               return (
                 <li key={m.slug}>
-                  <button type="button" onClick={() => onOpenMission(m.slug)} className="flex w-full items-center gap-3 rounded-2xl bg-white/[0.05] p-3 text-left">
+                  <button type="button" onClick={() => onOpenMission(m.slug)} className="hud-panel flex min-h-[60px] w-full items-center gap-3 p-3 text-left active:bg-white/10">
                     <span className="min-w-0 flex-1">
                       <span className={`block text-[11px] font-bold tracking-[0.14em] uppercase ${TYPE_COLOR[kind]}`}>
                         {m.category ? CATEGORY_LABEL[m.category] : TYPE_LABEL[m.type]}
@@ -88,15 +94,34 @@ export default function BuildingDetail({ building, routed, onWaypoint, onOpenMis
         )}
       </section>
 
-      <section className="rounded-2xl border border-dashed border-white/15 p-4">
-        <p className="text-[11px] font-bold tracking-[0.16em] text-ink/55 uppercase">Classes here</p>
-        <p className="mt-1 text-[14px] text-ink/70">Coming with Class Run: add your schedule and your classes in this building show up here, with waypoints and Rep for getting there on time.</p>
+      <section>
+        <h3 className={h}>Your classes here</h3>
+        {classes.length ? (
+          <ul className="space-y-2">
+            {classes.map((c) => (
+              <li key={c.id} className="hud-panel flex items-center justify-between px-3.5 py-3">
+                <span className="min-w-0">
+                  <span className="block truncate text-[15px] font-semibold text-ink">{c.course}</span>
+                  <span className="block text-[12px] text-ink/55">
+                    {c.days.map((d) => DAYS[d]).join(", ")} · {c.start}
+                    {c.room ? ` · ${c.room}` : ""}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <button type="button" onClick={onOpenSchedule} className="hud-panel flex min-h-[56px] w-full items-center justify-between px-4 text-left">
+            <span className="text-[14px] text-ink/75">Add your schedule to see classes here</span>
+            <span className="text-[18px] text-teal" aria-hidden>›</span>
+          </button>
+        )}
       </section>
 
       <button
         type="button"
         onClick={() => onWaypoint(!routed)}
-        className="flex min-h-[52px] w-full items-center justify-center rounded-2xl border border-white/12 bg-white/[0.06] text-[16px] font-bold tracking-wide text-ink uppercase"
+        className={`flex min-h-[52px] w-full items-center justify-center rounded-full text-[15px] font-bold ${routed ? "border border-white/12 bg-white/[0.06] text-ink" : "btn-sunset"}`}
       >
         {routed ? `Clear waypoint · ${Math.round(routed.distanceM / 10) * 10} m · ${routed.minutes} min` : "Set waypoint"}
       </button>

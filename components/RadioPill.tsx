@@ -4,46 +4,45 @@ import { useSyncExternalStore } from "react";
 import { getRadio, getServerRadio, radioOff, radioOn, subscribeRadio } from "@/lib/radio";
 import { STATION } from "@/lib/radioFacts";
 
-/** Map control: Forest FM on/off + live captions while a segment plays. */
+/** Forest FM: round control in the right-hand stack; captions in a card bottom-left while a segment plays. */
 export default function RadioPill() {
   const r = useSyncExternalStore(subscribeRadio, getRadio, getServerRadio);
   const live = r.status === "playing";
 
   return (
-    <div
-      className="pointer-events-none absolute left-4 z-20 flex max-w-[calc(100%-96px)] flex-col-reverse items-start gap-2"
-      style={{ bottom: "calc(var(--safe-bottom) + 168px)" }}
-    >
+    <>
       <button
         type="button"
         onClick={() => (r.on ? radioOff() : radioOn())}
         aria-pressed={r.on}
         aria-label={r.on ? `Turn ${STATION} off` : `Turn on ${STATION}`}
-        className={`glass pointer-events-auto flex min-h-[40px] items-center gap-2 px-3 text-[11px] font-bold tracking-[0.18em] uppercase ${r.on ? "text-gold" : "text-ink/70"}`}
-        style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)" }}
+        className={`glass absolute right-4 z-20 flex h-12 w-12 items-center justify-center rounded-full active:scale-95 ${r.on ? "text-gold" : "text-ink/80"}`}
+        style={{ bottom: "calc(var(--safe-bottom) + 288px)" }}
       >
-        <span className="flex h-3.5 items-end gap-[2px]" aria-hidden>
+        <span className="flex h-4 items-end gap-[2.5px]" aria-hidden>
           {[0, 1, 2, 3].map((i) => (
             <span
               key={i}
-              className={`block w-[3px] bg-current ${live ? "animate-[eq_0.9s_ease-in-out_infinite]" : ""}`}
-              style={{ height: `${[6, 10, 8, 4][i]}px`, animationDelay: `${i * 0.15}s` }}
+              className={`block w-[3px] rounded-full bg-current ${live ? "animate-[eq_0.9s_ease-in-out_infinite]" : ""}`}
+              style={{ height: `${[7, 12, 9, 5][i]}px`, animationDelay: `${i * 0.15}s` }}
             />
           ))}
         </span>
-        {STATION}
-        <span className="text-ink/50">{r.status === "tuning" ? "· tuning" : r.on ? "· on" : "· off"}</span>
       </button>
       {r.on && r.script && (r.status === "playing" || r.status === "tuning") && (
-        <p
+        <div
           key={r.script}
-          className="glass max-w-[270px] animate-[fadein_300ms_ease-out] px-3 py-2 text-[12px] leading-snug text-ink/85"
+          className="glass absolute left-4 z-20 max-w-[calc(100%-96px)] animate-[fadein_300ms_ease-out] rounded-[18px] px-3.5 py-2.5"
+          style={{ bottom: "calc(var(--safe-bottom) + 168px)" }}
           aria-live="polite"
         >
-          {r.scriptDistrict && <span className="mr-1 font-bold text-teal uppercase">{r.scriptDistrict}:</span>}
-          {r.script}
-        </p>
+          <p className="text-[11px] font-semibold text-gold">
+            {STATION}
+            {r.scriptDistrict && <span className="text-ink/55"> · {r.scriptDistrict}</span>}
+          </p>
+          <p className="mt-0.5 text-[13px] leading-snug text-ink/85">{r.script}</p>
+        </div>
       )}
-    </div>
+    </>
   );
 }

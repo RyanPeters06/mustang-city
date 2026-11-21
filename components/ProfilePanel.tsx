@@ -72,7 +72,7 @@ export default function ProfilePanel({
   const prevMin = nextRank ? [0, 1000, 5000, 15000].filter((n) => n < nextRank.min).pop()! : 15000;
   const toNext = nextRank ? Math.min(1, (rep - prevMin) / (nextRank.min - prevMin)) : 1;
 
-  const cta = "flex min-h-[52px] w-full items-center justify-center rounded-2xl text-[16px] font-bold uppercase tracking-wide";
+  const cta = "flex min-h-[52px] w-full items-center justify-center rounded-full text-[16px] font-bold";
   const h = "mb-2 text-[12px] font-bold tracking-[0.16em] text-ink/55 uppercase";
 
   return (

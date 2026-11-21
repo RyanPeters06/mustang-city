@@ -14,7 +14,7 @@ export default function LocateButton({ map }: { map: React.RefObject<MapHandle |
         if (fix) map.current?.locate(fix.lngLat);
         else startWatching();
       }}
-      className="glass absolute right-4 z-20 flex h-12 w-12 items-center justify-center rounded-2xl text-teal active:scale-95"
+      className="glass absolute right-4 z-20 flex h-12 w-12 items-center justify-center rounded-full text-teal active:scale-95"
       style={{ bottom: "calc(var(--safe-bottom) + 168px)" }}
     >
       <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden>

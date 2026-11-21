@@ -22,7 +22,7 @@ export default function Sheet({ open, title, onClose, children }: Props) {
             key="sheet"
             role="dialog"
             aria-label={title}
-            className="absolute inset-x-0 bottom-0 z-30 flex max-h-[78%] flex-col rounded-t-[10px] border-t border-white/10 overflow-hidden bg-night/[0.97] shadow-[0_-20px_60px_-10px_rgba(0,0,0,0.6)] backdrop-blur-xl"
+            className="absolute inset-x-0 bottom-0 z-30 flex max-h-[78%] flex-col rounded-t-[30px] border-t border-white/10 overflow-hidden bg-[#140c2b]/[0.96] shadow-[0_-20px_60px_-10px_rgba(0,0,0,0.6)] backdrop-blur-xl"
             style={{ paddingBottom: "calc(var(--safe-bottom) + 84px)" }}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
@@ -35,11 +35,10 @@ export default function Sheet({ open, title, onClose, children }: Props) {
               if (info.offset.y > 100 || info.velocity.y > 600) onClose();
             }}
           >
-            <div className="sunset-rule" aria-hidden />
-            <div className="flex justify-center pt-2 pb-1">
-              <div className="h-1 w-10 rounded-full bg-white/25" />
+            <div className="flex justify-center pt-2.5 pb-1">
+              <div className="h-[5px] w-10 rounded-full bg-white/20" />
             </div>
-            <h2 className="font-display px-6 pt-2 text-[30px] leading-none tracking-[0.01em] text-ink uppercase">{title}</h2>
+            <h2 className="font-display px-6 pt-2 text-[30px] leading-none tracking-[0.005em] text-ink uppercase">{title}</h2>
             <div className="overflow-y-auto px-6 pt-4">{children}</div>
           </motion.section>
         </>

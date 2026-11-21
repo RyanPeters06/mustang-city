@@ -79,11 +79,11 @@ export default function ScheduleManager() {
                 setMsg(`Saved ${ok.length} class${ok.length === 1 ? "" : "es"}${ok.length < pending.length ? ` (${pending.length - ok.length} skipped: no building)` : ""}.`);
                 setPending(null);
               }}
-              className="min-h-[48px] flex-1 bg-teal text-[14px] font-bold tracking-wide text-night uppercase"
+              className="min-h-[48px] flex-1 bg-teal text-[14px] font-bold text-night rounded-full"
             >
               Save
             </button>
-            <button type="button" onClick={() => setPending(null)} className="min-h-[48px] flex-1 border border-white/12 text-[14px] font-bold text-ink/80 uppercase">
+            <button type="button" onClick={() => setPending(null)} className="min-h-[48px] flex-1 border border-white/12 text-[14px] font-bold text-ink/80 rounded-full">
               Discard
             </button>
           </div>
@@ -133,7 +133,7 @@ export default function ScheduleManager() {
                 type="button"
                 aria-pressed={on}
                 onClick={() => setDraft({ ...draft, days: on ? draft.days.filter((x) => x !== i) : [...draft.days, i].sort() })}
-                className={`min-h-[44px] flex-1 text-[13px] font-bold ${on ? "bg-pink text-night" : "bg-white/[0.06] text-ink/70"}`}
+                className={`min-h-[44px] flex-1 text-[13px] font-bold ${on ? "btn-sunset" : "bg-white/[0.06] text-ink/70"} rounded-full`}
               >
                 {d}
               </button>
@@ -158,17 +158,17 @@ export default function ScheduleManager() {
             setDraft(empty());
             setMsg(`Added ${draft.course}.`);
           }}
-          className="min-h-[48px] w-full bg-pink text-[14px] font-bold tracking-wide text-night uppercase disabled:opacity-40"
+          className="min-h-[48px] w-full btn-sunset text-[14px] font-bold text-night disabled:opacity-40 rounded-full"
         >
           Add class
         </button>
       </section>
 
       <section className="grid grid-cols-2 gap-2">
-        <button type="button" onClick={() => ics.current?.click()} className="min-h-[48px] border border-white/12 bg-white/[0.04] text-[13px] font-bold text-ink">
+        <button type="button" onClick={() => ics.current?.click()} className="min-h-[48px] border border-white/12 bg-white/[0.04] text-[13px] font-bold text-ink rounded-full">
           Import .ics
         </button>
-        <button type="button" disabled={busy} onClick={() => shot.current?.click()} className="min-h-[48px] border border-white/12 bg-white/[0.04] text-[13px] font-bold text-ink disabled:opacity-50">
+        <button type="button" disabled={busy} onClick={() => shot.current?.click()} className="min-h-[48px] border border-white/12 bg-white/[0.04] text-[13px] font-bold text-ink disabled:opacity-50 rounded-full">
           {busy ? "Reading…" : "From screenshot"}
         </button>
         <input
@@ -224,7 +224,7 @@ export default function ScheduleManager() {
             clearSchedule();
             setMsg("Schedule deleted from this phone.");
           }}
-          className="min-h-[48px] w-full text-[13px] font-bold tracking-[0.14em] text-pink uppercase"
+          className="min-h-[48px] w-full text-[13px] font-bold tracking-[0.14em] text-pink rounded-full"
         >
           Delete my schedule
         </button>

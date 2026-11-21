@@ -159,6 +159,26 @@ export function resetFog() {
 }
 
 /** Build the fog layer data and the soft-edge lines from the revealed cells. */
+/**
+ * Chaikin corner-cutting on a closed ring: turns the stair-stepped hexagon outline into a smooth,
+ * organic shape (each pass replaces every corner with two points at 1/4 and 3/4 along its edges).
+ * Rings stay closed; area shrinks by well under a cell's width, so reveal accuracy is unchanged in practice.
+ */
+function smoothRing(ring: LngLat[], passes = 2): LngLat[] {
+  let pts = ring.slice(0, -1);
+  if (pts.length < 4) return ring;
+  for (let k = 0; k < passes; k++) {
+    const next: LngLat[] = [];
+    for (let i = 0; i < pts.length; i++) {
+      const [ax, ay] = pts[i];
+      const [bx, by] = pts[(i + 1) % pts.length];
+      next.push([ax * 0.75 + bx * 0.25, ay * 0.75 + by * 0.25], [ax * 0.25 + bx * 0.75, ay * 0.25 + by * 0.75]);
+    }
+    pts = next;
+  }
+  return [...pts, pts[0]];
+}
+
 export function buildFog(): { fog: FeatureCollection<Polygon>; edges: Feature<MultiLineString> } {
   ensureLoaded();
   const regions = cells.size ? cellsToMultiPolygon([...cells], true) : [];
@@ -167,7 +187,9 @@ export function buildFog(): { fog: FeatureCollection<Polygon>; edges: Feature<Mu
   const edgeLines: LngLat[][] = [];
 
   for (const region of regions) {
-    const [outer, ...inner] = region as LngLat[][];
+    const [rawOuter, ...rawInner] = region as LngLat[][];
+    const outer = smoothRing(rawOuter);
+    const inner = rawInner.map((r) => smoothRing(r));
     holes.push(outer);
     edgeLines.push(outer);
     for (const loop of inner) {

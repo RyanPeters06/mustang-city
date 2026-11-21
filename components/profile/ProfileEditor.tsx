@@ -137,7 +137,7 @@ export default function ProfileEditor({ snap, onClose }: { snap: ProgressSnapsho
       )}
 
       <div className="grid grid-cols-2 gap-2.5">
-        <button type="button" onClick={onClose} className="min-h-[52px] rounded-2xl bg-white/[0.06] text-[15px] font-bold text-ink">
+        <button type="button" onClick={onClose} className="min-h-[52px] rounded-full bg-white/[0.06] text-[15px] font-bold text-ink">
           Cancel
         </button>
         <button
@@ -147,7 +147,7 @@ export default function ProfileEditor({ snap, onClose }: { snap: ProgressSnapsho
             updateProfile({ ...draft, name: draft.name.trim() });
             onClose();
           }}
-          className="min-h-[52px] rounded-2xl bg-pink text-[15px] font-bold text-night uppercase disabled:opacity-40"
+          className="min-h-[52px] rounded-full btn-sunset text-[15px] font-bold text-night disabled:opacity-40"
         >
           Save
         </button>

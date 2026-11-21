@@ -28,7 +28,7 @@ export default function NextClassCard({ onWaypoint, routed }: { onWaypoint: (key
   return (
     <div
       className="glass pointer-events-auto absolute left-4 z-20 max-w-[calc(100%-132px)] px-3 py-2.5"
-      style={{ top: "calc(var(--safe-top) + 84px)", clipPath: "polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)" }}
+      style={{ top: "calc(var(--safe-top) + 84px)" }}
     >
       <p className="text-[10px] font-bold tracking-[0.2em] text-teal uppercase">{n.done ? "Class Run ✓ on time" : mins >= 0 ? `Next class · ${mins} min` : "Class started"}</p>
       <p className="truncate text-[15px] font-bold text-ink">{n.meeting.course}</p>

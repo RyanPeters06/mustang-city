@@ -24,10 +24,11 @@ export default function DistrictDetail({ name, onOpenMission }: { name: string; 
 
   return (
     <div className="space-y-4 pb-4">
-      <div className="flex items-center gap-2 text-[12px] font-bold tracking-[0.14em] uppercase">
-        <span className={unlocked ? "text-gold" : "text-ink/60"}>{unlocked ? "Unlocked" : "Locked"}</span>
-        <span className="text-ink/30">·</span>
-        <span className="text-teal">{Math.round(pct * 100)}% explored</span>
+      <div className="flex items-center gap-2">
+        <span className={`rounded-full px-2.5 py-1 text-[12px] font-semibold ${unlocked ? "bg-gold/15 text-gold" : "bg-white/[0.07] text-ink/65"}`}>
+          {unlocked ? "Claimed" : "Not claimed yet"}
+        </span>
+        <span className="rounded-full bg-teal/15 px-2.5 py-1 text-[12px] font-semibold text-teal">{Math.round(pct * 100)}% explored</span>
       </div>
 
       <div className="hud-panel p-4">
@@ -35,11 +36,11 @@ export default function DistrictDetail({ name, onOpenMission }: { name: string; 
           <span className="text-[13px] font-semibold text-ink/80">{unlocked ? "District claimed" : `Clear ${Math.round(UNLOCK_SHARE * 100)}% to claim it`}</span>
           <span className="text-[13px] font-bold text-orange">+{DISTRICT_REP} Rep</span>
         </div>
-        <div className="mt-2 h-2 overflow-hidden bg-white/10">
+        <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
           <div className={`h-full ${unlocked ? "bg-gold" : "bg-gradient-to-r from-pink to-orange"}`} style={{ width: `${(unlocked ? 1 : toUnlock) * 100}%` }} />
         </div>
         {d?.info?.startsWith("http") && (
-          <a href={d.info} target="_blank" rel="noreferrer" className="mt-3 inline-block min-h-[44px] pt-3 text-[13px] font-semibold text-teal underline">
+          <a href={d.info} target="_blank" rel="noreferrer" className="mt-3 inline-block min-h-[44px] pt-3 text-[13px] font-semibold text-teal underline rounded-full">
             City of London district profile
           </a>
         )}

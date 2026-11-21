@@ -108,7 +108,7 @@ export default function HeistPanel({ m, fix, inRange, onComplete }: Props) {
           type="button"
           disabled={!(offline && sim) && !inRange}
           onClick={join}
-          className="flex min-h-[52px] w-full items-center justify-center bg-purple text-[16px] font-bold tracking-wide text-ink uppercase disabled:opacity-50"
+          className="flex min-h-[52px] w-full items-center justify-center bg-purple text-[16px] font-bold text-ink disabled:opacity-50 rounded-full"
         >
           {open ? "Join the heist" : "Start the heist"}
         </button>

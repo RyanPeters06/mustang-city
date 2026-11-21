@@ -79,7 +79,7 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
     }
   }
 
-  const primary = "flex min-h-[52px] w-full items-center justify-center rounded-2xl text-[16px] font-bold uppercase tracking-wide";
+  const primary = "flex min-h-[52px] w-full items-center justify-center rounded-full text-[16px] font-bold";
 
   return (
     <div className="space-y-4 pb-4">

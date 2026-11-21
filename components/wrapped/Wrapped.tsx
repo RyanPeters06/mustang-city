@@ -341,12 +341,11 @@ function Share({ data, percentile, onClose }: { data: WrappedData; percentile: n
           type="button"
           disabled={!blob}
           onClick={share}
-          className="min-h-[52px] bg-ink text-[15px] font-bold tracking-[0.25em] text-night uppercase disabled:opacity-50"
-          style={{ clipPath: "polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%)" }}
+          className="min-h-[52px] bg-ink text-[15px] font-bold tracking-[0.25em] text-night disabled:opacity-50 rounded-full"
         >
           Share
         </button>
-        <button type="button" onClick={onClose} className="min-h-[48px] text-[14px] font-bold tracking-[0.2em] text-ink/70 uppercase">
+        <button type="button" onClick={onClose} className="min-h-[48px] text-[14px] font-bold tracking-[0.2em] text-ink/70 rounded-full">
           Back to the map
         </button>
       </div>

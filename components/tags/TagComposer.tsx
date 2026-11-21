@@ -55,7 +55,7 @@ export default function TagComposer({ onDone }: { onDone: (id: string) => void }
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={photo} alt="Photo to pin" className="h-16 w-16 rounded-xl object-cover" />
-          <button type="button" onClick={() => setPhoto(null)} className="min-h-[44px] text-[14px] font-semibold text-ink/70 underline">
+          <button type="button" onClick={() => setPhoto(null)} className="min-h-[44px] text-[14px] font-semibold text-ink/70 underline rounded-full">
             Remove photo
           </button>
         </div>
@@ -63,7 +63,7 @@ export default function TagComposer({ onDone }: { onDone: (id: string) => void }
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="min-h-[44px] text-[14px] font-semibold text-teal underline"
+          className="min-h-[44px] text-[14px] font-semibold text-teal underline rounded-full"
         >
           + Add a photo (optional)
         </button>
@@ -95,7 +95,7 @@ export default function TagComposer({ onDone }: { onDone: (id: string) => void }
       )}
 
       {!fix ? (
-        <button type="button" onClick={startWatching} className="flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-teal text-[16px] font-bold text-night uppercase">
+        <button type="button" onClick={startWatching} className="flex min-h-[52px] w-full items-center justify-center rounded-full bg-teal text-[16px] font-bold text-night">
           Turn on location
         </button>
       ) : !accurate ? (
@@ -107,7 +107,7 @@ export default function TagComposer({ onDone }: { onDone: (id: string) => void }
           type="button"
           disabled={busy || note.trim().length < 2}
           onClick={post}
-          className="flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-pink text-[16px] font-bold tracking-wide text-night uppercase disabled:opacity-50"
+          className="flex min-h-[52px] w-full items-center justify-center rounded-full btn-sunset text-[16px] font-bold text-night disabled:opacity-50"
         >
           {busy ? "Pinning…" : "Pin it here"}
         </button>

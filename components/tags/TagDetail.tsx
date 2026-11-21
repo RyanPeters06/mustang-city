@@ -54,7 +54,7 @@ export default function TagDetail({ id, onClose }: { id: string; onClose: () => 
               if (err) setError(err);
               else onClose();
             }}
-            className="flex min-h-[48px] w-full items-center justify-center rounded-2xl border border-white/12 bg-white/[0.06] text-[15px] font-bold text-ink/80 uppercase"
+            className="flex min-h-[48px] w-full items-center justify-center rounded-full border border-white/12 bg-white/[0.06] text-[15px] font-bold text-ink/80"
           >
             Delete tag
           </button>
@@ -64,9 +64,7 @@ export default function TagDetail({ id, onClose }: { id: string; onClose: () => 
           type="button"
           aria-pressed={tag.voted}
           onClick={async () => setError(await toggleVote(tag.id))}
-          className={`flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl text-[16px] font-bold tracking-wide uppercase ${
-            tag.voted ? "border border-teal/50 bg-teal/15 text-teal" : "bg-teal text-night"
-          }`}
+          className={`flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full text-[16px] font-bold ${ tag.voted ? "border border-teal/50 bg-teal/15 text-teal" : "bg-teal text-night" }`}
         >
           ▲ {tag.voted ? "Upvoted" : "Upvote"} · {tag.votes}
         </button>

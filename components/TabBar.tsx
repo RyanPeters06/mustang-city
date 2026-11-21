@@ -32,7 +32,7 @@ export default function TabBar({ active, onChange, visible = true }: { active: T
       style={{ paddingBottom: "calc(var(--safe-bottom) + 8px)" }}
       aria-label="Main"
     >
-      <div className="glass flex overflow-hidden rounded-[8px] p-1">
+      <div className="glass flex overflow-hidden rounded-[26px] p-1.5">
         {TABS.map((t) => {
           const on = t.id === active;
           return (
@@ -42,15 +42,12 @@ export default function TabBar({ active, onChange, visible = true }: { active: T
               onClick={() => onChange(t.id)}
               aria-current={on ? "page" : undefined}
               aria-label={t.label}
-              className={`relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-[4px] transition-colors ${
-                on ? "bg-gradient-to-b from-pink/20 to-transparent text-pink" : "text-ink/60 active:text-ink"
-              }`}
+              className={`relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-[20px] transition-colors duration-200 ${ on ? "bg-white/[0.09] text-pink" : "text-ink/55 active:text-ink" }`}
             >
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 {t.icon}
               </svg>
-              <span className="text-[10px] font-bold tracking-[0.16em] uppercase">{t.label}</span>
-              {on && <span className="absolute inset-x-4 top-0 h-[3px] bg-gradient-to-r from-gold via-pink to-purple" aria-hidden />}
+              <span className="text-[11px] font-semibold">{t.label}</span>
             </button>
           );
         })}

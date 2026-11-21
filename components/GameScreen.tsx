@@ -210,7 +210,7 @@ export default function GameScreen() {
       />
       <WeatherOverlay />
       <Hud visible={entered} />
-      {entered && <Radar />}
+      {entered && !sheetOpen && <Radar />}
       {mapState === "ready" && entered && !sheetOpen && (
         <>
           <LocationPrompt />
@@ -267,6 +267,10 @@ export default function GameScreen() {
             routed={waypoint?.slug === buildingKey ? waypoint : null}
             onWaypoint={(on) => routeTo(on ? buildingKey : null, building.center)}
             onOpenMission={openMission}
+            onOpenSchedule={() => {
+              closeBuilding();
+              setScheduleOpen(true);
+            }}
           />
         ) : tab === "missions" ? (
           <MissionList onOpen={openMission} onPassed={setPassed} />

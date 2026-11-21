@@ -77,7 +77,7 @@ export default function StudentJobs({ onPassed }: { onPassed: (info: { slug: str
     <section className="mt-6">
       <div className="mb-2 flex items-center justify-between">
         <h3 className="text-[12px] font-bold tracking-[0.16em] text-ink/60 uppercase">Student jobs {mode === "local" && <span className="text-gold">· samples</span>}</h3>
-        <button type="button" onClick={() => setWriting((w) => !w)} className="min-h-[44px] px-2 text-[13px] font-bold text-teal">
+        <button type="button" onClick={() => setWriting((w) => !w)} className="min-h-[44px] px-2 text-[13px] font-bold text-teal rounded-full">
           {writing ? "Cancel" : "+ Write a job"}
         </button>
       </div>
@@ -134,7 +134,7 @@ export default function StudentJobs({ onPassed }: { onPassed: (info: { slug: str
                       type="button"
                       disabled={!inRange}
                       onClick={() => checkIn(m)}
-                      className="flex min-h-[48px] w-full items-center justify-center bg-orange text-[14px] font-bold tracking-wide text-night uppercase disabled:opacity-40"
+                      className="flex min-h-[48px] w-full items-center justify-center bg-orange text-[14px] font-bold text-night disabled:opacity-40 rounded-full"
                     >
                       {inRange ? "Check in" : d !== null ? `${formatDistance(Math.max(0, d - m.radiusM))} to go` : "Turn on location"}
                     </button>
@@ -182,7 +182,7 @@ function Composer({ mode, fix, onPosted }: { mode: Mode; fix: { lngLat: [number,
       <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 50))} placeholder="Job title" className="w-full border border-white/12 bg-white/[0.05] px-3 py-2.5 text-[16px] text-ink placeholder:text-ink/35 focus:border-teal focus:outline-none" />
       <textarea value={briefing} onChange={(e) => setBriefing(e.target.value.slice(0, 140))} rows={3} placeholder="What should they do here?" className="w-full resize-none border border-white/12 bg-white/[0.05] px-3 py-2.5 text-[16px] text-ink placeholder:text-ink/35 focus:border-teal focus:outline-none" />
       {error && <p role="alert" className="text-[13px] text-pink">{error}</p>}
-      <button type="button" disabled={busy} onClick={post} className="flex min-h-[48px] w-full items-center justify-center bg-teal text-[14px] font-bold tracking-wide text-night uppercase disabled:opacity-50">
+      <button type="button" disabled={busy} onClick={post} className="flex min-h-[48px] w-full items-center justify-center bg-teal text-[14px] font-bold text-night disabled:opacity-50 rounded-full">
         {busy ? "Screening…" : "Post job"}
       </button>
     </div>
