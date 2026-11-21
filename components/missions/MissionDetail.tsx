@@ -11,6 +11,8 @@ import LoreCard from "./LoreCard";
 import GoosePortrait from "./GoosePortrait";
 import NextBus from "./NextBus";
 import HeistPanel from "./HeistPanel";
+import PosterButton from "./PosterButton";
+import { rememberPhoto } from "@/lib/poster";
 import { getRides, getServerRides, subscribeRides } from "@/lib/rides";
 import { useBriefing } from "@/lib/useBriefing";
 
@@ -54,6 +56,7 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
       const json = (await res.json()) as { pass?: boolean; reason?: string; rep?: number; message?: string };
       if (!res.ok) return setPhase({ kind: "error", message: json.message ?? "Something went wrong. Try again." });
       if (!json.pass) return setPhase({ kind: "error", message: `Not quite: ${json.reason ?? "try another angle."}` });
+      if (image) rememberPhoto(slug, image);
       completeMission({ slug, rep: m.rep, thumb, reason: json.reason });
       setPhase({ kind: "idle" });
       if (routed) onWaypoint(null);
@@ -115,6 +118,7 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
               {done.reason && <p className="text-[13px] text-ink/70">{done.reason}</p>}
             </div>
           </div>
+          {done.thumb && <PosterButton m={m} thumb={done.thumb} at={done.at} />}
           <LoreCard m={m} />
         </>
       ) : (
