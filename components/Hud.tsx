@@ -2,9 +2,11 @@
 
 import { useSyncExternalStore } from "react";
 import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/progress";
+import { getServerWeather, getWeather, subscribeWeather } from "@/lib/weather";
 
 export default function Hud({ visible = true }: { visible?: boolean }) {
   const { rep, rank, pct } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const w = useSyncExternalStore(subscribeWeather, getWeather, getServerWeather);
 
   return (
     <header
@@ -17,7 +19,14 @@ export default function Hud({ visible = true }: { visible?: boolean }) {
       >
         <div className="sunset-rule absolute inset-x-0 bottom-0" aria-hidden />
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold tracking-[0.2em] text-gold uppercase">{rank}</p>
+          <p className="text-[11px] font-semibold tracking-[0.2em] text-gold uppercase">
+            {rank}
+            {w.status === "live" && w.tempC !== null && (
+              <span className="text-ink/55">
+                {" "}· {Math.round(w.tempC)}°C {w.label}
+              </span>
+            )}
+          </p>
           <p className="font-display text-[22px] leading-none tracking-[0.02em] text-ink uppercase">Forest State</p>
         </div>
         <Stat label="Rep" value={rep.toLocaleString()} color="text-orange" />

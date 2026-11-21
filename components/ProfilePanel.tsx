@@ -230,6 +230,14 @@ export default function ProfilePanel({
           <p className="text-[14px] text-ink/60">Sign-in isn&apos;t switched on for this deployment yet. Your progress is saved on this device.</p>
         )}
       </section>
+
+      <p className="pb-2 text-[11px] leading-relaxed text-ink/40">
+        Data: City of London Open Data (planning districts) · London Transit Commission open data (routes, buses) ·{" "}
+        <a href="https://open-meteo.com/" target="_blank" rel="noreferrer" className="underline">
+          Weather by Open-Meteo.com
+        </a>{" "}
+        (CC BY 4.0) · Map © Mapbox © OpenStreetMap.
+      </p>
     </div>
   );
 }

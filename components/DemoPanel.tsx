@@ -13,6 +13,7 @@ import { getLightOverride, setLightOverride, type LightPreset } from "@/lib/mapS
 import { isSampleTurf, setSampleTurf } from "@/lib/turf";
 import { getHeistSim, setHeistSim } from "@/lib/heistDemo";
 import { ageAllCells } from "@/lib/fogAge";
+import { forceWeather } from "@/lib/weather";
 import type { MapHandle } from "./map/MapView";
 import type { PassedInfo } from "./missions/MissionDetail";
 
@@ -134,6 +135,9 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
           </button>
         ))}
       </div>
+      <button className={btn} onClick={() => forceWeather("rain")}>Weather: rain (demo)</button>
+      <button className={btn} onClick={() => forceWeather("snow")}>Weather: snow (demo)</button>
+      <button className={btn} onClick={() => forceWeather(null)}>Weather: live</button>
       <button className={btn} onClick={() => ageAllCells(200)}>Age fog 200 days (decay)</button>
       <button className={btn} onClick={() => ageAllCells(0)}>Refresh fog (no decay)</button>
       <button className={btn} onClick={() => setSampleTurf(!isSampleTurf())}>Sample faculty turf on/off</button>

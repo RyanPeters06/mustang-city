@@ -28,6 +28,7 @@ import TagComposer from "./tags/TagComposer";
 import DistrictDetail from "./districts/DistrictDetail";
 import CollectibleDetail from "./CollectibleDetail";
 import Radar from "./Radar";
+import WeatherOverlay from "./WeatherOverlay";
 import { startCollectibleWatch } from "@/lib/collectibleWatch";
 import { COLLECTIBLES } from "@/lib/collectibles";
 import { missionBySlug } from "@/lib/missions";
@@ -186,6 +187,7 @@ export default function GameScreen() {
           setTagSheet(id);
         }}
       />
+      <WeatherOverlay />
       <Hud visible={entered} />
       {entered && <Radar />}
       {mapState === "ready" && entered && !sheetOpen && (

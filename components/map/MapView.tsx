@@ -303,7 +303,7 @@ function addGameLayers(map: MapboxMap) {
       type: "FeatureCollection",
       features: [
         { type: "Feature", properties: { name: "FOREST STATE", size: 1 }, geometry: { type: "Point", coordinates: LONDON_CENTER } },
-        { type: "Feature", properties: { name: "MUSTANG CITY", size: 0.6 }, geometry: { type: "Point", coordinates: CAMPUS_CENTER } },
+        { type: "Feature", properties: { name: "MUSTANG CITY", size: 0.6 }, geometry: { type: "Point", coordinates: [CAMPUS_CENTER[0], CAMPUS_CENTER[1] + 0.009] } },
       ],
     },
   });
@@ -579,9 +579,9 @@ function addGameLayers(map: MapboxMap) {
     type: "circle",
     source: "buses",
     slot: "top",
-    minzoom: 11,
+    minzoom: 12.5,
     paint: {
-      "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 3.5, 16, 9],
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 12.5, 4, 16, 9],
       "circle-color": ["get", "color"],
       "circle-stroke-color": "#140a2e",
       "circle-stroke-width": 2,
