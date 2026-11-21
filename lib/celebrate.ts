@@ -1,5 +1,5 @@
 /** Queue of one-at-a-time celebration moments (rank ups, badges). */
-export type Celebration = { id: string; kind: "rank" | "badge" | "district"; title: string; subtitle: string; color?: string; glyph?: string };
+export type Celebration = { id: string; kind: "rank" | "badge" | "district" | "ride"; title: string; subtitle: string; color?: string; glyph?: string };
 
 let queue: Celebration[] = [];
 const listeners = new Set<() => void>();

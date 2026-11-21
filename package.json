@@ -8,11 +8,13 @@
     "start": "next start",
     "lint": "eslint",
     "db:schema": "node scripts/db.mjs db/schema.sql",
-    "db:seed": "node scripts/db.mjs db/seed.sql"
+    "db:seed": "node scripts/db.mjs db/seed.sql",
+    "gtfs:build": "node scripts/gtfs-build.mjs"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.33.0",
     "@google/genai": "^3.6.1",
+    "gtfs-realtime-bindings": "^1.1.1",
     "h3-js": "^4.5.0",
     "mapbox-gl": "^3.35.2",
     "motion": "^14.14.0",

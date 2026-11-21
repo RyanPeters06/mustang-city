@@ -5,6 +5,7 @@
 import { getSnapshot as getFogSnapshot, subscribe as subscribeFog } from "./fog";
 import { RANKS, rankFor } from "./rank";
 import { BADGES } from "./badges";
+import { getRides, subscribeRides } from "./rides";
 import { celebrate } from "./celebrate";
 import { DISTRICT_REP, getDistrictStats } from "./districts";
 
@@ -110,6 +111,7 @@ function ensureLoaded() {
     listeners.forEach((l) => l());
     checkMilestones();
   });
+  subscribeRides(() => checkMilestones()); // bus rides feed Route 6 Regular / Every Route (also starts detection)
   checkMilestones(true);
 }
 
@@ -128,7 +130,8 @@ function checkMilestones(silent = false) {
     celebrate({ id: `rank-${snap.rank}`, kind: "rank", title: snap.rank, subtitle: `${snap.rep.toLocaleString()} Rep` });
   }
 
-  const input = { completions: data.completions, pct: snap.pct };
+  const r = getRides();
+  const input = { completions: data.completions, pct: snap.pct, rides: r.rides, totalRoutes: r.total };
   for (const b of BADGES) {
     if (data.badges[b.code] || !b.evaluate(input).earned) continue;
     data.badges = { ...data.badges, [b.code]: Date.now() };

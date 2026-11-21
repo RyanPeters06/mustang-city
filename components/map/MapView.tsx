@@ -11,6 +11,9 @@ import { DISTRICTS, districtIndexAt } from "@/lib/districts";
 import { buildFog, isRevealedAt, subscribe } from "@/lib/fog";
 import { REVEAL_ACCURACY_M, getLastFix, onFix, type Fix } from "@/lib/location";
 import { getTags, subscribeTags } from "@/lib/tags";
+import { onBusFrame, subscribeBuses } from "@/lib/buses";
+import { LTC, routeById } from "@/lib/ltcData";
+import type { Vehicle } from "@/lib/ltc";
 import {
   CAMPUS_BUILDINGS,
   CAMPUS_CENTER,
@@ -515,6 +518,62 @@ function addGameLayers(map: MapboxMap) {
     },
   });
 
+  // --- LTC buses: route lines (static GTFS) + live vehicles (GTFS-realtime) ---------------
+  map.addSource("bus-routes", {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: LTC.shapes.map((sh) => ({
+        type: "Feature",
+        properties: { route: sh.route, color: routeById(sh.route)?.color ?? "#2ee6d6" },
+        geometry: { type: "LineString", coordinates: sh.line },
+      })),
+    },
+  });
+  map.addLayer({
+    id: "bus-routes",
+    type: "line",
+    source: "bus-routes",
+    slot: "top",
+    minzoom: 12.5,
+    layout: { "line-join": "round", "line-cap": "round" },
+    paint: {
+      "line-color": ["get", "color"],
+      "line-width": ["interpolate", ["linear"], ["zoom"], 12.5, 1, 16, 2.5],
+      "line-opacity": ["interpolate", ["linear"], ["zoom"], 12.5, 0, 13.5, 0.35],
+      "line-emissive-strength": 1,
+    },
+  });
+  map.addSource("buses", { type: "geojson", data: EMPTY });
+  map.addLayer({
+    id: "bus-dots",
+    type: "circle",
+    source: "buses",
+    slot: "top",
+    minzoom: 11,
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 3.5, 16, 9],
+      "circle-color": ["get", "color"],
+      "circle-stroke-color": "#140a2e",
+      "circle-stroke-width": 2,
+      "circle-emissive-strength": 1,
+    },
+  });
+  map.addLayer({
+    id: "bus-labels",
+    type: "symbol",
+    source: "buses",
+    slot: "top",
+    minzoom: 14,
+    layout: {
+      "text-field": ["get", "name"],
+      "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
+      "text-size": 9,
+      "text-allow-overlap": true,
+    },
+    paint: { "text-color": "#140a2e", "text-emissive-strength": 1 },
+  });
+
   // --- Geo-pinned tags: only ones the player may see (store already gates on revealed cells) ---
   map.addImage("tag-pin", missionIcon("#f6efff", TAG_GLYPH), { pixelRatio: 2 });
   map.addSource("tags", { type: "geojson", data: tagData() });
@@ -628,6 +687,20 @@ const MISSION_ICONS: [string, string, string][] = [
 ];
 
 const TAG_GLYPH = "M5 5h14v10h-7l-4 4v-4H5z M8.5 9.5h7 M8.5 12h4";
+
+function busData(vs: Vehicle[]): FeatureCollection {
+  return {
+    type: "FeatureCollection",
+    features: vs.map((v) => {
+      const r = routeById(v.route);
+      return {
+        type: "Feature",
+        properties: { id: v.id, route: v.route, name: r?.name ?? v.route.replace(/^0/, ""), color: r?.color ?? "#2ee6d6" },
+        geometry: { type: "Point", coordinates: v.lngLat },
+      };
+    }),
+  };
+}
 
 function tagData(): FeatureCollection {
   return {
@@ -1074,6 +1147,9 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
           }
         }),
       );
+      // Buses: glide every frame between 15 s updates.
+      cleanups.push(onBusFrame((vs) => (map.getSource("buses") as GeoJSONSource | undefined)?.setData(busData(vs))));
+      cleanups.push(subscribeBuses(() => {}));
       // Tags: redraw whenever the visible set changes.
       cleanups.push(subscribeTags(() => (map.getSource("tags") as GeoJSONSource | undefined)?.setData(tagData())));
       // One tap handler: mission blips / "?" areas win over the building underneath them.

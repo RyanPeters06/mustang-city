@@ -9,6 +9,8 @@ import { preparePhoto } from "@/lib/photo";
 import { TYPE_COLOR } from "./MissionList";
 import LoreCard from "./LoreCard";
 import GoosePortrait from "./GoosePortrait";
+import NextBus from "./NextBus";
+import { getRides, getServerRides, subscribeRides } from "@/lib/rides";
 import { useBriefing } from "@/lib/useBriefing";
 
 export type PassedInfo = { slug: string; rep: number; thumb?: string; reason: string };
@@ -30,6 +32,8 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const fileRef = useRef<HTMLInputElement>(null);
   const briefing = useBriefing(slug, m.briefing);
+  const { rides } = useSyncExternalStore(subscribeRides, getRides, getServerRides);
+  const rodeRecently = Object.values(rides).some((ts) => ts.some((t) => Date.now() - t < 45 * 60_000));
 
   const distance = missionDistance(m, fix?.lngLat ?? null);
   const accurate = !!fix && fix.accuracy <= REVEAL_ACCURACY_M;
@@ -119,6 +123,8 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
             {m.type === "photo" ? m.criteria : m.type === "bus" ? "Arrive by bus." : "Get inside the circle and check in."}
           </p>
 
+          <NextBus at={m.lngLat} />
+
           {phase.kind === "working" && (
             <div className="flex items-center gap-3 rounded-2xl bg-white/[0.05] p-3">
               {phase.preview && (
@@ -156,6 +162,10 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
               >
                 {phase.kind === "error" ? "Retake photo" : "Take photo"}
               </button>
+            ) : m.type === "bus" && !rodeRecently ? (
+              <p className="rounded-2xl bg-white/[0.05] px-4 py-3 text-center text-[14px] text-ink/70">
+                Arrive by bus: ride any LTC route here and it unlocks.
+              </p>
             ) : (
               <button
                 type="button"

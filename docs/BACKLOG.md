@@ -39,7 +39,7 @@ Full list with decisions: [docs/IDEAS.md §7](IDEAS.md#7-needs-from-ryan). Ideas
   Gemini TTS voice; never autoplay. *Done when:* entering a new neighbourhood queues a 15-second segment.
 - [x] **Graduation Wrapped** — Spotify-Wrapped-style recap (fog timelapse from replay data, stats,
   percentile), shareable card via Web Share. *Done when:* Wrapped renders from current progress and shares an image.
-- [ ] **Live buses + route collection** — LTC GTFS static + GTFS-RT in an API route, buses animate on the map,
+- [x] **Live buses + route collection** — LTC GTFS static + GTFS-RT in an API route, buses animate on the map,
   mission cards show next arrival; ride detection; "Every Route" progress. *Done when:* live buses move
   (or cached last-good feed with a "delayed" label).
 - [ ] **Faculty turf + heists** — districts tinted by faculty with most Rep; heist missions needing 3+ players

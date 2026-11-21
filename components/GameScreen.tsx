@@ -20,6 +20,7 @@ import AreaBanner from "./AreaBanner";
 import Celebrations from "./Celebrations";
 import TagButton from "./tags/TagButton";
 import RadioPill from "./RadioPill";
+import TransitChip from "./TransitChip";
 import Wrapped from "./wrapped/Wrapped";
 import { AnimatePresence } from "motion/react";
 import TagDetail from "./tags/TagDetail";
@@ -179,6 +180,7 @@ export default function GameScreen() {
           <LocateButton map={map} />
           <TagButton onClick={() => setTagSheet("new")} />
           <RadioPill />
+          <TransitChip />
           {friendShown && (
             <button
               type="button"

@@ -2,7 +2,7 @@
 import { MISSIONS } from "./missions";
 import type { Completion } from "./progress";
 
-export type BadgeInput = { completions: Record<string, Completion>; pct: number };
+export type BadgeInput = { completions: Record<string, Completion>; pct: number; rides?: Record<string, number[]>; totalRoutes?: number };
 export type BadgeStatus = { earned: boolean; have: number; need: number; lockedNote?: string };
 
 export type Badge = {
@@ -87,7 +87,10 @@ export const BADGES: Badge[] = [
     description: "Ride the same route on 10 different days",
     glyph: "M6 4h12a2 2 0 0 1 2 2v10H4V6a2 2 0 0 1 2-2zM4 11h16M7 19v-3M17 19v-3",
     color: "#FF8A3D",
-    evaluate: () => notYet("live buses"),
+    evaluate: (i) => {
+      const days = Object.values(i.rides ?? {}).map((ts) => new Set(ts.map((t) => new Date(t).toDateString())).size);
+      return progress(Math.max(0, ...days), 10);
+    },
   },
   {
     code: "every-route",
@@ -95,7 +98,7 @@ export const BADGES: Badge[] = [
     description: "Ride every LTC route",
     glyph: "M3 12h18M12 3v18M5 5l14 14M19 5 5 19",
     color: "#FF4F8B",
-    evaluate: () => notYet("live buses"),
+    evaluate: (i) => progress(Object.keys(i.rides ?? {}).length, i.totalRoutes ?? 38),
   },
 ];
 

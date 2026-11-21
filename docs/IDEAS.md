@@ -122,4 +122,4 @@ Still to try (logged):
 | Approve 3D model route (§3) | Middlesex College hero model | decision |
 | Pick a music route (§4) | Pause-screen music | decision |
 | Photos of Middlesex College / UC (any angle) | Option 3 hand-built models, textures | optional |
-| LTC GTFS-RT feed URL/key if required | Live buses | check |
+| Check live buses on the deployed site (LTC realtime host `gtfs.ltconline.ca` reset connections from the cloud build machine; static schedule works) | Live buses status chip should say "Live" | check |
