@@ -8,7 +8,7 @@ Status marks: `[ ]` todo · `[x]` done · `[~]` blocked (reason in the line) · 
 ## Needs from Ryan (unblocks items below)
 - `GEMINI_API_KEY` — photo checks, goose dialogue, radio host
 - Auth0 app + `AUTH0_*`, `APP_BASE_URL` — sign-in, friends, leaderboards
-- `DATABASE_URL` (Tiger Data) + `npm run db:schema && npm run db:seed` — accounts, friends, leaderboards, turf
+- `DATABASE_URL` (Tiger Data) + `npm run db:schema && npm run db:seed` — accounts, friends, leaderboards, turf, tags (re-run db:schema for `tag_votes`)
 
 ## Queue
 
@@ -32,7 +32,7 @@ Status marks: `[ ]` todo · `[x]` done · `[~]` blocked (reason in the line) · 
 - [x] **The Goose quest-giver** — original goose crime-boss portrait (SVG, original art), appears on mission
   briefings; Gemini rewrites briefings in character from stored text (fallback to stored text). *Done when:*
   briefings show the portrait; no facts are added to landmark text.
-- [ ] **Geo-pinned tags** — leave a note/photo on your current cell; others see it once their fog there is
+- [x] **Geo-pinned tags** — leave a note/photo on your current cell; others see it once their fog there is
   cleared; upvotes (+10 Rep). *Done when:* tag created by A appears for B only after B reveals that cell.
 - [ ] **AI radio host** — tap-to-start radio; Gemini script from current neighbourhood + nearby landmarks,
   Gemini TTS voice; never autoplay. *Done when:* entering a new neighbourhood queues a 15-second segment.

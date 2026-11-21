@@ -134,6 +134,15 @@ CREATE TABLE IF NOT EXISTS tags (
 );
 CREATE INDEX IF NOT EXISTS tags_h3_cell ON tags (h3_cell);
 
+-- One upvote per player per tag (feature 011). Author earns +10 Rep per upvote (rep recomputed in /api/me).
+CREATE TABLE IF NOT EXISTS tag_votes (
+  tag_id      integer NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+  user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tag_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS tags_user ON tags (user_id, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS collectibles (
   id         serial PRIMARY KEY,
   name       text NOT NULL,

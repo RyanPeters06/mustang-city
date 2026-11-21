@@ -92,3 +92,36 @@ export function briefingPassesGuard(stored: string, rewrite: string): boolean {
   const storedNums = new Set(stored.match(/\d+/g) ?? []);
   return (t.match(/\d+/g) ?? []).every((n) => storedNums.has(n));
 }
+
+const SCREEN_SCHEMA = {
+  type: "object",
+  properties: {
+    ok: { type: "boolean", description: "true if safe to show publicly in the game" },
+    reason: { type: "string", description: "if not ok, one short sentence for the author" },
+  },
+  required: ["ok", "reason"],
+};
+
+/** Screen a public geo-pinned tag (note + optional photo) before it is stored. */
+export async function screenTag(note: string, jpegBase64?: string): Promise<{ ok: boolean; reason: string }> {
+  const prompt = [
+    "You moderate public notes and photos students pin to places in a campus exploration game.",
+    `Note: ${note}`,
+    "Reject if it contains: harassment or insults aimed at a person, hate, sexual content, threats, encouragement",
+    "of illegal or dangerous acts, personal information (names with contact details, addresses of private homes,",
+    "student numbers), or a photo where a stranger's face is the subject. Allow jokes, opinions, tips and art.",
+    "Reply as JSON: ok, reason.",
+  ].join("\n");
+  const input: ({ type: "text"; text: string } | { type: "image"; data: string; mime_type: string })[] = [{ type: "text", text: prompt }];
+  if (jpegBase64) input.push({ type: "image", data: jpegBase64, mime_type: "image/jpeg" });
+
+  const interaction = await ai().interactions.create({
+    model: MODEL,
+    input,
+    response_format: { type: "text", mime_type: "application/json", schema: SCREEN_SCHEMA },
+    generation_config: { thinking_level: "low" },
+    store: false,
+  });
+  const parsed = JSON.parse(interaction.output_text ?? "{}") as { ok?: unknown; reason?: unknown };
+  return { ok: parsed.ok === true, reason: typeof parsed.reason === "string" ? parsed.reason.slice(0, 160) : "" };
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import TagsSection from "./profile/TagsSection";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/progress";
 import { MISSIONS, missionBySlug } from "@/lib/missions";
@@ -17,10 +18,12 @@ type Account = { kind: "loading" } | { kind: "signed-in"; user: User } | { kind:
 export default function ProfilePanel({
   denied,
   onOpenMission,
+  onOpenTag,
   onPlayReplay,
 }: {
   denied: boolean;
   onOpenMission: (slug: string) => void;
+  onOpenTag: (id: string) => void;
   onPlayReplay: () => void;
 }) {
   const snap = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
@@ -170,6 +173,8 @@ export default function ProfilePanel({
       <Neighbourhoods snap={snap} />
 
       <Replays onPlay={onPlayReplay} />
+
+      <TagsSection onOpen={onOpenTag} />
 
       {archive.length > 0 && (
         <section>

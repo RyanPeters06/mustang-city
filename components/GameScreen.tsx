@@ -18,6 +18,9 @@ import BuildingDetail from "./buildings/BuildingDetail";
 import ReplayBar from "./ReplayBar";
 import AreaBanner from "./AreaBanner";
 import Celebrations from "./Celebrations";
+import TagButton from "./tags/TagButton";
+import TagDetail from "./tags/TagDetail";
+import TagComposer from "./tags/TagComposer";
 import { missionBySlug } from "@/lib/missions";
 import { getLastFix } from "@/lib/location";
 import { walkingRoute } from "@/lib/directions";
@@ -55,6 +58,8 @@ export default function GameScreen() {
   const [waypoint, setWaypointState] = useState<Waypoint | null>(null);
   const [passed, setPassed] = useState<PassedInfo | null>(null);
   const [friendShown, setFriendShown] = useState<string | null>(null);
+  /** Tag sheet: a tag id, "new" for the composer, or null. */
+  const [tagSheet, setTagSheet] = useState<string | null>(null);
 
   // Start the account check (and sync) as soon as the app opens.
   useEffect(() => {
@@ -69,6 +74,7 @@ export default function GameScreen() {
   }, [params]);
 
   const openMission = useCallback((slug: string) => {
+    setTagSheet(null);
     setBuilding(null);
     map.current?.clearBuilding();
     setSelected(slug);
@@ -109,8 +115,12 @@ export default function GameScreen() {
   }, []);
 
   const clearPassed = useCallback(() => setPassed(null), []);
-  const sheetOpen = selected !== null || building !== null || tab !== "map";
-  const sheetTitle = selected
+  const sheetOpen = tagSheet !== null || selected !== null || building !== null || tab !== "map";
+  const sheetTitle = tagSheet
+    ? tagSheet === "new"
+      ? "Leave a tag"
+      : "Tag"
+    : selected
     ? (missionBySlug(selected)?.title ?? "")
     : building
       ? (building.name ?? "Campus building")
@@ -130,8 +140,14 @@ export default function GameScreen() {
         }}
         onMissionTap={openMission}
         onBuildingTap={(b) => {
+          setTagSheet(null);
           setSelected(null);
           setBuilding(b);
+        }}
+        onTagTap={(id) => {
+          setSelected(null);
+          closeBuilding();
+          setTagSheet(id);
         }}
       />
       <Hud />
@@ -139,6 +155,7 @@ export default function GameScreen() {
         <>
           <LocationPrompt />
           <LocateButton map={map} />
+          <TagButton onClick={() => setTagSheet("new")} />
           {friendShown && (
             <button
               type="button"
@@ -159,12 +176,17 @@ export default function GameScreen() {
         open={sheetOpen}
         title={sheetTitle}
         onClose={() => {
-          if (selected) setSelected(null);
+          if (tagSheet) setTagSheet(null);
+          else if (selected) setSelected(null);
           else if (building) closeBuilding();
           else setTab("map");
         }}
       >
-        {selected ? (
+        {tagSheet === "new" ? (
+          <TagComposer onDone={setTagSheet} />
+        ) : tagSheet ? (
+          <TagDetail key={tagSheet} id={tagSheet} onClose={() => setTagSheet(null)} />
+        ) : selected ? (
           <MissionDetail key={selected} slug={selected} waypoint={waypoint} onWaypoint={setMissionWaypoint} onPassed={setPassed} />
         ) : building ? (
           <BuildingDetail
@@ -177,7 +199,7 @@ export default function GameScreen() {
         ) : tab === "missions" ? (
           <MissionList onOpen={openMission} />
         ) : tab === "profile" ? (
-          <ProfilePanel denied={params.denied} onOpenMission={openMission} onPlayReplay={() => setTab("map")} />
+          <ProfilePanel denied={params.denied} onOpenMission={openMission} onOpenTag={setTagSheet} onPlayReplay={() => setTab("map")} />
         ) : (
           <CrewPanel prefill={params.add} shownFriend={friendShown} onToggleMap={toggleFriendMap} />
         )}
@@ -186,6 +208,7 @@ export default function GameScreen() {
       <TabBar
         active={tab}
         onChange={(t) => {
+          setTagSheet(null);
           setSelected(null);
           closeBuilding();
           setTab(t);

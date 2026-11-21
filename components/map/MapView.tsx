@@ -10,6 +10,7 @@ import { getSnapshot as getProgress, subscribe as subscribeProgress } from "@/li
 import { DISTRICTS } from "@/lib/districts";
 import { buildFog, isRevealedAt, subscribe } from "@/lib/fog";
 import { REVEAL_ACCURACY_M, getLastFix, onFix, type Fix } from "@/lib/location";
+import { getTags, subscribeTags } from "@/lib/tags";
 import {
   CAMPUS_BUILDINGS,
   CAMPUS_CENTER,
@@ -47,6 +48,7 @@ type Props = {
   onUnavailable: (reason: string) => void;
   onMissionTap: (slug: string) => void;
   onBuildingTap: (b: BuildingTap) => void;
+  onTagTap: (id: string) => void;
 };
 
 const reducedMotion = () =>
@@ -437,6 +439,35 @@ function addGameLayers(map: MapboxMap) {
     },
   });
 
+  // --- Geo-pinned tags: only ones the player may see (store already gates on revealed cells) ---
+  map.addImage("tag-pin", missionIcon("#f6efff", TAG_GLYPH), { pixelRatio: 2 });
+  map.addSource("tags", { type: "geojson", data: tagData() });
+  map.addLayer({
+    id: "tag-pins",
+    type: "symbol",
+    source: "tags",
+    slot: "top",
+    minzoom: 13,
+    layout: {
+      "icon-image": "tag-pin",
+      "icon-size": ["interpolate", ["linear"], ["zoom"], 13, 0.55, 17, 0.85],
+      "icon-allow-overlap": true,
+      "text-field": ["step", ["zoom"], "", 16, ["concat", "▲ ", ["to-string", ["get", "votes"]]]],
+      "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
+      "text-size": 10,
+      "text-offset": [0, 1.5],
+      "text-anchor": "top",
+      "text-optional": true,
+    },
+    paint: {
+      "text-color": "#f6efff",
+      "text-halo-color": "#140a2e",
+      "text-halo-width": 1.4,
+      "text-emissive-strength": 1,
+      "icon-emissive-strength": 1,
+    },
+  });
+
   // --- Player marker: accuracy circle, pulse, arrow (heading known) or dot ----------
   map.addImage("player-pulse", pulsingRing(map), { pixelRatio: 2 });
   map.addImage("player-arrow", arrowImage(), { pixelRatio: 2 });
@@ -519,6 +550,19 @@ const MISSION_ICONS: [string, string, string][] = [
   ["m-heist", "#7b2ff7", "M4 18h16 M4 18 3 7l5 4 4-6 4 6 5-4-1 11"],
   ["m-landmark", "#ffc857", "M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"],
 ];
+
+const TAG_GLYPH = "M5 5h14v10h-7l-4 4v-4H5z M8.5 9.5h7 M8.5 12h4";
+
+function tagData(): FeatureCollection {
+  return {
+    type: "FeatureCollection",
+    features: getTags().tags.map((t) => ({
+      type: "Feature",
+      properties: { id: t.id, votes: t.votes, mine: t.mine },
+      geometry: { type: "Point", coordinates: t.lngLat },
+    })),
+  };
+}
 
 const iconFor = (m: Mission) => (m.category ? "m-landmark" : `m-${m.type}`);
 
@@ -716,14 +760,14 @@ function pulsingRing(map: MapboxMap) {
   };
 }
 
-export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onBuildingTap }: Props) {
+export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapboxMap | null>(null);
   const followRef = useRef(false);
-  const callbacks = useRef({ onReady, onUnavailable, onMissionTap, onBuildingTap });
+  const callbacks = useRef({ onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap });
 
   useEffect(() => {
-    callbacks.current = { onReady, onUnavailable, onMissionTap, onBuildingTap };
+    callbacks.current = { onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap };
   });
 
   useImperativeHandle(ref, () => ({
@@ -875,6 +919,8 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
           }
         }),
       );
+      // Tags: redraw whenever the visible set changes.
+      cleanups.push(subscribeTags(() => (map.getSource("tags") as GeoJSONSource | undefined)?.setData(tagData())));
       // One tap handler: mission blips / "?" areas win over the building underneath them.
       map.on("click", (e) => {
         const box: [[number, number], [number, number]] = [
@@ -884,6 +930,9 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
         const mission = map.queryRenderedFeatures(box, { layers: ["mission-blips", "mission-areas-fill"] })[0];
         const slug = mission?.properties?.slug;
         if (typeof slug === "string") return callbacks.current.onMissionTap(slug);
+        const tag = map.queryRenderedFeatures(box, { layers: ["tag-pins"] })[0];
+        const tagId = tag?.properties?.id;
+        if (typeof tagId === "string") return callbacks.current.onTagTap(tagId);
 
         const building = map.queryRenderedFeatures(e.point, { layers: ["building-selected", "mission-buildings", "campus-buildings"] })[0];
         if (building && (building.geometry.type === "Polygon" || building.geometry.type === "MultiPolygon")) {
@@ -892,7 +941,7 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
           callbacks.current.onBuildingTap(buildingInfo(geometry, [e.lngLat.lng, e.lngLat.lat]));
         }
       });
-      for (const layer of ["mission-blips", "mission-areas-fill", "campus-buildings", "mission-buildings"]) {
+      for (const layer of ["mission-blips", "mission-areas-fill", "tag-pins", "campus-buildings", "mission-buildings"]) {
         map.on("mouseenter", layer, () => (map.getCanvas().style.cursor = "pointer"));
         map.on("mouseleave", layer, () => (map.getCanvas().style.cursor = ""));
       }
