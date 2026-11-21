@@ -163,3 +163,26 @@ export async function speak(script: string): Promise<{ data: string; mime: strin
   const audio = interaction.output_audio;
   return audio?.data ? { data: audio.data, mime: audio.mime_type ?? "audio/mp3" } : null;
 }
+
+/** Screen a student-written mission before it goes live (brief → "Gemini screens for unsafe or private-property missions"). */
+export async function screenMission(title: string, briefing: string, place: string): Promise<{ ok: boolean; reason: string }> {
+  const prompt = [
+    "You moderate player-written missions for a campus exploration game in London, Ontario. Players walk to the spot and check in.",
+    `Title: ${title}`,
+    `Briefing: ${briefing}`,
+    `Spot: ${place}`,
+    "Reject if it: sends people onto private property or into private homes/backyards, requires trespassing or entering",
+    "restricted areas (rooftops, tunnels, rail tracks, construction sites), is dangerous or illegal, targets or names a",
+    "private person, contains harassment, hate or sexual content, or shares personal information. Allow fun, public spots.",
+    "Reply as JSON: ok, reason (one short sentence for the author if rejected).",
+  ].join("\n");
+  const interaction = await ai().interactions.create({
+    model: MODEL,
+    input: [{ type: "text", text: prompt }],
+    response_format: { type: "text", mime_type: "application/json", schema: SCREEN_SCHEMA },
+    generation_config: { thinking_level: "low" },
+    store: false,
+  });
+  const parsed = JSON.parse(interaction.output_text ?? "{}") as { ok?: unknown; reason?: unknown };
+  return { ok: parsed.ok === true, reason: typeof parsed.reason === "string" ? parsed.reason.slice(0, 160) : "" };
+}

@@ -16,7 +16,7 @@ import { rememberPhoto } from "@/lib/poster";
 import { getRides, getServerRides, subscribeRides } from "@/lib/rides";
 import { useBriefing } from "@/lib/useBriefing";
 
-export type PassedInfo = { slug: string; rep: number; thumb?: string; reason: string };
+export type PassedInfo = { slug: string; rep: number; thumb?: string; reason: string; title?: string };
 
 type Props = {
   slug: string;

@@ -83,6 +83,9 @@ CREATE TABLE IF NOT EXISTS missions (
   source_url   text
 );
 
+-- Student-written missions (feature 017): daily limit needs a creation time.
+ALTER TABLE missions ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
+
 CREATE TABLE IF NOT EXISTS mission_completions (
   id             serial PRIMARY KEY,
   mission_id     integer NOT NULL REFERENCES missions(id) ON DELETE CASCADE,

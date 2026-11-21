@@ -44,7 +44,7 @@ Full list with decisions: [docs/IDEAS.md §7](IDEAS.md#7-needs-from-ryan). Ideas
   (or cached last-good feed with a "delayed" label).
 - [x] **Faculty turf + heists** — districts tinted by faculty with most Rep; heist missions needing 3+ players
   within radius/time window. *Done when:* turf colours update from DB; a 3-account heist completes.
-- [ ] **Polish pack** — poster-style mission cards (canvas + Web Share), hidden collectibles, radar HUD,
+- [x] **Polish pack** — poster-style mission cards (canvas + Web Share), hidden collectibles, radar HUD,
   fog decay (6 months), student-written missions with Gemini screening, live weather overlay.
 - [ ] **Hero 3D model: Middlesex College** — low-poly glTF via Mapbox `model` layer at z ≥ 16 (see
   `specs/003-friends-buildings/research.md`). *Done when:* model replaces the extrusion, stays at 60 fps.
