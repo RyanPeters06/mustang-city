@@ -19,11 +19,13 @@ export default function ProfilePanel({
   denied,
   onOpenMission,
   onOpenTag,
+  onOpenWrapped,
   onPlayReplay,
 }: {
   denied: boolean;
   onOpenMission: (slug: string) => void;
   onOpenTag: (id: string) => void;
+  onOpenWrapped: () => void;
   onPlayReplay: () => void;
 }) {
   const snap = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
@@ -167,6 +169,18 @@ export default function ProfilePanel({
           </ul>
         )}
       </section>
+
+      <button
+        type="button"
+        onClick={onOpenWrapped}
+        className="hud-panel flex min-h-[64px] w-full items-center justify-between px-4 py-3 text-left"
+      >
+        <span>
+          <span className="block text-[11px] font-bold tracking-[0.3em] text-teal uppercase">Your year so far</span>
+          <span className="font-display block text-[26px] leading-none text-ink uppercase">Forest State Wrapped</span>
+        </span>
+        <span className="text-[22px] text-pink" aria-hidden>▶</span>
+      </button>
 
       <BadgeGrid snap={snap} />
 

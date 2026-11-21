@@ -154,3 +154,6 @@ export function stopReplay() {
 }
 
 export const SAMPLE_TRACE_ID = SAMPLE.id;
+
+/** All recorded (non-sample) traces, oldest first — Wrapped's timelapse source. */
+export const getRecordedTraces = (): Trace[] => (ensureLoaded(), traces.filter((t) => !t.sample).sort((a, b) => a.startedAt - b.startedAt));

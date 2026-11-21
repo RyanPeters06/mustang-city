@@ -20,6 +20,8 @@ import AreaBanner from "./AreaBanner";
 import Celebrations from "./Celebrations";
 import TagButton from "./tags/TagButton";
 import RadioPill from "./RadioPill";
+import Wrapped from "./wrapped/Wrapped";
+import { AnimatePresence } from "motion/react";
 import TagDetail from "./tags/TagDetail";
 import TagComposer from "./tags/TagComposer";
 import DistrictDetail from "./districts/DistrictDetail";
@@ -65,6 +67,7 @@ export default function GameScreen() {
   /** Tag sheet: a tag id, "new" for the composer, or null. */
   const [tagSheet, setTagSheet] = useState<string | null>(null);
   const [district, setDistrict] = useState<string | null>(null);
+  const [wrapped, setWrapped] = useState(false);
 
   // Start the account check (and sync) as soon as the app opens.
   useEffect(() => {
@@ -222,7 +225,7 @@ export default function GameScreen() {
         ) : tab === "missions" ? (
           <MissionList onOpen={openMission} />
         ) : tab === "profile" ? (
-          <ProfilePanel denied={params.denied} onOpenMission={openMission} onOpenTag={setTagSheet} onPlayReplay={() => setTab("map")} />
+          <ProfilePanel denied={params.denied} onOpenMission={openMission} onOpenTag={setTagSheet} onOpenWrapped={() => setWrapped(true)} onPlayReplay={() => setTab("map")} />
         ) : (
           <CrewPanel prefill={params.add} shownFriend={friendShown} onToggleMap={toggleFriendMap} />
         )}
@@ -244,6 +247,7 @@ export default function GameScreen() {
       <ReplayBar />
       <Celebrations paused={passed !== null} />
       <MissionPassed info={passed} onDone={clearPassed} />
+      <AnimatePresence>{wrapped && <Wrapped key="wrapped" onClose={() => setWrapped(false)} />}</AnimatePresence>
       <DemoPanel map={map} selected={selected} onPassed={setPassed} />
     </main>
   );

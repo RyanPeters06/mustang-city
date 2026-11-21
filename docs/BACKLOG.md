@@ -37,7 +37,7 @@ Full list with decisions: [docs/IDEAS.md §7](IDEAS.md#7-needs-from-ryan). Ideas
   cleared; upvotes (+10 Rep). *Done when:* tag created by A appears for B only after B reveals that cell.
 - [x] **AI radio host** — tap-to-start radio; Gemini script from current neighbourhood + nearby landmarks,
   Gemini TTS voice; never autoplay. *Done when:* entering a new neighbourhood queues a 15-second segment.
-- [ ] **Graduation Wrapped** — Spotify-Wrapped-style recap (fog timelapse from replay data, stats,
+- [x] **Graduation Wrapped** — Spotify-Wrapped-style recap (fog timelapse from replay data, stats,
   percentile), shareable card via Web Share. *Done when:* Wrapped renders from current progress and shares an image.
 - [ ] **Live buses + route collection** — LTC GTFS static + GTFS-RT in an API route, buses animate on the map,
   mission cards show next arrival; ride detection; "Every Route" progress. *Done when:* live buses move
