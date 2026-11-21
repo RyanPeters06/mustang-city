@@ -27,11 +27,61 @@ INSERT INTO missions (slug, title, briefing, type, lat, lng, radius_m, criteria,
 ('amazing-race-thames', 'Race Leg on the Thames', 'A reality race came through campus. Get to the river.', 'photo',
   43.0072, -81.2787, 120, 'Photo shows the Thames River near Western campus.', 100, true,
   'film_tv', 'The Amazing Race Canada season 8, episode 6 ran a full leg in London, including downtown, the Thames River and Western''s campus.', NULL,
-  'https://www.filmlondon.ca')
+  'https://www.filmlondon.ca'),
+('blackfriars-bridge', 'Mail-Order Bridge', 'This bridge came in a box and it''s still standing. Respect the iron. Get it in frame.', 'photo',
+  42.9878, -81.2585, 100, 'Photo shows the white iron truss of Blackfriars Bridge over the river.', 100, true,
+  'history', 'Made by the Wrought Iron Bridge Company of Canton, Ohio, and assembled here by Isaac Crouse, Blackfriars Bridge opened on September 27, 1875; it was rebuilt in 2018.', 1875,
+  'https://historicplaces.ca/en/rep-reg/place-lieu.aspx?id=10079'),
+('old-courthouse', 'The Castle on Ridout', 'There''s a castle downtown and nobody acts like it''s weird. Go see the towers.', 'photo',
+  42.9815, -81.2536, 90, 'Photo shows the Middlesex County Court House, a castle-like brick building with towers.', 100, true,
+  'history', 'The Middlesex County Court House, an early Gothic Revival building with castle-like towers and crenellations, was completed in 1829 and named a National Historic Site in 1955.', 1829,
+  'https://www.pc.gc.ca/apps/dfhd/page_nhs_eng.aspx?id=415'),
+('covent-garden-market', 'The Old Market', 'Every good operation needs a supplier. Find the market and check in with the vendors.', 'checkin',
+  42.9824, -81.2501, 80, 'User is at Covent Garden Market.', 100, true,
+  'history', 'Covent Garden Market has traded on this downtown block since land was donated for it in 1845; a Museum London label dates its opening to November 1, 1845.', 1845,
+  'https://coventmarket.com/market-history'),
+('grand-theatre-ghost', 'The Man Who Vanished', 'The guy who ran this place walked out one night and never came back. Some say he never left. Go look.', 'photo',
+  42.9859, -81.251, 80, 'Photo shows the Grand Theatre''s exterior or marquee on Richmond Street.', 100, true,
+  'history', 'The Grand Theatre opened in 1901. Owner Ambrose Small sold his theatre holdings on December 2, 1919 and disappeared; the case was never solved, and local lore says his ghost haunts the building.', 1919,
+  'https://www.thecanadianencyclopedia.ca/en/article/grand-theatre'),
+('st-peters-basilica', 'Twin Towers of Dufferin', 'Big stone, big towers, very old. Go stand in front of it and look up.', 'photo',
+  42.9874, -81.2502, 90, 'Photo shows the twin-towered stone exterior of St. Peter''s Cathedral Basilica.', 100, true,
+  'history', 'St. Peter''s Cathedral Basilica was built in French Gothic Revival style from 1880 to 1885 and was raised to a minor basilica in 1961.', 1885,
+  'https://www.heritagetrust.on.ca/plaques/st-peters-cathedral-basilica'),
+('storybook-gardens', 'Once Upon a Park', 'Every boss started somewhere small. Go to the place where half this city had their first adventure.', 'checkin',
+  42.9576, -81.3168, 150, 'User is at Storybook Gardens in Springbank Park.', 150, true,
+  'history', 'Storybook Gardens opened in Springbank Park in 1958 and is still owned and run by the City of London.', 1958,
+  'https://london.ca/storybookgardens/about-us'),
+('forks-of-the-thames', 'The Capital That Wasn''t', 'Somebody once picked this exact spot to run the whole province. Didn''t happen. Stand where it almost did.', 'checkin',
+  42.9832, -81.2575, 110, 'User is at the Forks of the Thames, near Ivey Park.', 100, true,
+  'history', 'In 1793 Lieutenant-Governor John Graves Simcoe chose the Forks of the Thames as the future capital of Upper Canada and named it New London; the capital went to York (Toronto) instead.', 1793,
+  'https://london.ca/heritage'),
+('victoria-park-garrison', 'Barracks to Bandshell', 'Before the concerts and skating, soldiers drilled here. Get the park in frame.', 'photo',
+  42.989, -81.2483, 140, 'Photo shows Victoria Park: lawns, trees, the bandshell or the skating area.', 100, true,
+  'history', 'British troops garrisoned this ground from 1838; in 1874 it passed to the city and became Victoria Park, named for Queen Victoria.', 1874,
+  'https://historicplaces.ca/en/rep-reg/place-lieu.aspx?id=10655'),
+('lawson-village', 'The Village Before the City', 'Long before any of us, people built a whole town up here. Go pay respects. Quietly.', 'checkin',
+  43.0135, -81.3056, 150, 'User is at the Museum of Ontario Archaeology and Lawson site.', 150, true,
+  'history', 'The Lawson site is a palisaded Neutral Iroquoian village occupied around 1500–1525; the Museum of Ontario Archaeology moved beside it in 1981 and continues to excavate and reconstruct it.', 1500,
+  'https://www.thecanadianencyclopedia.ca/en/article/lawson-archaeological-site'),
+('wolseley-hall', 'The Old Barracks', 'This is where the toughest crew in the country got its start. Get the building. Don''t salute anyone you don''t know.', 'photo',
+  43.0011, -81.2316, 100, 'Photo shows Wolseley Hall, a red-brick barracks building with a tower, on Oxford Street East.', 100, true,
+  'history', 'Wolseley Hall (1886–88) was the first purpose-built infantry school erected by the Dominion government and home of the unit that became The Royal Canadian Regiment; it was named a National Historic Site in 1963.', 1886,
+  'https://www.pc.gc.ca/apps/dfhd/page_nhs_eng.aspx?id=417'),
+('uc-memorial-tower', 'The Memorial Tower', 'Everyone takes a picture of this tower. Fine. Take yours. But know why it''s there.', 'photo',
+  43.0093, -81.274, 70, 'Photo shows the stone tower of University College at Western.', 100, true,
+  'history', 'University College was built from 1922 to 1924; its Middlesex Memorial Tower was funded partly by a $100,000 gift from Middlesex County and dedicated to county men who died in the First World War.', 1924,
+  'https://en.wikipedia.org/wiki/University_College_(University_of_Western_Ontario)')
 ON CONFLICT (slug) DO NOTHING;
 
 -- Starter missions around Mustang City.
 INSERT INTO missions (slug, title, briefing, type, lat, lng, radius_m, criteria, rep_reward, is_official) VALUES
+('alumni-hall-heist', 'The Encore', 'Big job, big room. I need three of you at the hall at the same time. Not two. Three.', 'heist',
+  43.006, -81.2748, 120, 'Three or more players check in at Alumni Hall within 15 minutes.', 300, true),
+('thompson-heist', 'Cold Cash', 'The rink is colder than my heart. Bring a crew of three and get in and out together.', 'heist',
+  43.0028, -81.2756, 120, 'Three or more players check in at Thompson Arena within 15 minutes.', 300, true),
+('ivey-heist', 'The Business Plan', 'These folks plan everything. So do I. Three of you, one building, fifteen minutes.', 'heist',
+  43.0042, -81.2774, 120, 'Three or more players check in at the Ivey Business School within 15 minutes.', 300, true),
 ('middlesex-study-spot', 'The Secret Study Spot', 'There''s a quiet corner in Middlesex nobody talks about. Find it.', 'photo',
   43.00936, -81.27025, 60, 'Photo shows an indoor study space inside a stone university building.', 100, true),
 ('goose-sighting', 'Meet The Family', 'The Goose has cousins everywhere. Photograph one. Keep your distance.', 'photo',
@@ -56,5 +106,24 @@ INSERT INTO badges (code, name, description) VALUES
 ('route-6-regular', 'Route 6 Regular', 'Ride the same route on 10 different days'),
 ('every-route', 'Every Route', 'Ride all LTC routes'),
 ('cartographer', 'Cartographer', 'Explore 25% of London'),
-('heister', 'Heister', 'Complete 3 heists')
+('heister', 'Heister', 'Complete 3 heists'),
+('perfect-attendance', 'Perfect Attendance', 'Get to 5 classes on time in one week')
 ON CONFLICT (code) DO NOTHING;
+
+-- Hidden collectibles (feature 017): one sourced fact each (lib/collectibles.ts has the sources).
+INSERT INTO collectibles (name, lat, lng, lore_text)
+SELECT v.name, v.lat, v.lng, v.lore FROM (VALUES
+('Lost Bridge Planks', 42.9876, -81.2595, 'Two earlier timber bridges at the Blackfriars crossing failed in floods before the iron bridge was built.'),
+('Railroad Rivet', 42.9884, -81.2577, 'Bridge builder Isaac Crouse learned his trade working for the Central Pacific Railroad in Nevada in the late 1860s.'),
+('Jailhouse Key', 42.9824, -81.2546, 'A jail was attached to the court house''s west side in 1846; an eastward extension and a massive central tower followed by 1878.'),
+('District Seal', 42.9841, -81.2561, 'The first settlement at the Forks of the Thames came in 1826, when it became the administrative capital of the London District.'),
+('Box Seat Ticket', 42.9863, -81.2504, 'Ambrose Small had his own box seat on stage right at the Grand Theatre for many years.'),
+('1835 Fair Licence', 42.9820, -81.2493, 'Before the 1845 market site, an 1835 patent allowed a public fair or mart around Richmond, Dundas and King Streets.'),
+('Dedication Ribbon', 42.9897, -81.2474, 'Governor General Lord Dufferin dedicated Victoria Park in 1874.'),
+('Spire Sketch', 42.9870, -81.2493, 'St. Peter''s towers, sacristy and chapel were completed in 1957–58, decades after the cathedral was dedicated in 1885.'),
+('Architect''s Pencil', 42.9828, -81.2561, 'Museum London''s building was designed by Raymond Moriyama, the architect of Science North in Sudbury.'),
+('The Jurys'' Trowel', 43.0099, -81.2729, 'The Museum of Ontario Archaeology began at Western in 1933, founded by Wilfrid Jury and his father Amos.'),
+('Register Stamp', 43.0128, -81.3066, 'In 2004 the Lawson site became the first archaeological site in Ontario placed on the Canadian Register of Historic Places.'),
+('Royal Visitor Pass', 43.0016, -81.2306, 'The Royal Canadian Regiment Museum officially opened in 1983, during a royal visit by Prince Philip.')
+) AS v(name, lat, lng, lore)
+WHERE NOT EXISTS (SELECT 1 FROM collectibles c WHERE c.name = v.name);

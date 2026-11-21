@@ -83,6 +83,9 @@ CREATE TABLE IF NOT EXISTS missions (
   source_url   text
 );
 
+-- Student-written missions (feature 017): daily limit needs a creation time.
+ALTER TABLE missions ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
+
 CREATE TABLE IF NOT EXISTS mission_completions (
   id             serial PRIMARY KEY,
   mission_id     integer NOT NULL REFERENCES missions(id) ON DELETE CASCADE,
@@ -105,6 +108,7 @@ CREATE TABLE IF NOT EXISTS heist_attempts (
   photo_url   text,
   status      heist_status NOT NULL DEFAULT 'open'
 );
+CREATE INDEX IF NOT EXISTS heist_attempts_open ON heist_attempts (mission_id, started_at DESC) WHERE status = 'open';
 
 CREATE TABLE IF NOT EXISTS friendships (
   user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -133,6 +137,15 @@ CREATE TABLE IF NOT EXISTS tags (
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS tags_h3_cell ON tags (h3_cell);
+
+-- One upvote per player per tag (feature 011). Author earns +10 Rep per upvote (rep recomputed in /api/me).
+CREATE TABLE IF NOT EXISTS tag_votes (
+  tag_id      integer NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+  user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tag_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS tags_user ON tags (user_id, created_at DESC);
 
 CREATE TABLE IF NOT EXISTS collectibles (
   id         serial PRIMARY KEY,

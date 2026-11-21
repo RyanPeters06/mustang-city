@@ -29,4 +29,5 @@ Next.js (App Router) + TypeScript + Tailwind v4, Motion, Mapbox GL JS (Standard 
 - Testing: Playwright MCP (WebKit, iPhone 15) for layout; agent-browser for faked-GPS walks.
 - Entire is enabled — session checkpoints are pushed with the repo.
 - `npm run build` must pass before every push; Vercel deploys from `main`.
+- Ideas awaiting Ryan's review: `docs/IDEAS.md` (log only — never build from it until ticked and moved to the backlog).
 - Continuous building: `docs/BACKLOG.md` is the queue; `/build-next` builds one item; `/loop /build-next` keeps going.

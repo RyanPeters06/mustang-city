@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import MapView, { type BuildingTap, type MapHandle } from "./map/MapView";
-import LoadingScreen from "./map/LoadingScreen";
+import Intro from "./Intro";
 import Hud from "./Hud";
 import TabBar, { type Tab } from "./TabBar";
 import Sheet from "./Sheet";
@@ -18,6 +18,24 @@ import BuildingDetail from "./buildings/BuildingDetail";
 import ReplayBar from "./ReplayBar";
 import AreaBanner from "./AreaBanner";
 import Celebrations from "./Celebrations";
+import TagButton from "./tags/TagButton";
+import RadioPill from "./RadioPill";
+import TransitChip from "./TransitChip";
+import Wrapped from "./wrapped/Wrapped";
+import { AnimatePresence } from "motion/react";
+import TagDetail from "./tags/TagDetail";
+import TagComposer from "./tags/TagComposer";
+import DistrictDetail from "./districts/DistrictDetail";
+import CollectibleDetail from "./CollectibleDetail";
+import Radar from "./Radar";
+import WeatherOverlay from "./WeatherOverlay";
+import NextClassCard from "./classrun/NextClassCard";
+import ScheduleManager from "./classrun/ScheduleManager";
+import { CLASS_RUN_REP, onClassRun, startClassRunWatch } from "@/lib/schedule";
+import { recordClassRun } from "@/lib/progress";
+import { celebrate } from "@/lib/celebrate";
+import { startCollectibleWatch } from "@/lib/collectibleWatch";
+import { COLLECTIBLES } from "@/lib/collectibles";
 import { missionBySlug } from "@/lib/missions";
 import { getLastFix } from "@/lib/location";
 import { walkingRoute } from "@/lib/directions";
@@ -46,6 +64,8 @@ type Waypoint = { slug: string; distanceM: number; minutes: number };
 export default function GameScreen() {
   const map = useRef<MapHandle | null>(null);
   const [mapState, setMapState] = useState<"loading" | "ready" | "unavailable">("loading");
+  const [entered, setEntered] = useState(false);
+  const onEntered = useCallback(() => setEntered(true), []);
   const [reason, setReason] = useState<string>();
   const params = useSyncExternalStore(noopSubscribe, readParams, () => SERVER_PARAMS);
   const [chosenTab, setTab] = useState<Tab | null>(null);
@@ -55,20 +75,48 @@ export default function GameScreen() {
   const [waypoint, setWaypointState] = useState<Waypoint | null>(null);
   const [passed, setPassed] = useState<PassedInfo | null>(null);
   const [friendShown, setFriendShown] = useState<string | null>(null);
+  /** Tag sheet: a tag id, "new" for the composer, or null. */
+  const [tagSheet, setTagSheet] = useState<string | null>(null);
+  const [district, setDistrict] = useState<string | null>(null);
+  const [wrapped, setWrapped] = useState(false);
+  const [collectible, setCollectible] = useState<string | null>(null);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
 
   // Start the account check (and sync) as soon as the app opens.
   useEffect(() => {
     startPingLog();
+    startCollectibleWatch();
+    startClassRunWatch();
+    const offRun = onClassRun((m, key) => {
+      if (recordClassRun(key))
+        celebrate({
+          id: `class-${key}`,
+          kind: "class",
+          title: `${m.course} · ${m.building}`,
+          subtitle: `Made it before ${m.start} · +${CLASS_RUN_REP} Rep`,
+          color: "#2ee6d6",
+          glyph: "M4 5h16v15H4zM4 9h16M8 3v4M16 3v4M8 14l3 3 5-6",
+        });
+    });
     const off = subscribeAccount(() => {});
     return () => {
       off();
+      offRun();
     };
   }, []);
   useEffect(() => {
     if (params.denied || params.add) window.history.replaceState(null, "", "/");
   }, [params]);
 
+  const closeDistrict = useCallback(() => {
+    setDistrict(null);
+    map.current?.clearDistrict();
+  }, []);
+
   const openMission = useCallback((slug: string) => {
+    setDistrict(null);
+    map.current?.clearDistrict();
+    setTagSheet(null);
     setBuilding(null);
     map.current?.clearBuilding();
     setSelected(slug);
@@ -109,8 +157,18 @@ export default function GameScreen() {
   }, []);
 
   const clearPassed = useCallback(() => setPassed(null), []);
-  const sheetOpen = selected !== null || building !== null || tab !== "map";
-  const sheetTitle = selected
+  const sheetOpen = scheduleOpen || collectible !== null || district !== null || tagSheet !== null || selected !== null || building !== null || tab !== "map";
+  const sheetTitle = scheduleOpen
+    ? "Class Run"
+    : collectible
+    ? (COLLECTIBLES.find((c) => c.id === collectible)?.name ?? "Collectible")
+    : district
+    ? district
+    : tagSheet
+    ? tagSheet === "new"
+      ? "Leave a tag"
+      : "Tag"
+    : selected
     ? (missionBySlug(selected)?.title ?? "")
     : building
       ? (building.name ?? "Campus building")
@@ -130,15 +188,37 @@ export default function GameScreen() {
         }}
         onMissionTap={openMission}
         onBuildingTap={(b) => {
+          setTagSheet(null);
           setSelected(null);
           setBuilding(b);
         }}
+        onCollectibleTap={(id) => {
+          setTagSheet(null);
+          setSelected(null);
+          setCollectible(id);
+        }}
+        onDistrictTap={(name) => {
+          setTagSheet(null);
+          setSelected(null);
+          setDistrict(name);
+        }}
+        onTagTap={(id) => {
+          setSelected(null);
+          closeBuilding();
+          setTagSheet(id);
+        }}
       />
-      <Hud />
-      {mapState === "ready" && !sheetOpen && (
+      <WeatherOverlay />
+      <Hud visible={entered} />
+      {entered && <Radar />}
+      {mapState === "ready" && entered && !sheetOpen && (
         <>
           <LocationPrompt />
           <LocateButton map={map} />
+          <TagButton onClick={() => setTagSheet("new")} />
+          <RadioPill />
+          <NextClassCard onWaypoint={routeTo} routed={waypoint?.slug ?? null} />
+          <TransitChip />
           {friendShown && (
             <button
               type="button"
@@ -159,12 +239,26 @@ export default function GameScreen() {
         open={sheetOpen}
         title={sheetTitle}
         onClose={() => {
-          if (selected) setSelected(null);
+          if (scheduleOpen) setScheduleOpen(false);
+          else if (collectible) setCollectible(null);
+          else if (district) closeDistrict();
+          else if (tagSheet) setTagSheet(null);
+          else if (selected) setSelected(null);
           else if (building) closeBuilding();
           else setTab("map");
         }}
       >
-        {selected ? (
+        {scheduleOpen ? (
+          <ScheduleManager />
+        ) : collectible ? (
+          <CollectibleDetail id={collectible} />
+        ) : district ? (
+          <DistrictDetail key={district} name={district} onOpenMission={openMission} />
+        ) : tagSheet === "new" ? (
+          <TagComposer onDone={setTagSheet} />
+        ) : tagSheet ? (
+          <TagDetail key={tagSheet} id={tagSheet} onClose={() => setTagSheet(null)} />
+        ) : selected ? (
           <MissionDetail key={selected} slug={selected} waypoint={waypoint} onWaypoint={setMissionWaypoint} onPassed={setPassed} />
         ) : building ? (
           <BuildingDetail
@@ -175,27 +269,33 @@ export default function GameScreen() {
             onOpenMission={openMission}
           />
         ) : tab === "missions" ? (
-          <MissionList onOpen={openMission} />
+          <MissionList onOpen={openMission} onPassed={setPassed} />
         ) : tab === "profile" ? (
-          <ProfilePanel denied={params.denied} onOpenMission={openMission} onPlayReplay={() => setTab("map")} />
+          <ProfilePanel denied={params.denied} onOpenMission={openMission} onOpenTag={setTagSheet} onOpenWrapped={() => setWrapped(true)} onOpenCollectible={setCollectible} onOpenSchedule={() => setScheduleOpen(true)} onPlayReplay={() => setTab("map")} />
         ) : (
           <CrewPanel prefill={params.add} shownFriend={friendShown} onToggleMap={toggleFriendMap} />
         )}
       </Sheet>
 
       <TabBar
+        visible={entered}
         active={tab}
         onChange={(t) => {
+          setScheduleOpen(false);
+          setCollectible(null);
+          closeDistrict();
+          setTagSheet(null);
           setSelected(null);
           closeBuilding();
           setTab(t);
         }}
       />
-      <LoadingScreen state={mapState} reason={reason} />
+      <Intro map={map} mapState={mapState} reason={reason} onDone={onEntered} />
       <AreaBanner />
       <ReplayBar />
       <Celebrations paused={passed !== null} />
       <MissionPassed info={passed} onDone={clearPassed} />
+      <AnimatePresence>{wrapped && <Wrapped key="wrapped" onClose={() => setWrapped(false)} />}</AnimatePresence>
       <DemoPanel map={map} selected={selected} onPassed={setPassed} />
     </main>
   );

@@ -1,5 +1,7 @@
 "use client";
 
+import TagsSection from "./profile/TagsSection";
+import CollectiblesSection from "./profile/CollectiblesSection";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/progress";
 import { MISSIONS, missionBySlug } from "@/lib/missions";
@@ -17,10 +19,18 @@ type Account = { kind: "loading" } | { kind: "signed-in"; user: User } | { kind:
 export default function ProfilePanel({
   denied,
   onOpenMission,
+  onOpenTag,
+  onOpenWrapped,
+  onOpenCollectible,
+  onOpenSchedule,
   onPlayReplay,
 }: {
   denied: boolean;
   onOpenMission: (slug: string) => void;
+  onOpenTag: (id: string) => void;
+  onOpenWrapped: () => void;
+  onOpenCollectible: (id: string) => void;
+  onOpenSchedule: () => void;
   onPlayReplay: () => void;
 }) {
   const snap = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
@@ -165,11 +175,35 @@ export default function ProfilePanel({
         )}
       </section>
 
+      <button
+        type="button"
+        onClick={onOpenWrapped}
+        className="hud-panel flex min-h-[64px] w-full items-center justify-between px-4 py-3 text-left"
+      >
+        <span>
+          <span className="block text-[11px] font-bold tracking-[0.3em] text-teal uppercase">Your year so far</span>
+          <span className="font-display block text-[26px] leading-none text-ink uppercase">Forest State Wrapped</span>
+        </span>
+        <span className="text-[22px] text-pink" aria-hidden>▶</span>
+      </button>
+
+      <button type="button" onClick={onOpenSchedule} className="hud-panel flex min-h-[60px] w-full items-center justify-between px-4 py-3 text-left">
+        <span>
+          <span className="block text-[11px] font-bold tracking-[0.3em] text-teal uppercase">Class Run · {Object.keys(snap.classRuns).length} on time</span>
+          <span className="block text-[15px] font-bold text-ink">Add your schedule, get waypoints to class</span>
+        </span>
+        <span className="text-[20px] text-teal" aria-hidden>›</span>
+      </button>
+
       <BadgeGrid snap={snap} />
 
       <Neighbourhoods snap={snap} />
 
+      <CollectiblesSection snap={snap} onOpen={onOpenCollectible} />
+
       <Replays onPlay={onPlayReplay} />
+
+      <TagsSection onOpen={onOpenTag} />
 
       {archive.length > 0 && (
         <section>
@@ -206,6 +240,14 @@ export default function ProfilePanel({
           <p className="text-[14px] text-ink/60">Sign-in isn&apos;t switched on for this deployment yet. Your progress is saved on this device.</p>
         )}
       </section>
+
+      <p className="pb-2 text-[11px] leading-relaxed text-ink/40">
+        Data: City of London Open Data (planning districts) · London Transit Commission open data (routes, buses) ·{" "}
+        <a href="https://open-meteo.com/" target="_blank" rel="noreferrer" className="underline">
+          Weather by Open-Meteo.com
+        </a>{" "}
+        (CC BY 4.0) · Map © Mapbox © OpenStreetMap.
+      </p>
     </div>
   );
 }

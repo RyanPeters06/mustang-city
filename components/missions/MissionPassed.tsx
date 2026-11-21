@@ -40,7 +40,7 @@ export default function MissionPassed({ info, onDone }: { info: PassedInfo | nul
 
   return (
     <AnimatePresence>
-      {info && m && (
+      {info && (m || info.title) && (
         <motion.button
           type="button"
           key={info.slug}
@@ -97,7 +97,7 @@ export default function MissionPassed({ info, onDone }: { info: PassedInfo | nul
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.35 }}
           >
-            {m.title}
+            {m?.title ?? info.title}
           </motion.p>
           <motion.p
             className="mt-2 text-[34px] font-bold text-orange tabular-nums"

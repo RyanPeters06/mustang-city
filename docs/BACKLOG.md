@@ -6,9 +6,10 @@ brief's build plan and cut list (core first). Each item has "Done when" checks t
 Status marks: `[ ]` todo · `[x]` done · `[~]` blocked (reason in the line) · `[>]` in progress
 
 ## Needs from Ryan (unblocks items below)
+Full list with decisions: [docs/IDEAS.md §7](IDEAS.md#7-needs-from-ryan). Ideas awaiting review live in `docs/IDEAS.md` (not built).
 - `GEMINI_API_KEY` — photo checks, goose dialogue, radio host
 - Auth0 app + `AUTH0_*`, `APP_BASE_URL` — sign-in, friends, leaderboards
-- `DATABASE_URL` (Tiger Data) + `npm run db:schema && npm run db:seed` — accounts, friends, leaderboards, turf
+- `DATABASE_URL` (Tiger Data) + `npm run db:schema && npm run db:seed` — accounts, friends, leaderboards, turf, tags (re-run db:schema for `tag_votes`)
 
 ## Queue
 
@@ -29,25 +30,25 @@ Status marks: `[ ]` todo · `[x]` done · `[~]` blocked (reason in the line) · 
   (continuous aggregate for weekly Rep). *Done when:* two test accounts rank correctly; degrades without DB.
 - [x] **Time-of-day palette** — suncalc sunrise/sunset for London drives `lightPreset` (dawn/day/dusk/night),
   re-evaluated every 10 min. *Done when:* forcing the clock to sunset switches to dusk without reload.
-- [ ] **The Goose quest-giver** — original goose crime-boss portrait (SVG, original art), appears on mission
+- [x] **The Goose quest-giver** — original goose crime-boss portrait (SVG, original art), appears on mission
   briefings; Gemini rewrites briefings in character from stored text (fallback to stored text). *Done when:*
   briefings show the portrait; no facts are added to landmark text.
-- [ ] **Geo-pinned tags** — leave a note/photo on your current cell; others see it once their fog there is
+- [x] **Geo-pinned tags** — leave a note/photo on your current cell; others see it once their fog there is
   cleared; upvotes (+10 Rep). *Done when:* tag created by A appears for B only after B reveals that cell.
-- [ ] **AI radio host** — tap-to-start radio; Gemini script from current neighbourhood + nearby landmarks,
+- [x] **AI radio host** — tap-to-start radio; Gemini script from current neighbourhood + nearby landmarks,
   Gemini TTS voice; never autoplay. *Done when:* entering a new neighbourhood queues a 15-second segment.
-- [ ] **Graduation Wrapped** — Spotify-Wrapped-style recap (fog timelapse from replay data, stats,
+- [x] **Graduation Wrapped** — Spotify-Wrapped-style recap (fog timelapse from replay data, stats,
   percentile), shareable card via Web Share. *Done when:* Wrapped renders from current progress and shares an image.
-- [ ] **Live buses + route collection** — LTC GTFS static + GTFS-RT in an API route, buses animate on the map,
+- [x] **Live buses + route collection** — LTC GTFS static + GTFS-RT in an API route, buses animate on the map,
   mission cards show next arrival; ride detection; "Every Route" progress. *Done when:* live buses move
   (or cached last-good feed with a "delayed" label).
-- [ ] **Faculty turf + heists** — districts tinted by faculty with most Rep; heist missions needing 3+ players
+- [x] **Faculty turf + heists** — districts tinted by faculty with most Rep; heist missions needing 3+ players
   within radius/time window. *Done when:* turf colours update from DB; a 3-account heist completes.
-- [ ] **Polish pack** — poster-style mission cards (canvas + Web Share), hidden collectibles, radar HUD,
+- [x] **Polish pack** — poster-style mission cards (canvas + Web Share), hidden collectibles, radar HUD,
   fog decay (6 months), student-written missions with Gemini screening, live weather overlay.
-- [ ] **Hero 3D model: Middlesex College** — low-poly glTF via Mapbox `model` layer at z ≥ 16 (see
+- [x] **Hero 3D model: Middlesex College** (+ University College and 19 campus-core buildings, spec 019) — low-poly glTF via Mapbox `model` layer at z ≥ 16 (see
   `specs/003-friends-buildings/research.md`). *Done when:* model replaces the extrusion, stays at 60 fps.
-- [ ] **Class Run** — schedule import + class waypoints + on-time Rep (design in `docs/roadmap.md`).
+- [x] **Class Run** — schedule import + class waypoints + on-time Rep (design in `docs/roadmap.md`).
 
 ## Done
 - [x] Friday foundation (spec 001) · [x] Missions & profiles (spec 002) · [x] Friends & building cards (spec 003)

@@ -38,7 +38,7 @@ export default function AreaBanner() {
         <motion.div
           key={area}
           className="pointer-events-none absolute inset-x-0 z-20 text-center"
-          style={{ top: "calc(var(--safe-top) + 92px)" }}
+          style={{ top: "calc(var(--safe-top) + 224px)" }}
           initial={{ opacity: 0, y: -8, letterSpacing: "0.5em" }}
           animate={{ opacity: 1, y: 0, letterSpacing: "0.22em" }}
           exit={{ opacity: 0 }}

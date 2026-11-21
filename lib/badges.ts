@@ -1,8 +1,9 @@
 /** Badge definitions (brief → Progression + Landmark missions). Pure: evaluated from progress data. */
 import { MISSIONS } from "./missions";
 import type { Completion } from "./progress";
+import { onTimeThisWeek } from "./schedule";
 
-export type BadgeInput = { completions: Record<string, Completion>; pct: number };
+export type BadgeInput = { completions: Record<string, Completion>; pct: number; rides?: Record<string, number[]>; totalRoutes?: number; classRuns?: Record<string, number> };
 export type BadgeStatus = { earned: boolean; have: number; need: number; lockedNote?: string };
 
 export type Badge = {
@@ -19,7 +20,6 @@ const bySlug = (slug: string) => MISSIONS.find((m) => m.slug === slug);
 const londonHour = (ms: number) =>
   Number(new Intl.DateTimeFormat("en-CA", { hour: "numeric", hour12: false, timeZone: "America/Toronto" }).format(ms));
 const progress = (have: number, need: number): BadgeStatus => ({ earned: have >= need, have: Math.min(have, need), need });
-const notYet = (system: string): BadgeStatus => ({ earned: false, have: 0, need: 1, lockedNote: `Unlocks when ${system} launch` });
 
 export const BADGES: Badge[] = [
   {
@@ -79,7 +79,7 @@ export const BADGES: Badge[] = [
     description: "Complete 3 heists",
     glyph: "M4 18h16M4 18 3 7l5 4 4-6 4 6 5-4-1 11",
     color: "#7B2FF7",
-    evaluate: () => notYet("heists"),
+    evaluate: (i) => progress(count(i, (slug) => bySlug(slug)?.type === "heist"), 3),
   },
   {
     code: "route-6-regular",
@@ -87,7 +87,10 @@ export const BADGES: Badge[] = [
     description: "Ride the same route on 10 different days",
     glyph: "M6 4h12a2 2 0 0 1 2 2v10H4V6a2 2 0 0 1 2-2zM4 11h16M7 19v-3M17 19v-3",
     color: "#FF8A3D",
-    evaluate: () => notYet("live buses"),
+    evaluate: (i) => {
+      const days = Object.values(i.rides ?? {}).map((ts) => new Set(ts.map((t) => new Date(t).toDateString())).size);
+      return progress(Math.max(0, ...days), 10);
+    },
   },
   {
     code: "every-route",
@@ -95,7 +98,15 @@ export const BADGES: Badge[] = [
     description: "Ride every LTC route",
     glyph: "M3 12h18M12 3v18M5 5l14 14M19 5 5 19",
     color: "#FF4F8B",
-    evaluate: () => notYet("live buses"),
+    evaluate: (i) => progress(Object.keys(i.rides ?? {}).length, i.totalRoutes ?? 38),
+  },
+  {
+    code: "perfect-attendance",
+    name: "Perfect Attendance",
+    description: "Get to 5 classes on time in one week",
+    glyph: "M4 5h16v15H4zM4 9h16M8 3v4M16 3v4M8 14l3 3 5-6",
+    color: "#2EE6D6",
+    evaluate: (i) => progress(onTimeThisWeek(i.classRuns ?? {}), 5),
   },
 ];
 

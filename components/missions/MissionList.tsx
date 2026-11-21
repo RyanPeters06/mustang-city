@@ -4,6 +4,8 @@ import { useSyncExternalStore } from "react";
 import { CATEGORY_LABEL, MISSIONS, TYPE_LABEL, formatDistance, missionDistance, type Mission } from "@/lib/missions";
 import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/progress";
 import { useLastFix } from "@/lib/useLastFix";
+import StudentJobs from "./StudentJobs";
+import type { PassedInfo } from "./MissionDetail";
 
 export const TYPE_COLOR: Record<string, string> = {
   photo: "text-pink",
@@ -13,7 +15,7 @@ export const TYPE_COLOR: Record<string, string> = {
   landmark: "text-gold",
 };
 
-export default function MissionList({ onOpen }: { onOpen: (slug: string) => void }) {
+export default function MissionList({ onOpen, onPassed }: { onOpen: (slug: string) => void; onPassed: (info: PassedInfo) => void }) {
   const { completions, missionCount } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const fix = useLastFix();
   const from = fix?.lngLat ?? null;
@@ -34,6 +36,7 @@ export default function MissionList({ onOpen }: { onOpen: (slug: string) => void
           </li>
         ))}
       </ul>
+      <StudentJobs onPassed={onPassed} />
     </div>
   );
 }

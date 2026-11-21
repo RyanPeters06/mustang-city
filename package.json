@@ -8,11 +8,14 @@
     "start": "next start",
     "lint": "eslint",
     "db:schema": "node scripts/db.mjs db/schema.sql",
-    "db:seed": "node scripts/db.mjs db/seed.sql"
+    "db:seed": "node scripts/db.mjs db/seed.sql",
+    "gtfs:build": "node scripts/gtfs-build.mjs",
+    "models:build": "node scripts/build-models.mjs"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.33.0",
     "@google/genai": "^3.6.1",
+    "gtfs-realtime-bindings": "^1.1.1",
     "h3-js": "^4.5.0",
     "mapbox-gl": "^3.35.2",
     "motion": "^14.14.0",
@@ -25,6 +28,9 @@
     "suncalc": "^2.1.4"
   },
   "devDependencies": {
+    "@gltf-transform/core": "^4.1.1",
+    "@gltf-transform/extensions": "^4.1.1",
+    "@mapbox/vector-tile": "^2.0.3",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/geojson": "^7946.0.16",
     "@types/node": "^20",
@@ -32,8 +38,10 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/suncalc": "^1.9.2",
+    "earcut": "^3.0.1",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "pbf": "^4.0.1",
     "tailwindcss": "4.3.3",
     "typescript": "^5"
   }

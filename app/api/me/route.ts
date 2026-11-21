@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAccount, toHandle } from "@/lib/session";
 import { fogRepFromCells } from "@/lib/rank";
+import { TAG_VOTE_REP } from "@/lib/tagRules";
 
 const CELL = /^[0-9a-f]{15}$/;
 const MAX_CELLS = 50_000;
@@ -57,13 +58,15 @@ export async function POST(req: Request) {
       ON CONFLICT (mission_id, user_id) DO NOTHING`;
   }
 
-  const [stats] = await sql<{ cells: number; missions: number; mission_rep: number }[]>`
+  const [stats] = await sql<{ cells: number; missions: number; mission_rep: number; tag_votes: number }[]>`
     SELECT
       (SELECT count(*)::int FROM revealed_cells WHERE user_id = ${me.id}) AS cells,
       (SELECT count(*)::int FROM mission_completions WHERE user_id = ${me.id}) AS missions,
       (SELECT coalesce(sum(m.rep_reward), 0)::int FROM mission_completions mc JOIN missions m ON m.id = mc.mission_id
-        WHERE mc.user_id = ${me.id}) AS mission_rep`;
-  const rep = fogRepFromCells(stats.cells) + stats.mission_rep;
+        WHERE mc.user_id = ${me.id}) AS mission_rep,
+      (SELECT coalesce(sum(votes), 0)::int FROM tags WHERE user_id = ${me.id}) +
+      (SELECT count(*)::int FROM mission_votes v JOIN missions ms ON ms.id = v.mission_id WHERE ms.creator_id = ${me.id} AND v.value = 1) AS tag_votes`;
+  const rep = fogRepFromCells(stats.cells) + stats.mission_rep + stats.tag_votes * TAG_VOTE_REP;
 
   await sql`
     UPDATE users SET handle = ${handle}, display_name = ${displayName}, faculty = ${p.faculty?.slice(0, 60) || null},

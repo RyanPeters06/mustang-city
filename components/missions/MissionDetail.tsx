@@ -8,8 +8,15 @@ import { useLastFix } from "@/lib/useLastFix";
 import { preparePhoto } from "@/lib/photo";
 import { TYPE_COLOR } from "./MissionList";
 import LoreCard from "./LoreCard";
+import GoosePortrait from "./GoosePortrait";
+import NextBus from "./NextBus";
+import HeistPanel from "./HeistPanel";
+import PosterButton from "./PosterButton";
+import { rememberPhoto } from "@/lib/poster";
+import { getRides, getServerRides, subscribeRides } from "@/lib/rides";
+import { useBriefing } from "@/lib/useBriefing";
 
-export type PassedInfo = { slug: string; rep: number; thumb?: string; reason: string };
+export type PassedInfo = { slug: string; rep: number; thumb?: string; reason: string; title?: string };
 
 type Props = {
   slug: string;
@@ -27,6 +34,9 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
   const fix = useLastFix(800);
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const fileRef = useRef<HTMLInputElement>(null);
+  const briefing = useBriefing(slug, m.briefing);
+  const { rides } = useSyncExternalStore(subscribeRides, getRides, getServerRides);
+  const rodeRecently = Object.values(rides).some((ts) => ts.some((t) => Date.now() - t < 45 * 60_000));
 
   const distance = missionDistance(m, fix?.lngLat ?? null);
   const accurate = !!fix && fix.accuracy <= REVEAL_ACCURACY_M;
@@ -46,6 +56,7 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
       const json = (await res.json()) as { pass?: boolean; reason?: string; rep?: number; message?: string };
       if (!res.ok) return setPhase({ kind: "error", message: json.message ?? "Something went wrong. Try again." });
       if (!json.pass) return setPhase({ kind: "error", message: `Not quite: ${json.reason ?? "try another angle."}` });
+      if (image) rememberPhoto(slug, image);
       completeMission({ slug, rep: m.rep, thumb, reason: json.reason });
       setPhase({ kind: "idle" });
       if (routed) onWaypoint(null);
@@ -85,11 +96,15 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
       </div>
 
       {/* The Goose's briefing */}
-      <blockquote className="relative rounded-2xl bg-white/[0.05] p-4 pl-5">
-        <span className="absolute top-3 bottom-3 left-0 w-1 rounded-full bg-pink" aria-hidden />
-        <p className="text-[11px] font-bold tracking-[0.16em] text-pink uppercase">The Goose</p>
-        <p className="mt-1 text-[15px] leading-snug text-ink/90">“{m.briefing}”</p>
-      </blockquote>
+      <figure className="flex items-start gap-3 rounded-2xl bg-white/[0.05] p-3">
+        <GoosePortrait size={60} className="shrink-0 rounded-2xl ring-1 ring-pink/50" />
+        <blockquote className="min-w-0 pt-0.5">
+          <p className="text-[11px] font-bold tracking-[0.16em] text-pink uppercase">The Goose</p>
+          <p key={briefing} className="mt-1 animate-[fadein_300ms_ease-out] text-[15px] leading-snug text-ink/90">
+            “{briefing}”
+          </p>
+        </blockquote>
+      </figure>
 
       {done ? (
         <>
@@ -103,14 +118,17 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
               {done.reason && <p className="text-[13px] text-ink/70">{done.reason}</p>}
             </div>
           </div>
+          {done.thumb && <PosterButton m={m} thumb={done.thumb} at={done.at} />}
           <LoreCard m={m} />
         </>
       ) : (
         <>
           <p className="text-[13px] text-ink/60">
             <span className="font-semibold text-ink/80">Objective:</span>{" "}
-            {m.type === "photo" ? m.criteria : m.type === "bus" ? "Arrive by bus." : "Get inside the circle and check in."}
+            {m.type === "photo" ? m.criteria : m.type === "bus" ? "Arrive by bus." : m.type === "heist" ? "Get a crew of 3 inside the circle within 15 minutes." : "Get inside the circle and check in."}
           </p>
+
+          <NextBus at={m.lngLat} />
 
           {phase.kind === "working" && (
             <div className="flex items-center gap-3 rounded-2xl bg-white/[0.05] p-3">
@@ -128,7 +146,17 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
           )}
 
           <div className="grid gap-2.5">
-            {!fix ? (
+            {m.type === "heist" ? (
+              <HeistPanel
+                m={m}
+                fix={fix && accurate ? { lngLat: fix.lngLat, accuracy: fix.accuracy } : null}
+                inRange={inRange}
+                onComplete={() => {
+                  completeMission({ slug, rep: m.rep, reason: "Heist crew complete." });
+                  onPassed({ slug, rep: m.rep, reason: "Heist crew complete." });
+                }}
+              />
+            ) : !fix ? (
               <button type="button" onClick={startWatching} className={`${primary} bg-teal text-night`}>
                 Turn on location
               </button>
@@ -149,6 +177,10 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
               >
                 {phase.kind === "error" ? "Retake photo" : "Take photo"}
               </button>
+            ) : m.type === "bus" && !rodeRecently ? (
+              <p className="rounded-2xl bg-white/[0.05] px-4 py-3 text-center text-[14px] text-ink/70">
+                Arrive by bus: ride any LTC route here and it unlocks.
+              </p>
             ) : (
               <button
                 type="button"
