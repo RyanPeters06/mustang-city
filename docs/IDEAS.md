@@ -7,6 +7,35 @@ All theming stays original: "GTA 6-inspired" in public copy only — no Rockstar
 
 ---
 
+## 0. Ranked by hackathon win odds (Nov 21)
+
+How judges actually see the project: the Devpost video first, then ~3 minutes of live demo, often holding the phone
+themselves. So ranking = (how much a judge notices it in that window) × (how likely it lands) ÷ effort.
+
+| # | Idea | Why it moves the odds | Effort |
+|---|---|---|---|
+| 1 | **Devpost trailer** (§1) | Judges watch the video before anything else; intro flight + fog timelapse + MISSION PASSED cut to music | M |
+| 2 | **Comic-panel cover art intro** (§8, Ryan) | Sells the genre in the first 5 seconds of both the video and the live demo; cheap if the art is generated | S (+ art) |
+| 3 | **Live big-screen mirror `/stage`** (§1) | Fog clearing live on a laptop while you walk up to the judges is the "wow" moment | M |
+| 4 | **"Wanted level" for curiosity** (§1) | Instantly reads as the genre, tiny build, shows on every screen | S |
+| 5 | **The Goose calls you** (§1) | Character + Gemini TTS = memorable + strengthens the Gemini sponsor prize | M |
+| 6 | **First-run coach marks** (§5) | Judges hold the phone cold; 3 pointers stop them getting lost | S |
+| 7 | **Stash & carry inventory** (§8, Ryan) | Gives the city a real game loop ("bring it home to Mustang City") — great pitch line; needs a scripted demo beat to show | M |
+| 8 | **Pause-screen music** (§4) | Atmosphere makes every demo second feel like a game; procedural version needs no licence | S |
+| 9 | **Near-miss nudges** (§2) | "3% from unlocking Old East Village" is a one-line demo of the hook loop | S |
+| 10 | **Photo mode** (§1) | Shareable stills for Devpost/socials | S |
+| 11 | **Variable rewards on pass** (§2) | Makes the MISSION PASSED beat land harder | S |
+| 12 | **Accessibility mode** (§1) | Impact story some judges weigh heavily | M |
+| 13 | **O-Week mode** (§1) | Real-user adoption story at Western | S |
+| 14 | **Daily Job + forgiving streaks** (§2) | Retention judges ask about; mostly a pitch slide | S |
+| 15 | **Radio news interruptions** (§1) | Nice, but needs friends + radio on during the demo | M |
+| 16 | **Loot challenges between players** (§8, Ryan) | Exciting, but needs real-time multiplayer, opt-in location and a mini-game — high risk of a broken demo | L |
+| 17 | **Heist trailer generator** (§1) | Strong but big; the Devpost trailer covers most of the value | L |
+| 18 | Push notifications, seasonal events, collection sets, friend overlap, surprise blips, rank perks (§2) | Long-term retention; little visible in 3 minutes | S–M |
+| 19 | **Sustainability stats** (§1) | Only matters for a sustainability track | S |
+
+**Suggested next build order if approved:** 2 → 4 → 6 → 8 → 1 (record the trailer last, once everything looks final) → 3 → 5 → 7.
+
 ## 1. Hackathon-winning ideas
 
 | ✓ | Idea | Why it wins | Effort | Impact |
@@ -116,6 +145,42 @@ Still to try (logged):
 - [ ] Student jobs on the map as blips + waypoint (currently list-only in the Missions tab).
 - [ ] Legend panel with blip-type toggles (brief §Map).
 
+## 8. Ryan's ideas (Nov 21) — logged, not built
+
+### Stash & carry inventory (Mustang City is your stash)
+- **Loop:** loot you pick up out in Forest State (collectibles, mission rewards, rare drops) goes into a **carry bag** with
+  limited slots (e.g. 6, +1 per rank). It only becomes permanent once you **bank it at the stash** — any spot inside
+  Mustang City (campus geofence), or a stash building like UCC. Full bag → you must go back to campus or drop something.
+- **Why it fits:** turns campus into home base (the brief's whole premise), gives every trip out a reason to come back,
+  and makes Rep from loot feel earned. Shows well as a HUD bag counter + a "STASHED" moment when you walk onto campus.
+- **Build sketch:** `inventory` (carried) and `stash` tables (or device storage first); items = existing collectibles +
+  mission drops; bag UI in Profile; geofence check in the location pipeline (same as Class Run arrival).
+- **Effort:** M for single-player (no DB needed to demo).
+
+### Losing loot / player challenges (multiplayer)
+- **Idea:** unbanked loot is at risk — another player can **challenge** you (a quick mini-game) and the loser drops an
+  item from their bag. Banked loot is always safe.
+- **Mini-game options:** reaction duel, rock-paper-scissors best of 3, or a **London trivia duel** using the sourced
+  landmark facts (on-brand, educational, no physical risk).
+- **Must-haves (privacy/safety, constitution):** both players opt in; never show exact positions — only "a challenger is
+  nearby" within the same coarse area (H3 res-8, ~0.7 km²); challenges happen in the app, never require approaching
+  someone; easy decline; no challenges in residences; rate limits.
+- **Build sketch:** needs DB + Auth0 + a realtime channel (polling or Supabase/Pusher-style); `challenges` table.
+- **Effort:** L; demo risk high without two real accounts on stage. Good "roadmap" slide even if not built.
+
+### Comic-panel cover art intro
+- **Idea:** the intro's title card becomes a fragmented collage of angled comic-style panels (like big open-world game
+  covers): London scenes — Blackfriars Bridge, Covent Garden, the UC tower, an LTC bus, The Goose, a student on UC Hill —
+  in the sunset palette, panels sliding in one by one before "Tap to enter".
+- **IP guardrails (constitution: original IP only):** use **our own** Mustang City / Forest State wordmark in the layout,
+  not a parody of the GTA logo or its typeface — a recognisable parody of a trademarked logo is exactly what the rules
+  forbid and is risky on a public Devpost. The *collage layout* is a generic style and is fine. Prompts must not name
+  GTA, Rockstar or copy specific cover art; no real people's faces; keep the prompts + the image tool's licence in the repo.
+- **What I need if Ryan generates it:** 6–8 separate panel images (~1024 px, any aspect), or one 1080×1920 collage plus
+  a version without text. I'll handle the angled framing, sunset grading, animation and the wordmark in code.
+- **Alternative:** with `GEMINI_API_KEY`, I can generate the panels with Gemini's image model from written prompts.
+- **Effort:** S once the art exists.
+
 ## 7. Needs from Ryan
 
 | Need | Unblocks | Status |
@@ -128,5 +193,7 @@ Still to try (logged):
 | ~~Approve 3D model route (§3)~~ | Built stylised models (spec 019) | ✅ done |
 | Check live weather on the deployed site (Open-Meteo returned 429 to the cloud build machine) | HUD temperature + rain/snow | check |
 | Pick a music route (§4) | Pause-screen music | decision |
+| Cover-art panels (§8) — or a Gemini key so I generate them | Comic-panel intro | optional |
+| Approve which ranked ideas to build (§0) | Next build round | decision |
 | Photos of Middlesex College / UC (any angle) | Option 3 hand-built models, textures | optional |
 | Check live buses on the deployed site (LTC realtime host `gtfs.ltconline.ca` reset connections from the cloud build machine; static schedule works) | Live buses status chip should say "Live" | check |
