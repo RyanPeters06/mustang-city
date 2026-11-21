@@ -26,6 +26,10 @@ import { AnimatePresence } from "motion/react";
 import TagDetail from "./tags/TagDetail";
 import TagComposer from "./tags/TagComposer";
 import DistrictDetail from "./districts/DistrictDetail";
+import CollectibleDetail from "./CollectibleDetail";
+import Radar from "./Radar";
+import { startCollectibleWatch } from "@/lib/collectibleWatch";
+import { COLLECTIBLES } from "@/lib/collectibles";
 import { missionBySlug } from "@/lib/missions";
 import { getLastFix } from "@/lib/location";
 import { walkingRoute } from "@/lib/directions";
@@ -69,10 +73,12 @@ export default function GameScreen() {
   const [tagSheet, setTagSheet] = useState<string | null>(null);
   const [district, setDistrict] = useState<string | null>(null);
   const [wrapped, setWrapped] = useState(false);
+  const [collectible, setCollectible] = useState<string | null>(null);
 
   // Start the account check (and sync) as soon as the app opens.
   useEffect(() => {
     startPingLog();
+    startCollectibleWatch();
     const off = subscribeAccount(() => {});
     return () => {
       off();
@@ -131,8 +137,10 @@ export default function GameScreen() {
   }, []);
 
   const clearPassed = useCallback(() => setPassed(null), []);
-  const sheetOpen = district !== null || tagSheet !== null || selected !== null || building !== null || tab !== "map";
-  const sheetTitle = district
+  const sheetOpen = collectible !== null || district !== null || tagSheet !== null || selected !== null || building !== null || tab !== "map";
+  const sheetTitle = collectible
+    ? (COLLECTIBLES.find((c) => c.id === collectible)?.name ?? "Collectible")
+    : district
     ? district
     : tagSheet
     ? tagSheet === "new"
@@ -162,6 +170,11 @@ export default function GameScreen() {
           setSelected(null);
           setBuilding(b);
         }}
+        onCollectibleTap={(id) => {
+          setTagSheet(null);
+          setSelected(null);
+          setCollectible(id);
+        }}
         onDistrictTap={(name) => {
           setTagSheet(null);
           setSelected(null);
@@ -174,6 +187,7 @@ export default function GameScreen() {
         }}
       />
       <Hud visible={entered} />
+      {entered && <Radar />}
       {mapState === "ready" && entered && !sheetOpen && (
         <>
           <LocationPrompt />
@@ -201,14 +215,17 @@ export default function GameScreen() {
         open={sheetOpen}
         title={sheetTitle}
         onClose={() => {
-          if (district) closeDistrict();
+          if (collectible) setCollectible(null);
+          else if (district) closeDistrict();
           else if (tagSheet) setTagSheet(null);
           else if (selected) setSelected(null);
           else if (building) closeBuilding();
           else setTab("map");
         }}
       >
-        {district ? (
+        {collectible ? (
+          <CollectibleDetail id={collectible} />
+        ) : district ? (
           <DistrictDetail key={district} name={district} onOpenMission={openMission} />
         ) : tagSheet === "new" ? (
           <TagComposer onDone={setTagSheet} />
@@ -227,7 +244,7 @@ export default function GameScreen() {
         ) : tab === "missions" ? (
           <MissionList onOpen={openMission} />
         ) : tab === "profile" ? (
-          <ProfilePanel denied={params.denied} onOpenMission={openMission} onOpenTag={setTagSheet} onOpenWrapped={() => setWrapped(true)} onPlayReplay={() => setTab("map")} />
+          <ProfilePanel denied={params.denied} onOpenMission={openMission} onOpenTag={setTagSheet} onOpenWrapped={() => setWrapped(true)} onOpenCollectible={setCollectible} onPlayReplay={() => setTab("map")} />
         ) : (
           <CrewPanel prefill={params.add} shownFriend={friendShown} onToggleMap={toggleFriendMap} />
         )}
@@ -237,6 +254,7 @@ export default function GameScreen() {
         visible={entered}
         active={tab}
         onChange={(t) => {
+          setCollectible(null);
           closeDistrict();
           setTagSheet(null);
           setSelected(null);

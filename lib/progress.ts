@@ -6,6 +6,7 @@ import { getSnapshot as getFogSnapshot, subscribe as subscribeFog } from "./fog"
 import { RANKS, rankFor } from "./rank";
 import { BADGES } from "./badges";
 import { getRides, subscribeRides } from "./rides";
+import { COLLECTIBLES, COLLECTIBLE_REP } from "./collectibles";
 import { celebrate } from "./celebrate";
 import { DISTRICT_REP, getDistrictStats } from "./districts";
 
@@ -66,6 +67,7 @@ type Stored = {
   lastRank: string | null; // last rank celebrated (null = not yet initialised)
   demoRep: number; // demo-controls only
   districts: Record<string, number>; // unlocked district name → at
+  finds?: Record<string, number>; // collectible id → found at
 };
 
 export type ProgressSnapshot = {
@@ -76,6 +78,7 @@ export type ProgressSnapshot = {
   badges: Record<string, number>;
   demoRep: number;
   districts: Record<string, number>;
+  finds: Record<string, number>;
   rep: number;
   rank: string;
   nextRank: { name: string; min: number } | null;
@@ -101,6 +104,7 @@ function ensureLoaded() {
         lastRank: parsed.lastRank ?? null,
         demoRep: parsed.demoRep ?? 0,
         districts: parsed.districts ?? {},
+        finds: parsed.finds ?? {},
       };
     }
   } catch {
@@ -186,7 +190,8 @@ export function getSnapshot(): ProgressSnapshot {
     const list = Object.values(data.completions);
     const missionRep = list.reduce((s, c) => s + c.rep, 0);
     const districtRep = Object.keys(data.districts).length * DISTRICT_REP;
-    const rep = fog.rep + missionRep + data.demoRep + districtRep;
+    const findRep = Object.keys(data.finds ?? {}).length * COLLECTIBLE_REP;
+    const rep = fog.rep + missionRep + data.demoRep + districtRep + findRep;
     snapshot = {
       completions: data.completions,
       profile: data.profile,
@@ -195,6 +200,7 @@ export function getSnapshot(): ProgressSnapshot {
       badges: data.badges,
       demoRep: data.demoRep,
       districts: data.districts,
+      finds: data.finds ?? {},
       rep,
       pct: fog.pct,
       ...rankFor(rep),
@@ -211,6 +217,7 @@ const SERVER: ProgressSnapshot = {
   badges: {},
   demoRep: 0,
   districts: {},
+  finds: {},
   rep: 0,
   rank: "Frosh",
   nextRank: RANKS[1],
@@ -253,7 +260,7 @@ export const unlockLabel = (id: EmblemId) => {
 /** Dev/demo only: forget completions. */
 export function resetProgress() {
   ensureLoaded();
-  data = { ...data, completions: {}, demoRep: 0 };
+  data = { ...data, completions: {}, demoRep: 0, finds: {} };
   save();
 }
 
@@ -265,3 +272,12 @@ export function addDemoRep(n: number) {
 }
 
 export const totalMissions = MISSIONS.length;
+
+/** Mark a hidden collectible found (once). Returns true if it's new. */
+export function findCollectible(id: string) {
+  ensureLoaded();
+  if (data.finds?.[id] || !COLLECTIBLES.some((c) => c.id === id)) return false;
+  data.finds = { ...(data.finds ?? {}), [id]: Date.now() };
+  save();
+  return true;
+}

@@ -3,26 +3,23 @@
 import { useSyncExternalStore } from "react";
 import { getBuses, getServerBuses, subscribeBuses } from "@/lib/buses";
 
-/** Honest status for the bus layer: live, delayed (last good feed), simulated (dev only) or offline. */
+/** Bus layer status, shown only when the feed isn't live: delayed (last good), simulated (dev) or offline. */
 export default function TransitChip() {
   const b = useSyncExternalStore(subscribeBuses, getBuses, getServerBuses);
-  if (b.status === "loading") return null;
+  if (b.status === "loading" || b.status === "live") return null;
   const label =
-    b.status === "live"
-      ? `Live buses · ${b.count}`
-      : b.status === "delayed"
-        ? `Buses delayed · ${Math.max(1, Math.round((b.ageSec ?? 60) / 60))} min old`
-        : b.status === "simulated"
-          ? "Simulated buses (dev)"
-          : "Live buses offline";
-  const dot = b.status === "live" ? "bg-teal" : b.status === "unavailable" ? "bg-ink/30" : "bg-gold";
+    b.status === "delayed"
+      ? `Buses delayed · ${Math.max(1, Math.round((b.ageSec ?? 60) / 60))} min old`
+      : b.status === "simulated"
+        ? "Simulated buses (dev)"
+        : "Live buses offline";
   return (
     <div
-      className="glass pointer-events-none absolute right-4 z-20 flex min-h-[32px] items-center gap-2 px-3 text-[10px] font-bold tracking-[0.16em] text-ink/75 uppercase"
-      style={{ bottom: "calc(var(--safe-bottom) + 288px)", clipPath: "polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px)" }}
+      className="glass pointer-events-none absolute right-4 z-20 flex min-h-[26px] max-w-[160px] items-center gap-1.5 px-2 text-[9px] font-bold tracking-[0.12em] text-ink/75 uppercase"
+      style={{ top: "calc(var(--safe-top) + 182px)", clipPath: "polygon(6px 0, 100% 0, 100% 100%, 0 100%, 0 6px)" }}
       role="status"
     >
-      <span className={`h-2 w-2 rounded-full ${dot} ${b.status === "live" ? "animate-pulse" : ""}`} aria-hidden />
+      <span className={`h-1.5 w-1.5 rounded-full ${b.status === "unavailable" ? "bg-ink/30" : "bg-gold"}`} aria-hidden />
       {label}
     </div>
   );

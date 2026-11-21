@@ -108,3 +108,21 @@ INSERT INTO badges (code, name, description) VALUES
 ('cartographer', 'Cartographer', 'Explore 25% of London'),
 ('heister', 'Heister', 'Complete 3 heists')
 ON CONFLICT (code) DO NOTHING;
+
+-- Hidden collectibles (feature 017): one sourced fact each (lib/collectibles.ts has the sources).
+INSERT INTO collectibles (name, lat, lng, lore_text)
+SELECT v.name, v.lat, v.lng, v.lore FROM (VALUES
+('Lost Bridge Planks', 42.9876, -81.2595, 'Two earlier timber bridges at the Blackfriars crossing failed in floods before the iron bridge was built.'),
+('Railroad Rivet', 42.9884, -81.2577, 'Bridge builder Isaac Crouse learned his trade working for the Central Pacific Railroad in Nevada in the late 1860s.'),
+('Jailhouse Key', 42.9824, -81.2546, 'A jail was attached to the court house''s west side in 1846; an eastward extension and a massive central tower followed by 1878.'),
+('District Seal', 42.9841, -81.2561, 'The first settlement at the Forks of the Thames came in 1826, when it became the administrative capital of the London District.'),
+('Box Seat Ticket', 42.9863, -81.2504, 'Ambrose Small had his own box seat on stage right at the Grand Theatre for many years.'),
+('1835 Fair Licence', 42.9820, -81.2493, 'Before the 1845 market site, an 1835 patent allowed a public fair or mart around Richmond, Dundas and King Streets.'),
+('Dedication Ribbon', 42.9897, -81.2474, 'Governor General Lord Dufferin dedicated Victoria Park in 1874.'),
+('Spire Sketch', 42.9870, -81.2493, 'St. Peter''s towers, sacristy and chapel were completed in 1957–58, decades after the cathedral was dedicated in 1885.'),
+('Architect''s Pencil', 42.9828, -81.2561, 'Museum London''s building was designed by Raymond Moriyama, the architect of Science North in Sudbury.'),
+('The Jurys'' Trowel', 43.0099, -81.2729, 'The Museum of Ontario Archaeology began at Western in 1933, founded by Wilfrid Jury and his father Amos.'),
+('Register Stamp', 43.0128, -81.3066, 'In 2004 the Lawson site became the first archaeological site in Ontario placed on the Canadian Register of Historic Places.'),
+('Royal Visitor Pass', 43.0016, -81.2306, 'The Royal Canadian Regiment Museum officially opened in 1983, during a royal visit by Prince Philip.')
+) AS v(name, lat, lng, lore)
+WHERE NOT EXISTS (SELECT 1 FROM collectibles c WHERE c.name = v.name);

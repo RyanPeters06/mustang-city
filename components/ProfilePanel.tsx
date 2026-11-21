@@ -1,6 +1,7 @@
 "use client";
 
 import TagsSection from "./profile/TagsSection";
+import CollectiblesSection from "./profile/CollectiblesSection";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/progress";
 import { MISSIONS, missionBySlug } from "@/lib/missions";
@@ -20,12 +21,14 @@ export default function ProfilePanel({
   onOpenMission,
   onOpenTag,
   onOpenWrapped,
+  onOpenCollectible,
   onPlayReplay,
 }: {
   denied: boolean;
   onOpenMission: (slug: string) => void;
   onOpenTag: (id: string) => void;
   onOpenWrapped: () => void;
+  onOpenCollectible: (id: string) => void;
   onPlayReplay: () => void;
 }) {
   const snap = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
@@ -185,6 +188,8 @@ export default function ProfilePanel({
       <BadgeGrid snap={snap} />
 
       <Neighbourhoods snap={snap} />
+
+      <CollectiblesSection snap={snap} onOpen={onOpenCollectible} />
 
       <Replays onPlay={onPlayReplay} />
 

@@ -13,6 +13,7 @@ import { REVEAL_ACCURACY_M, getLastFix, onFix, type Fix } from "@/lib/location";
 import { getTags, subscribeTags } from "@/lib/tags";
 import { onBusFrame, subscribeBuses } from "@/lib/buses";
 import { getTurf, subscribeTurf } from "@/lib/turf";
+import { COLLECTIBLES } from "@/lib/collectibles";
 import { facultyColor } from "@/lib/faculty";
 import { LTC, routeById } from "@/lib/ltcData";
 import type { Vehicle } from "@/lib/ltc";
@@ -64,6 +65,7 @@ type Props = {
   onBuildingTap: (b: BuildingTap) => void;
   onTagTap: (id: string) => void;
   onDistrictTap: (name: string) => void;
+  onCollectibleTap: (id: string) => void;
 };
 
 const reducedMotion = () =>
@@ -590,6 +592,19 @@ function addGameLayers(map: MapboxMap) {
     paint: { "text-color": "#140a2e", "text-emissive-strength": 1 },
   });
 
+  // --- Collectibles: only the ones you've found (hidden until within 50 m) ----------------
+  map.addImage("collectible", missionIcon("#ffc857", "M12 4 19 12 12 20 5 12Z"), { pixelRatio: 2 });
+  map.addSource("collectibles", { type: "geojson", data: collectibleData() });
+  map.addLayer({
+    id: "collectible-pins",
+    type: "symbol",
+    source: "collectibles",
+    slot: "top",
+    minzoom: 12,
+    layout: { "icon-image": "collectible", "icon-size": ["interpolate", ["linear"], ["zoom"], 12, 0.45, 17, 0.75], "icon-allow-overlap": true },
+    paint: { "icon-emissive-strength": 1 },
+  });
+
   // --- Geo-pinned tags: only ones the player may see (store already gates on revealed cells) ---
   map.addImage("tag-pin", missionIcon("#f6efff", TAG_GLYPH), { pixelRatio: 2 });
   map.addSource("tags", { type: "geojson", data: tagData() });
@@ -715,6 +730,18 @@ function busData(vs: Vehicle[]): FeatureCollection {
         geometry: { type: "Point", coordinates: v.lngLat },
       };
     }),
+  };
+}
+
+function collectibleData(): FeatureCollection {
+  const finds = getProgress().finds;
+  return {
+    type: "FeatureCollection",
+    features: COLLECTIBLES.filter((c) => finds[c.id]).map((c) => ({
+      type: "Feature",
+      properties: { id: c.id },
+      geometry: { type: "Point", coordinates: c.lngLat },
+    })),
   };
 }
 
@@ -964,15 +991,15 @@ function pulsingRing(map: MapboxMap) {
   };
 }
 
-export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap, onDistrictTap }: Props) {
+export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap, onDistrictTap, onCollectibleTap }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapboxMap | null>(null);
   const followRef = useRef(false);
   const introRef = useRef<{ skip: () => void } | null>(null);
-  const callbacks = useRef({ onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap, onDistrictTap });
+  const callbacks = useRef({ onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap, onDistrictTap, onCollectibleTap });
 
   useEffect(() => {
-    callbacks.current = { onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap, onDistrictTap };
+    callbacks.current = { onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap, onDistrictTap, onCollectibleTap };
   });
 
   useImperativeHandle(ref, () => ({
@@ -1167,6 +1194,7 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
         subscribeProgress(() => {
           if (!map.getSource("missions")) return;
           refreshMissions(map);
+          (map.getSource("collectibles") as GeoJSONSource | undefined)?.setData(collectibleData());
           const key = Object.keys(getProgress().districts).join("|");
           if (key !== districtKey) {
             districtKey = key;
@@ -1189,6 +1217,8 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
         const mission = map.queryRenderedFeatures(box, { layers: ["mission-blips", "mission-areas-fill"] })[0];
         const slug = mission?.properties?.slug;
         if (typeof slug === "string") return callbacks.current.onMissionTap(slug);
+        const col = map.queryRenderedFeatures(box, { layers: ["collectible-pins"] })[0]?.properties?.id;
+        if (typeof col === "string") return callbacks.current.onCollectibleTap(col);
         const tag = map.queryRenderedFeatures(box, { layers: ["tag-pins"] })[0];
         const tagId = tag?.properties?.id;
         if (typeof tagId === "string") return callbacks.current.onTagTap(tagId);
