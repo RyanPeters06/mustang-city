@@ -29,6 +29,8 @@ import DistrictDetail from "./districts/DistrictDetail";
 import CollectibleDetail from "./CollectibleDetail";
 import Radar from "./Radar";
 import WeatherOverlay from "./WeatherOverlay";
+import Legend from "./Legend";
+import Onboarding from "./Onboarding";
 import NextClassCard from "./classrun/NextClassCard";
 import ScheduleManager from "./classrun/ScheduleManager";
 import { CLASS_RUN_REP, onClassRun, startClassRunWatch } from "@/lib/schedule";
@@ -216,6 +218,7 @@ export default function GameScreen() {
           <LocationPrompt />
           <LocateButton map={map} />
           <TagButton onClick={() => setTagSheet("new")} />
+          <Legend map={map} />
           <RadioPill />
           <NextClassCard onWaypoint={routeTo} routed={waypoint?.slug ?? null} />
           <TransitChip />
@@ -297,6 +300,7 @@ export default function GameScreen() {
       <Intro map={map} mapState={mapState} reason={reason} onDone={onEntered} />
       <AreaBanner />
       <ReplayBar />
+      <Onboarding ready={mapState === "ready" && entered} />
       <Celebrations paused={passed !== null} />
       <MissionPassed info={passed} onDone={clearPassed} />
       <AnimatePresence>{wrapped && <Wrapped key="wrapped" onClose={() => setWrapped(false)} />}</AnimatePresence>

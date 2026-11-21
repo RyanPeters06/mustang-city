@@ -58,6 +58,16 @@ export type MapHandle = {
   clearBuilding: () => void;
   /** Lower the raised neighbourhood. */
   clearDistrict: () => void;
+  /** Legend toggles: show/hide a group of map layers. */
+  setGroupVisible: (group: LayerGroup, on: boolean) => void;
+};
+
+export type LayerGroup = "buses" | "tags" | "collectibles" | "landmarks";
+const GROUP_LAYERS: Record<LayerGroup, string[]> = {
+  buses: ["bus-dots", "bus-labels", "bus-routes"],
+  tags: ["tag-pins"],
+  collectibles: ["collectible-pins"],
+  landmarks: ["mission-areas-fill", "mission-areas-line", "mission-area-labels"],
 };
 
 type Props = {
@@ -1290,6 +1300,11 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
       );
     },
     clearBuilding: () => (mapRef.current?.getSource("building-selected") as GeoJSONSource | undefined)?.setData(EMPTY),
+    setGroupVisible: (group, on) => {
+      const map = mapRef.current;
+      if (!map) return;
+      for (const id of GROUP_LAYERS[group]) if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
+    },
     clearDistrict: () => {
       if (mapRef.current) raiseDistrict(mapRef.current, -1);
     },

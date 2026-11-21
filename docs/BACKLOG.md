@@ -66,9 +66,9 @@ palette, control stack, building framing, postcard loading screen, unified butto
 - [ ] **Typography pass** — one condensed display face for titles + one UI face; fewer letter-spaced caps labels;
   consistent sizes (12/14/16/20/30).
 - [ ] **Motion pass** — shared easing tokens; spring sheets with velocity; tab-switch cross-fade; reduced-motion audit.
-- [ ] **Empty/first-run states** — friendly first-run pointers, empty states with a next action, "Set your name"
+- [x] **Empty/first-run states** (first-run cards done; more empty states welcome) — friendly first-run pointers, empty states with a next action, "Set your name"
   onboarding card.
-- [ ] **Map legend + blip toggles** — brief §Map; one tidy panel instead of more floating chips.
+- [x] **Map legend + blip toggles** — brief §Map; one tidy panel instead of more floating chips.
 - [ ] **Accessibility audit** — contrast on glass, 44 pt targets, VoiceOver labels for map controls, Dynamic Type.
 - [ ] **Comic-panel cover art** — drop Ryan's panels into the loading screen when supplied (docs/COVER_ART.md).
 
