@@ -7,7 +7,7 @@ import type { Feature, FeatureCollection, LineString, MultiPolygon, Polygon } fr
 import { cellsToMultiPolygon } from "h3-js";
 import { MISSIONS, approxCenter, missionBySlug, type Mission } from "@/lib/missions";
 import { getSnapshot as getProgress, subscribe as subscribeProgress } from "@/lib/progress";
-import { DISTRICTS } from "@/lib/districts";
+import { DISTRICTS, districtIndexAt } from "@/lib/districts";
 import { buildFog, isRevealedAt, subscribe } from "@/lib/fog";
 import { REVEAL_ACCURACY_M, getLastFix, onFix, type Fix } from "@/lib/location";
 import { getTags, subscribeTags } from "@/lib/tags";
@@ -20,7 +20,6 @@ import {
   MISSION_BUILDINGS,
   SEA_RING,
   inCampus,
-  ringIsCounterClockwise,
   distanceM,
   type LngLat,
 } from "@/lib/geo";
@@ -40,6 +39,8 @@ export type MapHandle = {
   showFriendArea: (cells: string[] | null, color?: string) => void;
   /** Remove the tapped-building highlight. */
   clearBuilding: () => void;
+  /** Lower the raised neighbourhood. */
+  clearDistrict: () => void;
 };
 
 type Props = {
@@ -49,6 +50,7 @@ type Props = {
   onMissionTap: (slug: string) => void;
   onBuildingTap: (b: BuildingTap) => void;
   onTagTap: (id: string) => void;
+  onDistrictTap: (name: string) => void;
 };
 
 const reducedMotion = () =>
@@ -167,7 +169,55 @@ function addGameLayers(map: MapboxMap) {
     },
   });
 
-  // --- Island: open sea around Forest State, glowing coastline + surf rings ----------
+  // --- Ghost city under the fog: major roads + the Thames, faint at overview zoom ---------
+  // (Sits above the fog but below the sea, so it only shows inside Forest State.)
+  map.addLayer({
+    id: "ghost-water",
+    type: "line",
+    source: "streets",
+    "source-layer": "waterway",
+    slot: "top",
+    filter: ["==", ["get", "class"], "river"],
+    paint: {
+      "line-color": "#2ee6d6",
+      "line-width": ["interpolate", ["linear"], ["zoom"], 9.4, 1.2, 13, 3],
+      "line-opacity": ["interpolate", ["linear"], ["zoom"], 9.4, 0.55, 13, 0.35, 15, 0],
+      "line-emissive-strength": 1,
+    },
+  });
+  map.addLayer({
+    id: "ghost-roads",
+    type: "line",
+    source: "streets",
+    "source-layer": "road",
+    slot: "top",
+    filter: ["match", ["get", "class"], ["motorway", "trunk", "primary", "secondary"], true, false],
+    layout: { "line-join": "round", "line-cap": "round" },
+    paint: {
+      "line-color": ["match", ["get", "class"], ["motorway", "trunk"], "#ff8a3d", "#f6efff"],
+      "line-width": ["interpolate", ["linear"], ["zoom"], 9.4, ["match", ["get", "class"], ["motorway", "trunk"], 1.4, 0.6], 13, ["match", ["get", "class"], ["motorway", "trunk"], 2.4, 1.2]],
+      "line-opacity": ["interpolate", ["linear"], ["zoom"], 9.4, 0.32, 12.5, 0.18, 14, 0],
+      "line-emissive-strength": 1,
+    },
+  });
+
+  // --- Selected region (tap a neighbourhood at city zoom): it rises out of the map ---
+  map.addSource("district-selected", { type: "geojson", data: EMPTY });
+  map.addLayer({
+    id: "district-selected-fill",
+    type: "fill-extrusion",
+    source: "district-selected",
+    slot: "top",
+    paint: {
+      "fill-extrusion-color": "#ff4f8b",
+      "fill-extrusion-height": 0,
+      "fill-extrusion-height-transition": { duration: 700, delay: 0 },
+      "fill-extrusion-opacity": 0.55,
+      "fill-extrusion-emissive-strength": 1,
+    },
+  });
+
+  // --- Island: open sea around Forest State, glowing coastline ----------
   map.addSource("sea", {
     type: "geojson",
     data: { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [SEA_RING, LONDON_BOUNDARY] } },
@@ -183,24 +233,20 @@ function addGameLayers(map: MapboxMap) {
     slot: "top",
     paint: { "fill-color": "#1b0d45", "fill-emissive-strength": 1 },
   });
-  // line-offset is relative to line direction; flip so surf always sits out at sea.
-  const out = ringIsCounterClockwise(LONDON_BOUNDARY) ? 1 : -1;
-  for (const [i, offset] of [14, 30, 50].entries()) {
-    map.addLayer({
-      id: `surf-${i}`,
-      type: "line",
-      source: "coast",
-      slot: "top",
-      layout: { "line-join": "round" },
-      paint: {
-        "line-color": "#2ee6d6",
-        "line-width": 1.2,
-        "line-opacity": 0.35 - i * 0.1,
-        "line-offset": out * offset,
-        "line-emissive-strength": 1,
-      },
-    });
-  }
+  // Chart grid over the sea (map-menu feel); fades out as you zoom into the streets.
+  map.addSource("chart-grid", { type: "geojson", data: chartGrid() });
+  map.addLayer({
+    id: "chart-grid",
+    type: "line",
+    source: "chart-grid",
+    slot: "top",
+    paint: {
+      "line-color": "#2ee6d6",
+      "line-width": 0.6,
+      "line-opacity": ["interpolate", ["linear"], ["zoom"], 9.4, 0.16, 12, 0],
+      "line-emissive-strength": 1,
+    },
+  });
   map.addLayer({
     id: "coast-glow",
     type: "line",
@@ -244,7 +290,7 @@ function addGameLayers(map: MapboxMap) {
     layout: {
       "text-field": ["get", "name"],
       "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
-      "text-size": ["*", ["get", "size"], ["interpolate", ["linear"], ["zoom"], 9.5, 20, 13, 30]],
+      "text-size": ["interpolate", ["linear"], ["zoom"], 9.4, ["*", ["get", "size"], 22], 13, ["*", ["get", "size"], 32]],
       "text-letter-spacing": 0.25,
       "text-allow-overlap": true,
     },
@@ -253,7 +299,19 @@ function addGameLayers(map: MapboxMap) {
       "text-halo-color": "#140a2e",
       "text-halo-width": 2,
       "text-halo-blur": 1,
-      "text-opacity": ["interpolate", ["linear"], ["zoom"], 13.5, 1, 14.5, 0],
+      "text-opacity": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        10.2,
+        1,
+        11,
+        ["case", ["==", ["get", "name"], "FOREST STATE"], 0, 1],
+        13.5,
+        ["case", ["==", ["get", "name"], "FOREST STATE"], 0, 1],
+        14.5,
+        0,
+      ],
       "text-emissive-strength": 1,
     },
   });
@@ -326,7 +384,7 @@ function addGameLayers(map: MapboxMap) {
     type: "line",
     source: "districts",
     slot: "top",
-    minzoom: 10,
+    minzoom: 9,
     maxzoom: 15,
     paint: {
       "line-color": ["case", ["get", "unlocked"], "#ffc857", "#f6efff"],
@@ -341,12 +399,12 @@ function addGameLayers(map: MapboxMap) {
     type: "symbol",
     source: "district-labels",
     slot: "top",
-    minzoom: 10.6,
+    minzoom: 9.6,
     maxzoom: 14,
     layout: {
       "text-field": ["upcase", ["get", "name"]],
       "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
-      "text-size": ["interpolate", ["linear"], ["zoom"], 10.6, 10, 13, 15],
+      "text-size": ["interpolate", ["linear"], ["zoom"], 9.6, 8, 11, 10, 13, 15],
       "text-letter-spacing": 0.22,
       "text-max-width": 7,
       "text-padding": 6,
@@ -418,7 +476,7 @@ function addGameLayers(map: MapboxMap) {
     slot: "top",
     layout: {
       "icon-image": ["get", "icon"],
-      "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.7, 16, 1],
+      "icon-size": ["interpolate", ["linear"], ["zoom"], 9.4, 0.42, 11, 0.6, 16, 1],
       "icon-allow-overlap": true,
       "symbol-sort-key": ["case", ["get", "done"], 1, 0],
       "text-field": ["step", ["zoom"], "", 15.5, ["get", "title"]],
@@ -625,6 +683,34 @@ function missionData(): { points: FeatureCollection; areas: FeatureCollection } 
   return { points: { type: "FeatureCollection", features: points }, areas: { type: "FeatureCollection", features: areas } };
 }
 
+/** Lat/lng chart grid across the sea box (every 0.1°). */
+function chartGrid(): FeatureCollection {
+  const xs = SEA_RING.map((p) => p[0]);
+  const ys = SEA_RING.map((p) => p[1]);
+  const [w, e, s, n] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  const features: Feature[] = [];
+  for (let x = Math.ceil(w * 10) / 10; x <= e; x += 0.1)
+    features.push({ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: [[x, s], [x, n]] } });
+  for (let y = Math.ceil(s * 10) / 10; y <= n; y += 0.1)
+    features.push({ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: [[w, y], [e, y]] } });
+  return { type: "FeatureCollection", features };
+}
+
+/** Raise (or lower, with -1) a neighbourhood out of the map. */
+function raiseDistrict(map: MapboxMap, index: number) {
+  const src = map.getSource("district-selected") as GeoJSONSource | undefined;
+  if (!src) return;
+  if (index < 0) {
+    map.setPaintProperty("district-selected-fill", "fill-extrusion-height", 0);
+    setTimeout(() => src.setData(EMPTY), 700);
+    return;
+  }
+  const d = DISTRICTS[index];
+  map.setPaintProperty("district-selected-fill", "fill-extrusion-height", 0);
+  src.setData({ type: "Feature", properties: { name: d.name }, geometry: { type: "MultiPolygon", coordinates: d.polygons } });
+  requestAnimationFrame(() => map.setPaintProperty("district-selected-fill", "fill-extrusion-height", 450));
+}
+
 function districtShapes(): FeatureCollection {
   const unlocked = getProgress().districts;
   return {
@@ -760,14 +846,14 @@ function pulsingRing(map: MapboxMap) {
   };
 }
 
-export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap }: Props) {
+export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap, onDistrictTap }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapboxMap | null>(null);
   const followRef = useRef(false);
-  const callbacks = useRef({ onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap });
+  const callbacks = useRef({ onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap, onDistrictTap });
 
   useEffect(() => {
-    callbacks.current = { onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap };
+    callbacks.current = { onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap, onDistrictTap };
   });
 
   useImperativeHandle(ref, () => ({
@@ -822,6 +908,9 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
       );
     },
     clearBuilding: () => (mapRef.current?.getSource("building-selected") as GeoJSONSource | undefined)?.setData(EMPTY),
+    clearDistrict: () => {
+      if (mapRef.current) raiseDistrict(mapRef.current, -1);
+    },
     locate: (lngLat) => {
       followRef.current = true;
       mapRef.current?.flyTo({ center: lngLat, padding: NO_PAD, zoom: Math.max(mapRef.current.getZoom(), 16), duration: dur(1400), essential: true });
@@ -934,6 +1023,31 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
         const tagId = tag?.properties?.id;
         if (typeof tagId === "string") return callbacks.current.onTagTap(tagId);
 
+        // City zoom: tap a neighbourhood and it rises out of the map.
+        if (map.getZoom() < 14) {
+          const idx = districtIndexAt([e.lngLat.lng, e.lngLat.lat]);
+          if (idx >= 0) {
+            raiseDistrict(map, idx);
+            const [w, s2, e2, n] = DISTRICTS[idx].bbox;
+            followRef.current = false;
+            map.fitBounds(
+              [
+                [w, s2],
+                [e2, n],
+              ],
+              {
+                padding: { top: 90, bottom: map.getContainer().clientHeight * 0.52, left: 40, right: 40 },
+                pitch: 50,
+                bearing: map.getBearing(),
+                maxZoom: 14,
+                duration: dur(1200),
+                essential: true,
+              },
+            );
+            return callbacks.current.onDistrictTap(DISTRICTS[idx].name);
+          }
+          return;
+        }
         const building = map.queryRenderedFeatures(e.point, { layers: ["building-selected", "mission-buildings", "campus-buildings"] })[0];
         if (building && (building.geometry.type === "Polygon" || building.geometry.type === "MultiPolygon")) {
           const geometry = building.geometry;

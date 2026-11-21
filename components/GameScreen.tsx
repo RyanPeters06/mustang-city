@@ -21,6 +21,7 @@ import Celebrations from "./Celebrations";
 import TagButton from "./tags/TagButton";
 import TagDetail from "./tags/TagDetail";
 import TagComposer from "./tags/TagComposer";
+import DistrictDetail from "./districts/DistrictDetail";
 import { missionBySlug } from "@/lib/missions";
 import { getLastFix } from "@/lib/location";
 import { walkingRoute } from "@/lib/directions";
@@ -60,6 +61,7 @@ export default function GameScreen() {
   const [friendShown, setFriendShown] = useState<string | null>(null);
   /** Tag sheet: a tag id, "new" for the composer, or null. */
   const [tagSheet, setTagSheet] = useState<string | null>(null);
+  const [district, setDistrict] = useState<string | null>(null);
 
   // Start the account check (and sync) as soon as the app opens.
   useEffect(() => {
@@ -73,7 +75,14 @@ export default function GameScreen() {
     if (params.denied || params.add) window.history.replaceState(null, "", "/");
   }, [params]);
 
+  const closeDistrict = useCallback(() => {
+    setDistrict(null);
+    map.current?.clearDistrict();
+  }, []);
+
   const openMission = useCallback((slug: string) => {
+    setDistrict(null);
+    map.current?.clearDistrict();
     setTagSheet(null);
     setBuilding(null);
     map.current?.clearBuilding();
@@ -115,8 +124,10 @@ export default function GameScreen() {
   }, []);
 
   const clearPassed = useCallback(() => setPassed(null), []);
-  const sheetOpen = tagSheet !== null || selected !== null || building !== null || tab !== "map";
-  const sheetTitle = tagSheet
+  const sheetOpen = district !== null || tagSheet !== null || selected !== null || building !== null || tab !== "map";
+  const sheetTitle = district
+    ? district
+    : tagSheet
     ? tagSheet === "new"
       ? "Leave a tag"
       : "Tag"
@@ -143,6 +154,11 @@ export default function GameScreen() {
           setTagSheet(null);
           setSelected(null);
           setBuilding(b);
+        }}
+        onDistrictTap={(name) => {
+          setTagSheet(null);
+          setSelected(null);
+          setDistrict(name);
         }}
         onTagTap={(id) => {
           setSelected(null);
@@ -176,13 +192,16 @@ export default function GameScreen() {
         open={sheetOpen}
         title={sheetTitle}
         onClose={() => {
-          if (tagSheet) setTagSheet(null);
+          if (district) closeDistrict();
+          else if (tagSheet) setTagSheet(null);
           else if (selected) setSelected(null);
           else if (building) closeBuilding();
           else setTab("map");
         }}
       >
-        {tagSheet === "new" ? (
+        {district ? (
+          <DistrictDetail key={district} name={district} onOpenMission={openMission} />
+        ) : tagSheet === "new" ? (
           <TagComposer onDone={setTagSheet} />
         ) : tagSheet ? (
           <TagDetail key={tagSheet} id={tagSheet} onClose={() => setTagSheet(null)} />
@@ -208,6 +227,7 @@ export default function GameScreen() {
       <TabBar
         active={tab}
         onChange={(t) => {
+          closeDistrict();
           setTagSheet(null);
           setSelected(null);
           closeBuilding();
