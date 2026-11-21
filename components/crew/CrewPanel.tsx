@@ -10,6 +10,7 @@ import { demoCells, demoFriends } from "@/lib/demoCrew";
 import type { FriendRow } from "@/app/api/friends/route";
 import type { EmblemId } from "@/lib/progress";
 import Emblem from "../profile/Emblem";
+import Leaderboard from "./Leaderboard";
 
 type Lists = { friends: FriendRow[]; incoming: FriendRow[]; outgoing: FriendRow[] };
 type Props = {
@@ -20,7 +21,7 @@ type Props = {
 
 const fmtPct = (p: number) => `${p < 10 ? p.toFixed(2) : p.toFixed(1)}%`;
 
-export default function CrewPanel({ prefill, shownFriend, onToggleMap }: Props) {
+function CrewList({ prefill, shownFriend, onToggleMap }: Props) {
   const account = useSyncExternalStore(subscribeAccount, getAccount, getServerAccount);
   const me = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const live = account.auth === "signed-in" && account.sync !== "db-unavailable";
@@ -287,5 +288,34 @@ function FriendCard({
         {shown ? "Hide their map" : "Show their map"}
       </button>
     </li>
+  );
+}
+
+/** Crew tab: friends list or leaderboard. */
+export default function CrewPanel(props: Props) {
+  const [view, setView] = useState<"crew" | "board">("crew");
+  return (
+    <div>
+      <div className="mb-4 flex gap-1 rounded-2xl bg-white/[0.06] p-1" role="tablist" aria-label="Crew views">
+        {(
+          [
+            ["crew", "Crew"],
+            ["board", "Leaderboard"],
+          ] as const
+        ).map(([v, label]) => (
+          <button
+            key={v}
+            type="button"
+            role="tab"
+            aria-selected={view === v}
+            onClick={() => setView(v)}
+            className={`min-h-[40px] flex-1 rounded-xl text-[14px] font-bold ${view === v ? "bg-white/12 text-ink" : "text-ink/55"}`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {view === "crew" ? <CrewList {...props} /> : <Leaderboard />}
+    </div>
   );
 }

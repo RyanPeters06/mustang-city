@@ -25,7 +25,7 @@ Status marks: `[ ]` todo · `[x]` done · `[~]` blocked (reason in the line) · 
   Profile, large stylised district names at city zoom. *Done when:* demo walk through Old East Village unlocks it.
 - [x] **Server ping log** — write live GPS fixes to the `location_pings` hypertable when signed in (batched),
   so replays/Wrapped survive device changes. *Done when:* a signed-in walk appears in `location_pings`; no-op without DB.
-- [ ] **Leaderboards** — weekly + all-time, filter friends / faculty / all Western, by Rep and % explored
+- [x] **Leaderboards** — weekly + all-time, filter friends / faculty / all Western, by Rep and % explored
   (continuous aggregate for weekly Rep). *Done when:* two test accounts rank correctly; degrades without DB.
 - [ ] **Time-of-day palette** — suncalc sunrise/sunset for London drives `lightPreset` (dawn/day/dusk/night),
   re-evaluated every 10 min. *Done when:* forcing the clock to sunset switches to dusk without reload.
