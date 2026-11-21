@@ -3,9 +3,10 @@
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 import type { Map as MapboxMap, GeoJSONSource } from "mapbox-gl";
+import type { Feature, FeatureCollection } from "geojson";
 import { buildFog, subscribe } from "@/lib/fog";
 import { onFix } from "@/lib/location";
-import { CAMPUS_CENTER, CAMPUS_POLYGON, LONDON_CENTER, MISSION_BUILDINGS, inCampus, type LngLat } from "@/lib/geo";
+import { CAMPUS_CENTER, LONDON_CENTER, MISSION_BUILDINGS, inCampus, type LngLat } from "@/lib/geo";
 import { ATMOSPHERE, CAMPUS_PITCH, CAMPUS_ZOOM, CITY_PITCH, basemapConfig, londonLightPreset } from "@/lib/mapStyle";
 
 export type MapHandle = {
@@ -25,19 +26,62 @@ const reducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const dur = (ms: number) => (reducedMotion() ? 0 : ms);
 
-const polygon = (ring: LngLat[]) => ({ type: "Polygon" as const, coordinates: [ring] });
+const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
+
+function pointInRing([x, y]: LngLat, ring: LngLat[]) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i];
+    const [xj, yj] = ring[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+/** Copy campus + mission building footprints out of the loaded streets tiles. */
+function collectCampusBuildings(map: MapboxMap) {
+  const campus = new Map<string, Feature>();
+  const mission = new Map<string, Feature>();
+  for (const f of map.querySourceFeatures("streets", { sourceLayer: "building" })) {
+    const g = f.geometry;
+    const first = (g.type === "Polygon" ? g.coordinates[0]?.[0] : g.type === "MultiPolygon" ? g.coordinates[0]?.[0]?.[0] : null) as
+      | LngLat
+      | null
+      | undefined;
+    if (!first || !inCampus(first)) continue;
+    const key = `${f.id ?? ""}:${first[0].toFixed(6)},${first[1].toFixed(6)}`;
+    const feature: Feature = { type: "Feature", properties: f.properties ?? {}, geometry: g };
+    campus.set(key, feature);
+    const rings = (g.type === "Polygon" ? [g.coordinates[0]] : g.type === "MultiPolygon" ? g.coordinates.map((p) => p[0]) : []) as LngLat[][];
+    if (MISSION_BUILDINGS.some((b) => rings.some((r) => pointInRing(b.point, r)))) mission.set(key, feature);
+  }
+  (map.getSource("campus-buildings") as GeoJSONSource | undefined)?.setData({ type: "FeatureCollection", features: [...campus.values()] });
+  (map.getSource("mission-buildings") as GeoJSONSource | undefined)?.setData({ type: "FeatureCollection", features: [...mission.values()] });
+  return campus.size;
+}
 
 function addGameLayers(map: MapboxMap) {
   // --- Campus 3D buildings (Mustang City) -----------------------------------
+  // `within` only matches points/lines, so campus footprints are copied out of the streets
+  // tiles into GeoJSON sources (see collectCampusBuildings). This invisible layer makes the
+  // building tiles load.
   map.addSource("streets", { type: "vector", url: "mapbox://mapbox.mapbox-streets-v8" });
+  map.addLayer({
+    id: "streets-building-loader",
+    type: "fill",
+    source: "streets",
+    "source-layer": "building",
+    minzoom: 13,
+    paint: { "fill-opacity": 0 },
+  });
+  map.addSource("campus-buildings", { type: "geojson", data: EMPTY });
+  map.addSource("mission-buildings", { type: "geojson", data: EMPTY });
   map.addLayer({
     id: "campus-buildings",
     type: "fill-extrusion",
-    source: "streets",
-    "source-layer": "building",
+    source: "campus-buildings",
     slot: "middle",
     minzoom: 14.5,
-    filter: ["within", polygon(CAMPUS_POLYGON)],
     paint: {
       "fill-extrusion-color": [
         "interpolate", ["linear"], ["coalesce", ["get", "height"], 10],
@@ -55,11 +99,9 @@ function addGameLayers(map: MapboxMap) {
   map.addLayer({
     id: "mission-buildings",
     type: "fill-extrusion",
-    source: "streets",
-    "source-layer": "building",
+    source: "mission-buildings",
     slot: "middle",
     minzoom: 14.5,
-    filter: ["any", ...MISSION_BUILDINGS.map((b) => ["within", polygon(b.polygon)])],
     paint: {
       "fill-extrusion-color": "#ffc857",
       "fill-extrusion-height": ["+", ["coalesce", ["get", "height"], 12], 3],
@@ -78,7 +120,7 @@ function addGameLayers(map: MapboxMap) {
     type: "fill",
     source: "fog",
     slot: "top",
-    paint: { "fill-color": "#000000", "fill-opacity": 0.97, "fill-emissive-strength": 1 },
+    paint: { "fill-color": "#000000", "fill-opacity": 1, "fill-emissive-strength": 1 },
   });
   map.addLayer({
     id: "fog-edge",
@@ -176,6 +218,7 @@ export default function MapView({ ref, onReady, onUnavailable }: Props) {
         attributionControl: false,
       });
       mapRef.current = map;
+      if (process.env.NODE_ENV !== "production") (window as unknown as { __mcMap: MapboxMap }).__mcMap = map;
       map.addControl(new mapboxgl.AttributionControl({ compact: true }), "bottom-right");
 
       map.on("style.load", () => {
@@ -183,6 +226,14 @@ export default function MapView({ ref, onReady, onUnavailable }: Props) {
         addGameLayers(map);
       });
       map.once("idle", () => callbacks.current.onReady());
+
+      // Refresh campus footprints as new building tiles arrive (debounced).
+      let campusTimer: ReturnType<typeof setTimeout> | undefined;
+      map.on("sourcedata", (e) => {
+        if (e.sourceId !== "streets" || !e.isSourceLoaded) return;
+        clearTimeout(campusTimer);
+        campusTimer = setTimeout(() => collectCampusBuildings(map), 300);
+      });
       map.on("error", (e) => {
         const status = (e.error as { status?: number } | undefined)?.status;
         if (status === 401 || status === 403) callbacks.current.onUnavailable("bad-token");
@@ -235,5 +286,10 @@ export default function MapView({ ref, onReady, onUnavailable }: Props) {
     };
   }, []);
 
-  return <div ref={containerRef} className="absolute inset-0" />;
+  // Mapbox sets `position: relative` on its container, so size it from an absolute wrapper.
+  return (
+    <div className="absolute inset-0">
+      <div ref={containerRef} className="h-full w-full" />
+    </div>
+  );
 }

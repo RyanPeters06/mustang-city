@@ -22,10 +22,15 @@ export function basemapConfig(lightPreset: LightPreset) {
     showPlaceLabels: true,
     showRoadLabels: false,
     show3dObjects: true,
-    colorWater: "#3b1a8a",
+    colorLand: "#2a1748",
+    colorWater: "#4a22b0",
+    colorGreenspace: "#2c3f5c",
+    colorEducation: "#4a2370",
+    colorBuildings: "#6a4a9a",
     colorMotorways: "#ff4f8b",
     colorTrunks: "#ff8a3d",
-    colorGreenspace: "#2a4a3f",
+    colorRoads: "#c76aa0",
+    roadsBrightness: 1,
     colorPlaceLabels: "#ffd9ec",
   } as const;
 }

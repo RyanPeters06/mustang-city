@@ -33,19 +33,19 @@ ON CONFLICT (slug) DO NOTHING;
 -- Starter missions around Mustang City.
 INSERT INTO missions (slug, title, briefing, type, lat, lng, radius_m, criteria, rep_reward, is_official) VALUES
 ('middlesex-study-spot', 'The Secret Study Spot', 'There''s a quiet corner in Middlesex nobody talks about. Find it.', 'photo',
-  43.0092, -81.2707, 60, 'Photo shows an indoor study space inside a stone university building.', 100, true),
+  43.00936, -81.27025, 60, 'Photo shows an indoor study space inside a stone university building.', 100, true),
 ('goose-sighting', 'Meet The Family', 'The Goose has cousins everywhere. Photograph one. Keep your distance.', 'photo',
   43.0096, -81.2737, 400, 'Photo clearly shows at least one Canada goose.', 100, true),
 ('uc-hill-summit', 'King of the Hill', 'Stand at the top of UC Hill and look over your kingdom.', 'photo',
   43.0089, -81.2737, 60, 'Photo taken from the top of a grassy hill looking over a university campus.', 100, true),
 ('the-spoke', 'Find The Spoke', 'Every crew needs a hangout. Locate The Spoke.', 'checkin',
-  43.0080, -81.2752, 50, 'User is at The Spoke cafe in the University Community Centre.', 100, true),
+  43.00865, -81.27621, 60, 'User is at The Spoke cafe in the University Community Centre.', 100, true),
 ('old-east-bus', 'Ride East', 'Take a bus to Old East Village. Don''t walk. The Goose will know.', 'bus',
   42.9890, -81.2230, 150, 'User arrives in Old East Village by bus.', 150, true),
 ('gates-of-western', 'The Gates', 'Every legend starts at the gates. Get the arch in frame.', 'photo',
   43.0052, -81.2683, 80, 'Photo shows the stone entrance gates of Western University.', 100, true),
 ('weldon-night', 'Library After Dark', 'Weldon never sleeps. Prove it after 10pm.', 'checkin',
-  43.0098, -81.2754, 60, 'User is at Weldon Library.', 100, true),
+  43.00789, -81.27565, 60, 'User is at Weldon Library.', 100, true),
 ('richmond-row', 'Strip Patrol', 'Walk the Row. Find the busiest corner.', 'checkin',
   42.9935, -81.2510, 120, 'User is on Richmond Row.', 100, true)
 ON CONFLICT (slug) DO NOTHING;

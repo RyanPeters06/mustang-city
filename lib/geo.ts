@@ -34,26 +34,11 @@ export const CAMPUS_BBOX = {
   north: 43.0175,
 };
 
-export const CAMPUS_POLYGON: LngLat[] = [
-  [CAMPUS_BBOX.west, CAMPUS_BBOX.south],
-  [CAMPUS_BBOX.east, CAMPUS_BBOX.south],
-  [CAMPUS_BBOX.east, CAMPUS_BBOX.north],
-  [CAMPUS_BBOX.west, CAMPUS_BBOX.north],
-  [CAMPUS_BBOX.west, CAMPUS_BBOX.south],
-];
-
-/** Footprint areas of mission buildings that should glow (small boxes around each building). */
-export const MISSION_BUILDINGS: { name: string; polygon: LngLat[] }[] = [
-  {
-    name: "Middlesex College",
-    polygon: [
-      [-81.2716, 43.0086],
-      [-81.2697, 43.0086],
-      [-81.2697, 43.0098],
-      [-81.2716, 43.0098],
-      [-81.2716, 43.0086],
-    ],
-  },
+/** Mission buildings that glow: any building footprint containing this point (Mapbox Search positions). */
+export const MISSION_BUILDINGS: { name: string; point: LngLat }[] = [
+  { name: "Middlesex College", point: [-81.27025, 43.00936] },
+  { name: "University Community Centre", point: [-81.27621, 43.00865] },
+  { name: "D.B. Weldon Library", point: [-81.27565, 43.00789] },
 ];
 
 export function inCampus([lng, lat]: LngLat) {
