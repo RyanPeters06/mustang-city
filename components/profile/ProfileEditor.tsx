@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ACCENTS, EMBLEMS, FACULTIES, emblemUnlocked, unlockLabel, updateProfile, type Profile, type ProgressSnapshot } from "@/lib/progress";
 import { missionBySlug } from "@/lib/missions";
 import Emblem from "./Emblem";
+import { BADGES } from "@/lib/badges";
 
 const YEARS = ["", "1st year", "2nd year", "3rd year", "4th year", "5th+ year", "Grad"];
 
@@ -12,6 +13,7 @@ export default function ProfileEditor({ snap, onClose }: { snap: ProgressSnapsho
   const set = (patch: Partial<Profile>) => setDraft((d) => ({ ...d, ...patch }));
   const nameOk = draft.name.trim().length === 0 || /^[\p{L}\p{N} ._-]{3,20}$/u.test(draft.name.trim());
   const photos = Object.values(snap.completions).filter((c) => c.thumb);
+  const earned = BADGES.filter((b) => snap.badges[b.code]);
 
   const field = "w-full rounded-xl border border-white/12 bg-white/[0.06] px-3.5 py-3 text-[16px] text-ink outline-none focus:border-pink";
 
@@ -75,6 +77,20 @@ export default function ProfileEditor({ snap, onClose }: { snap: ProgressSnapsho
           })}
         </div>
       </fieldset>
+
+      {earned.length > 0 && (
+        <label className="block">
+          <span className="mb-1.5 block text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">Title</span>
+          <select className={field} value={draft.title} onChange={(e) => set({ title: e.target.value })}>
+            <option value="">No title</option>
+            {earned.map((b) => (
+              <option key={b.code} value={b.code}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
 
       <fieldset>
         <legend className="mb-2 text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">Accent</legend>

@@ -16,7 +16,7 @@ Status marks: `[ ]` todo · `[x]` done · `[~]` blocked (reason in the line) · 
   "Replays" list in Profile; play any trace back at 1×/4×/16× so fog clears on screen; demo panel can load
   a bundled sample walk. *Done when:* a recorded 2-minute walk replays at 16× with fog clearing and the
   arrow following; replay never writes new reveals twice.
-- [ ] **Rank-up toast + badges** — full-screen "RANK UP" moment when rank changes; badge engine for the
+- [x] **Rank-up toast + badges** — full-screen "RANK UP" moment when rank changes; badge engine for the
   brief's six badges (Cartographer, Goose Whisperer, Night Owl, Heister, Route 6 Regular, Every Route) with a Badges grid
   on Profile; titles selectable under the name. *Done when:* crossing 1,000 Rep (via demo controls) shows the
   toast once; earned badges persist.

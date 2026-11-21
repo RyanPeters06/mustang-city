@@ -4,6 +4,8 @@
  */
 import { getSnapshot as getFogSnapshot, subscribe as subscribeFog } from "./fog";
 import { RANKS, rankFor } from "./rank";
+import { BADGES } from "./badges";
+import { celebrate } from "./celebrate";
 
 export { rankFor };
 import { MISSIONS } from "./missions";
@@ -50,24 +52,33 @@ export type Profile = {
   emblem: EmblemId;
   accent: string;
   showcase: string[]; // up to 3 mission slugs
+  title: string; // an earned badge code, or ""
 };
 
-const DEFAULT_PROFILE: Profile = { name: "", faculty: "", year: "", emblem: "mustang", accent: ACCENTS[0], showcase: [] };
+const DEFAULT_PROFILE: Profile = { name: "", faculty: "", year: "", emblem: "mustang", accent: ACCENTS[0], showcase: [], title: "" };
 
-type Stored = { completions: Record<string, Completion>; profile: Profile };
+type Stored = {
+  completions: Record<string, Completion>;
+  profile: Profile;
+  badges: Record<string, number>; // code → earned at
+  lastRank: string | null; // last rank celebrated (null = not yet initialised)
+  demoRep: number; // demo-controls only
+};
 
 export type ProgressSnapshot = {
   completions: Record<string, Completion>;
   profile: Profile;
   missionRep: number;
   missionCount: number;
+  badges: Record<string, number>;
+  demoRep: number;
   rep: number;
   rank: string;
   nextRank: { name: string; min: number } | null;
   pct: number;
 };
 
-let data: Stored = { completions: {}, profile: DEFAULT_PROFILE };
+let data: Stored = { completions: {}, profile: DEFAULT_PROFILE, badges: {}, lastRank: null, demoRep: 0 };
 let loaded = false;
 let snapshot: ProgressSnapshot | null = null;
 const listeners = new Set<() => void>();
@@ -79,7 +90,13 @@ function ensureLoaded() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<Stored>;
-      data = { completions: parsed.completions ?? {}, profile: { ...DEFAULT_PROFILE, ...parsed.profile } };
+      data = {
+        completions: parsed.completions ?? {},
+        profile: { ...DEFAULT_PROFILE, ...parsed.profile },
+        badges: parsed.badges ?? {},
+        lastRank: parsed.lastRank ?? null,
+        demoRep: parsed.demoRep ?? 0,
+      };
     }
   } catch {
     /* corrupted — start fresh */
@@ -87,12 +104,40 @@ function ensureLoaded() {
   subscribeFog(() => {
     snapshot = null;
     listeners.forEach((l) => l());
+    checkMilestones();
   });
+  checkMilestones(true);
 }
 
-function save() {
+/** Celebrate rank-ups and newly earned badges (once each). `silent` on first load. */
+function checkMilestones(silent = false) {
+  const snap = getSnapshot();
+  let changed = false;
+
+  const idx = (name: string | null) => RANKS.findIndex((r) => r.name === name);
+  if (data.lastRank === null) {
+    data.lastRank = snap.rank; // first run: start from the current rank, no celebration
+    changed = true;
+  } else if (!silent && idx(snap.rank) > idx(data.lastRank)) {
+    data.lastRank = snap.rank;
+    changed = true;
+    celebrate({ id: `rank-${snap.rank}`, kind: "rank", title: snap.rank, subtitle: `${snap.rep.toLocaleString()} Rep` });
+  }
+
+  const input = { completions: data.completions, pct: snap.pct };
+  for (const b of BADGES) {
+    if (data.badges[b.code] || !b.evaluate(input).earned) continue;
+    data.badges = { ...data.badges, [b.code]: Date.now() };
+    changed = true;
+    if (!silent) celebrate({ id: `badge-${b.code}`, kind: "badge", title: b.name, subtitle: b.description, color: b.color, glyph: b.glyph });
+  }
+  if (changed) save(false);
+}
+
+function save(recheck = true) {
   snapshot = null;
   listeners.forEach((l) => l());
+  if (recheck) checkMilestones();
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch {
@@ -119,12 +164,14 @@ export function getSnapshot(): ProgressSnapshot {
     const fog = getFogSnapshot();
     const list = Object.values(data.completions);
     const missionRep = list.reduce((s, c) => s + c.rep, 0);
-    const rep = fog.rep + missionRep;
+    const rep = fog.rep + missionRep + data.demoRep;
     snapshot = {
       completions: data.completions,
       profile: data.profile,
       missionRep,
       missionCount: list.length,
+      badges: data.badges,
+      demoRep: data.demoRep,
       rep,
       pct: fog.pct,
       ...rankFor(rep),
@@ -138,6 +185,8 @@ const SERVER: ProgressSnapshot = {
   profile: DEFAULT_PROFILE,
   missionRep: 0,
   missionCount: 0,
+  badges: {},
+  demoRep: 0,
   rep: 0,
   rank: "Frosh",
   nextRank: RANKS[1],
@@ -180,7 +229,14 @@ export const unlockLabel = (id: EmblemId) => {
 /** Dev/demo only: forget completions. */
 export function resetProgress() {
   ensureLoaded();
-  data = { ...data, completions: {} };
+  data = { ...data, completions: {}, demoRep: 0 };
+  save();
+}
+
+/** Demo controls only: add Rep that is tracked separately and cleared by "Reset missions". */
+export function addDemoRep(n: number) {
+  ensureLoaded();
+  data = { ...data, demoRep: data.demoRep + n };
   save();
 }
 

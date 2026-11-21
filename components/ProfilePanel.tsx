@@ -7,6 +7,8 @@ import Emblem from "./profile/Emblem";
 import ProfileEditor from "./profile/ProfileEditor";
 import LoreCard from "./missions/LoreCard";
 import Replays from "./profile/Replays";
+import BadgeGrid from "./profile/BadgeGrid";
+import { badgeByCode } from "@/lib/badges";
 
 type User = { name?: string; email?: string; picture?: string };
 type Account = { kind: "loading" } | { kind: "signed-in"; user: User } | { kind: "signed-out" } | { kind: "unavailable" };
@@ -79,6 +81,11 @@ export default function ProfilePanel({
           <Emblem id={profile.emblem} accent={profile.accent} size={64} />
           <div className="min-w-0 flex-1">
             <p className="line-clamp-2 text-[19px] leading-tight font-bold break-words text-ink">{name}</p>
+            {profile.title && badgeByCode(profile.title) && (
+              <p className="text-[11px] font-bold tracking-[0.14em] uppercase" style={{ color: badgeByCode(profile.title)!.color }}>
+                {badgeByCode(profile.title)!.name}
+              </p>
+            )}
             <p className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-ink/60">
               {[profile.faculty || "No faculty yet", profile.year].filter(Boolean).join(" · ")}
             </p>
@@ -156,6 +163,8 @@ export default function ProfilePanel({
           </ul>
         )}
       </section>
+
+      <BadgeGrid snap={snap} />
 
       <Replays onPlay={onPlayReplay} />
 

@@ -16,6 +16,7 @@ import MissionPassed from "./missions/MissionPassed";
 import CrewPanel from "./crew/CrewPanel";
 import BuildingDetail from "./buildings/BuildingDetail";
 import ReplayBar from "./ReplayBar";
+import Celebrations from "./Celebrations";
 import { missionBySlug } from "@/lib/missions";
 import { getLastFix } from "@/lib/location";
 import { walkingRoute } from "@/lib/directions";
@@ -189,6 +190,7 @@ export default function GameScreen() {
       />
       <LoadingScreen state={mapState} reason={reason} />
       <ReplayBar />
+      <Celebrations paused={passed !== null} />
       <MissionPassed info={passed} onDone={clearPassed} />
       <DemoPanel map={map} selected={selected} onPassed={setPassed} />
     </main>
