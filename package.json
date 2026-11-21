@@ -6,18 +6,23 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:schema": "node scripts/db.mjs db/schema.sql",
+    "db:seed": "node scripts/db.mjs db/seed.sql"
   },
   "dependencies": {
+    "@auth0/nextjs-auth0": "^4.33.0",
     "h3-js": "^4.5.0",
     "mapbox-gl": "^3.35.2",
     "motion": "^14.14.0",
     "next": "16.4.6",
+    "postgres": "^4.1.1",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",
+    "@types/geojson": "^7946.0.16",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
