@@ -1,0 +1,61 @@
+{
+  "version": 2,
+  "skills": {
+    "agent-browser": {
+      "source": "vercel-labs/agent-browser",
+      "commit": "a7e41ff16a2be5daca4eccef71f3a97a34352bc1",
+      "sourceType": "github",
+      "skillPath": "skills/agent-browser/SKILL.md",
+      "computedHash": "a0dfac7503f69bcf529b2660fc79964064c4f179eb65695904ddc45fc0d99d20"
+    },
+    "gemini-api-dev": {
+      "source": "google-gemini/gemini-skills",
+      "commit": "c4d0c62c1240e08a90546186bf320600ab6a039a",
+      "sourceType": "github",
+      "skillPath": "skills/gemini-api-dev/SKILL.md",
+      "computedHash": "b3823bd7210e46d4528ca85ebc03326842a6df47ced9a856a1729639f9756c12"
+    },
+    "mapbox-cartography": {
+      "source": "mapbox/mapbox-agent-skills",
+      "commit": "84d991e36ad5ac7195796ff9e9fdc378155f470c",
+      "sourceType": "github",
+      "skillPath": "skills/mapbox-cartography/SKILL.md",
+      "computedHash": "e794bfe7287b1a8a01661d3ef6d9857e4c4b47590476c6ca73ca549d518e6411"
+    },
+    "mapbox-token-security": {
+      "source": "mapbox/mapbox-agent-skills",
+      "commit": "84d991e36ad5ac7195796ff9e9fdc378155f470c",
+      "sourceType": "github",
+      "skillPath": "skills/mapbox-token-security/SKILL.md",
+      "computedHash": "bde192f0a44c6cd5b0c194dd33a5f1fb145a7b2fd22ae8436c9ec995922b2992"
+    },
+    "mapbox-web-integration-patterns": {
+      "source": "mapbox/mapbox-agent-skills",
+      "commit": "84d991e36ad5ac7195796ff9e9fdc378155f470c",
+      "sourceType": "github",
+      "skillPath": "skills/mapbox-web-integration-patterns/SKILL.md",
+      "computedHash": "83def89b176cc63f35c7b94b5b73d99320da3578bed3a37ae0f29588608e301e"
+    },
+    "mapbox-web-performance-patterns": {
+      "source": "mapbox/mapbox-agent-skills",
+      "commit": "84d991e36ad5ac7195796ff9e9fdc378155f470c",
+      "sourceType": "github",
+      "skillPath": "skills/mapbox-web-performance-patterns/SKILL.md",
+      "computedHash": "9c29472b82d862886aaeb6523a896bb8c13fa19188c91ee12303c7cecfbf57d7"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "commit": "5a37a6329fbad3666c3207392a6a7c0110e92efb",
+      "sourceType": "github",
+      "skillPath": "skills/react-best-practices/SKILL.md",
+      "computedHash": "7991ed4fbecdac23f47c1a40c243e00a212a9e7f3604db93959b3ae11dffe299"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "commit": "5a37a6329fbad3666c3207392a6a7c0110e92efb",
+      "sourceType": "github",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "computedHash": "5994e4cfd86144903d2ba750f862b9e36af15e3297aac983679e347b99f6cb71"
+    }
+  }
+}
