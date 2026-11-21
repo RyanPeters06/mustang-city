@@ -230,6 +230,37 @@
         "label": "Skill: speckit-implement",
         "default_collapsed": true
       }
+    },
+    {
+      "id": "claude-skill-toolu_01GLdkvKaEnBYFH9vmuD9PQ8",
+      "event_type": "tool_invocation",
+      "skill": {
+        "name": "impeccable"
+      },
+      "source": {
+        "agent": "claude-code",
+        "signal": "skill_tool_use",
+        "confidence": "explicit"
+      },
+      "turn_id": "00e4b8c2bb9b",
+      "transcript_anchor": {
+        "unit": "line",
+        "start": 765,
+        "end": 766,
+        "entry_ids": [
+          "294948a0-0224-4b4b-9e6f-ad26535efc40"
+        ],
+        "tool_use_id": "toolu_01GLdkvKaEnBYFH9vmuD9PQ8"
+      },
+      "native": {
+        "tool_name": "Skill",
+        "tool_use_id": "toolu_01GLdkvKaEnBYFH9vmuD9PQ8"
+      },
+      "collapse": {
+        "target": "tool_pair",
+        "label": "Skill: impeccable",
+        "default_collapsed": true
+      }
     }
   ]
 }
