@@ -3,7 +3,8 @@
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 import type { Map as MapboxMap, GeoJSONSource } from "mapbox-gl";
-import type { Feature, FeatureCollection, LineString } from "geojson";
+import type { Feature, FeatureCollection, LineString, MultiPolygon, Polygon } from "geojson";
+import { cellsToMultiPolygon } from "h3-js";
 import { MISSIONS, approxCenter, missionBySlug, type Mission } from "@/lib/missions";
 import { getSnapshot as getProgress, subscribe as subscribeProgress } from "@/lib/progress";
 import { buildFog, isRevealedAt, subscribe } from "@/lib/fog";
@@ -18,6 +19,7 @@ import {
   SEA_RING,
   inCampus,
   ringIsCounterClockwise,
+  distanceM,
   type LngLat,
 } from "@/lib/geo";
 import { ATMOSPHERE, CAMPUS_PITCH, CAMPUS_ZOOM, CITY_PITCH, basemapConfig, londonLightPreset } from "@/lib/mapStyle";
@@ -32,6 +34,10 @@ export type MapHandle = {
   showMission: (slug: string) => void;
   /** Draw (or clear with null) the glowing waypoint route. */
   setRoute: (route: LineString | null) => void;
+  /** Tint a friend's explored cells (null clears) and frame them. */
+  showFriendArea: (cells: string[] | null, color?: string) => void;
+  /** Remove the tapped-building highlight. */
+  clearBuilding: () => void;
 };
 
 type Props = {
@@ -39,6 +45,7 @@ type Props = {
   onReady: () => void;
   onUnavailable: (reason: string) => void;
   onMissionTap: (slug: string) => void;
+  onBuildingTap: (b: BuildingTap) => void;
 };
 
 const reducedMotion = () =>
@@ -275,6 +282,39 @@ function addGameLayers(map: MapboxMap) {
     },
   });
 
+  // --- Selected campus building (tap) ---------------------------------------------
+  map.addSource("building-selected", { type: "geojson", data: EMPTY });
+  map.addLayer({
+    id: "building-selected",
+    type: "fill-extrusion",
+    source: "building-selected",
+    slot: "middle",
+    paint: {
+      "fill-extrusion-color": "#2ee6d6",
+      "fill-extrusion-height": ["+", ["coalesce", ["get", "height"], 12], 4],
+      "fill-extrusion-base": ["coalesce", ["get", "min_height"], 0],
+      "fill-extrusion-opacity": 0.95,
+      "fill-extrusion-emissive-strength": 1,
+    },
+  });
+
+  // --- A friend's explored area, tinted in their accent (above the fog) ------------
+  map.addSource("friend-area", { type: "geojson", data: EMPTY });
+  map.addLayer({
+    id: "friend-area-fill",
+    type: "fill",
+    source: "friend-area",
+    slot: "top",
+    paint: { "fill-color": "#2ee6d6", "fill-opacity": 0.32, "fill-emissive-strength": 1 },
+  });
+  map.addLayer({
+    id: "friend-area-line",
+    type: "line",
+    source: "friend-area",
+    slot: "top",
+    paint: { "line-color": "#2ee6d6", "line-width": 1.5, "line-opacity": 0.9, "line-emissive-strength": 1 },
+  });
+
   // --- Waypoint route (under blips and player) -----------------------------------
   map.addSource("route", { type: "geojson", data: EMPTY });
   map.addLayer({
@@ -408,6 +448,26 @@ function addGameLayers(map: MapboxMap) {
 
   const last = getLastFix();
   if (last) setPlayer(map, last);
+}
+
+export type BuildingTap = { name: string | null; center: LngLat; rings: LngLat[][] };
+
+/** Name a tapped footprint by finding which OSM-named building point lies inside it. */
+function buildingInfo(geometry: Polygon | MultiPolygon, tap: LngLat): BuildingTap {
+  const rings = (geometry.type === "Polygon" ? [geometry.coordinates[0]] : geometry.coordinates.map((p) => p[0])) as LngLat[][];
+  // Query geometry is clipped to tiles, so the label point may fall outside the piece we got.
+  // Fall back to the nearest named building to the footprint's centre (not the tap: at 60° pitch
+  // the tap's ground point can sit well behind the building).
+  const ring = rings[0] ?? [];
+  const center: LngLat = ring.length
+    ? [ring.reduce((s, p) => s + p[0], 0) / ring.length, ring.reduce((s, p) => s + p[1], 0) / ring.length]
+    : tap;
+  const named =
+    CAMPUS_BUILDINGS.find((b) => rings.some((r) => pointInRing([b.lng, b.lat], r))) ??
+    CAMPUS_BUILDINGS.map((b) => ({ b, d: distanceM(center, [b.lng, b.lat]) }))
+      .filter((x) => x.d <= 60)
+      .sort((a, z) => a.d - z.d)[0]?.b;
+  return { name: named?.name ?? null, center: named ? [named.lng, named.lat] : center, rings };
 }
 
 const MISSION_ICONS: [string, string, string][] = [
@@ -585,14 +645,14 @@ function pulsingRing(map: MapboxMap) {
   };
 }
 
-export default function MapView({ ref, onReady, onUnavailable, onMissionTap }: Props) {
+export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onBuildingTap }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapboxMap | null>(null);
   const followRef = useRef(false);
-  const callbacks = useRef({ onReady, onUnavailable, onMissionTap });
+  const callbacks = useRef({ onReady, onUnavailable, onMissionTap, onBuildingTap });
 
   useEffect(() => {
-    callbacks.current = { onReady, onUnavailable, onMissionTap };
+    callbacks.current = { onReady, onUnavailable, onMissionTap, onBuildingTap };
   });
 
   useImperativeHandle(ref, () => ({
@@ -625,6 +685,28 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap }: P
       (mapRef.current?.getSource("route") as GeoJSONSource | undefined)?.setData(
         route ? { type: "Feature", properties: {}, geometry: route } : EMPTY,
       ),
+    showFriendArea: (cells, color = "#2ee6d6") => {
+      const map = mapRef.current;
+      const src = map?.getSource("friend-area") as GeoJSONSource | undefined;
+      if (!map || !src) return;
+      if (!cells?.length) return src.setData(EMPTY);
+      const polys = cellsToMultiPolygon(cells, true) as LngLat[][][];
+      src.setData({ type: "Feature", properties: {}, geometry: { type: "MultiPolygon", coordinates: polys } });
+      map.setPaintProperty("friend-area-fill", "fill-color", color);
+      map.setPaintProperty("friend-area-line", "line-color", color);
+      // Frame their area above the sheet.
+      let [w, s, e, n] = [180, 90, -180, -90];
+      for (const poly of polys) for (const [x, y] of poly[0]) [w, s, e, n] = [Math.min(w, x), Math.min(s, y), Math.max(e, x), Math.max(n, y)];
+      followRef.current = false;
+      map.fitBounds(
+        [
+          [w, s],
+          [e, n],
+        ],
+        { padding: { top: 110, bottom: 200, left: 30, right: 30 }, pitch: CITY_PITCH, maxZoom: 15.5, duration: dur(1600) },
+      );
+    },
+    clearBuilding: () => (mapRef.current?.getSource("building-selected") as GeoJSONSource | undefined)?.setData(EMPTY),
     locate: (lngLat) => {
       followRef.current = true;
       mapRef.current?.flyTo({ center: lngLat, padding: NO_PAD, zoom: Math.max(mapRef.current.getZoom(), 16), duration: dur(1400), essential: true });
@@ -711,11 +793,24 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap }: P
       // Player: move the marker; follow the player until they pan the map themselves.
       // Missions: refresh when completions change; tap a blip or a "?" area to open it.
       cleanups.push(subscribeProgress(() => map.getSource("missions") && refreshMissions(map)));
-      for (const layer of ["mission-blips", "mission-areas-fill"]) {
-        map.on("click", layer, (e) => {
-          const slug = e.features?.[0]?.properties?.slug;
-          if (typeof slug === "string") callbacks.current.onMissionTap(slug);
-        });
+      // One tap handler: mission blips / "?" areas win over the building underneath them.
+      map.on("click", (e) => {
+        const box: [[number, number], [number, number]] = [
+          [e.point.x - 8, e.point.y - 8],
+          [e.point.x + 8, e.point.y + 8],
+        ];
+        const mission = map.queryRenderedFeatures(box, { layers: ["mission-blips", "mission-areas-fill"] })[0];
+        const slug = mission?.properties?.slug;
+        if (typeof slug === "string") return callbacks.current.onMissionTap(slug);
+
+        const building = map.queryRenderedFeatures(e.point, { layers: ["building-selected", "mission-buildings", "campus-buildings"] })[0];
+        if (building && (building.geometry.type === "Polygon" || building.geometry.type === "MultiPolygon")) {
+          const geometry = building.geometry;
+          (map.getSource("building-selected") as GeoJSONSource).setData({ type: "Feature", properties: building.properties ?? {}, geometry });
+          callbacks.current.onBuildingTap(buildingInfo(geometry, [e.lngLat.lng, e.lngLat.lat]));
+        }
+      });
+      for (const layer of ["mission-blips", "mission-areas-fill", "campus-buildings", "mission-buildings"]) {
         map.on("mouseenter", layer, () => (map.getCanvas().style.cursor = "pointer"));
         map.on("mouseleave", layer, () => (map.getCanvas().style.cursor = ""));
       }

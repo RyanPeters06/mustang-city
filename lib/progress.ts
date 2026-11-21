@@ -2,7 +2,10 @@
  * Player progress kept on the device: mission completions + profile.
  * Rep = fog Rep (cells cleared) + mission Rep; rank comes from total Rep.
  */
-import { getSnapshot as getFogSnapshot, subscribe as subscribeFog, RANKS } from "./fog";
+import { getSnapshot as getFogSnapshot, subscribe as subscribeFog } from "./fog";
+import { RANKS, rankFor } from "./rank";
+
+export { rankFor };
 import { MISSIONS } from "./missions";
 
 const STORAGE_KEY = "mc.progress.v1";
@@ -102,11 +105,6 @@ function save() {
       /* give up silently; progress still lives in memory this session */
     }
   }
-}
-
-export function rankFor(rep: number) {
-  const idx = [...RANKS].map((r) => rep >= r.min).lastIndexOf(true);
-  return { rank: RANKS[Math.max(0, idx)].name, nextRank: RANKS[idx + 1] ?? null };
 }
 
 export function subscribe(l: () => void) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import MapView, { type MapHandle } from "./map/MapView";
+import MapView, { type BuildingTap, type MapHandle } from "./map/MapView";
 import LoadingScreen from "./map/LoadingScreen";
 import Hud from "./Hud";
 import TabBar, { type Tab } from "./TabBar";
@@ -13,60 +13,106 @@ import LocateButton from "./LocateButton";
 import MissionList from "./missions/MissionList";
 import MissionDetail, { type PassedInfo } from "./missions/MissionDetail";
 import MissionPassed from "./missions/MissionPassed";
+import CrewPanel from "./crew/CrewPanel";
+import BuildingDetail from "./buildings/BuildingDetail";
 import { missionBySlug } from "@/lib/missions";
 import { getLastFix } from "@/lib/location";
 import { walkingRoute } from "@/lib/directions";
+import { subscribeAccount } from "@/lib/account";
+import type { LngLat } from "@/lib/geo";
+import type { FriendRow } from "@/app/api/friends/route";
 
 const TITLES: Record<Exclude<Tab, "map">, string> = { missions: "Missions", crew: "Crew", profile: "Profile" };
 
-// `?denied=uwo` is set by the Auth0 callback when a non-Western account signs in. Read once.
-let deniedAtLoad: boolean | undefined;
-const readDenied = () => (deniedAtLoad ??= new URLSearchParams(window.location.search).get("denied") === "uwo");
+// Deep-link params, read once: `?denied=uwo` (Auth0 callback) and `?add=<handle>` (friend QR code).
+let paramsAtLoad: { denied: boolean; add: string | null } | undefined;
+const readParams = () => {
+  if (!paramsAtLoad) {
+    const p = new URLSearchParams(window.location.search);
+    paramsAtLoad = { denied: p.get("denied") === "uwo", add: p.get("add")?.toLowerCase().slice(0, 24) ?? null };
+  }
+  return paramsAtLoad;
+};
+const SERVER_PARAMS = { denied: false, add: null };
 const noopSubscribe = () => () => {};
 
+/** `key` is a mission slug or `bldg:<name>`. */
 type Waypoint = { slug: string; distanceM: number; minutes: number };
 
 export default function GameScreen() {
   const map = useRef<MapHandle | null>(null);
   const [mapState, setMapState] = useState<"loading" | "ready" | "unavailable">("loading");
   const [reason, setReason] = useState<string>();
-  const denied = useSyncExternalStore(noopSubscribe, readDenied, () => false);
+  const params = useSyncExternalStore(noopSubscribe, readParams, () => SERVER_PARAMS);
   const [chosenTab, setTab] = useState<Tab | null>(null);
-  const tab: Tab = chosenTab ?? (denied ? "profile" : "map");
+  const tab: Tab = chosenTab ?? (params.denied ? "profile" : params.add ? "crew" : "map");
   const [selected, setSelected] = useState<string | null>(null);
+  const [building, setBuilding] = useState<BuildingTap | null>(null);
   const [waypoint, setWaypointState] = useState<Waypoint | null>(null);
   const [passed, setPassed] = useState<PassedInfo | null>(null);
+  const [friendShown, setFriendShown] = useState<string | null>(null);
 
+  // Start the account check (and sync) as soon as the app opens.
   useEffect(() => {
-    if (denied) window.history.replaceState(null, "", "/");
-  }, [denied]);
+    const off = subscribeAccount(() => {});
+    return () => {
+      off();
+    };
+  }, []);
+  useEffect(() => {
+    if (params.denied || params.add) window.history.replaceState(null, "", "/");
+  }, [params]);
 
   const openMission = useCallback((slug: string) => {
+    setBuilding(null);
+    map.current?.clearBuilding();
     setSelected(slug);
     map.current?.showMission(slug);
   }, []);
 
-  const setWaypoint = useCallback(async (slug: string | null) => {
-    if (!slug) {
+  const routeTo = useCallback(async (key: string | null, to?: LngLat) => {
+    if (!key || !to) {
       map.current?.setRoute(null);
       setWaypointState(null);
       return;
     }
-    const m = missionBySlug(slug);
     const from = getLastFix()?.lngLat ?? map.current?.center();
-    if (!m || !from) return;
+    if (!from) return;
     try {
-      const r = await walkingRoute(from, m.lngLat);
+      const r = await walkingRoute(from, to);
       map.current?.setRoute(r.geometry);
-      setWaypointState({ slug, distanceM: r.distanceM, minutes: r.minutes });
+      setWaypointState({ slug: key, distanceM: r.distanceM, minutes: r.minutes });
     } catch {
       setWaypointState(null);
     }
   }, []);
 
+  const setMissionWaypoint = useCallback(
+    (slug: string | null) => routeTo(slug, slug ? missionBySlug(slug)?.lngLat : undefined),
+    [routeTo],
+  );
+
+  const toggleFriendMap = useCallback((f: FriendRow, cells: string[] | null) => {
+    map.current?.showFriendArea(cells, f.accent);
+    setFriendShown(cells ? f.handle : null);
+    if (cells) setTab("map"); // close the sheet so the tinted area is visible
+  }, []);
+
+  const closeBuilding = useCallback(() => {
+    setBuilding(null);
+    map.current?.clearBuilding();
+  }, []);
+
   const clearPassed = useCallback(() => setPassed(null), []);
-  const sheetOpen = selected !== null || tab !== "map";
-  const sheetTitle = selected ? (missionBySlug(selected)?.title ?? "") : tab === "map" ? "" : TITLES[tab];
+  const sheetOpen = selected !== null || building !== null || tab !== "map";
+  const sheetTitle = selected
+    ? (missionBySlug(selected)?.title ?? "")
+    : building
+      ? (building.name ?? "Campus building")
+      : tab === "map"
+        ? ""
+        : TITLES[tab];
+  const buildingKey = building ? `bldg:${building.name ?? building.center.join(",")}` : null;
 
   return (
     <main className="absolute inset-0">
@@ -78,28 +124,57 @@ export default function GameScreen() {
           setMapState("unavailable");
         }}
         onMissionTap={openMission}
+        onBuildingTap={(b) => {
+          setSelected(null);
+          setBuilding(b);
+        }}
       />
       <Hud />
       {mapState === "ready" && !sheetOpen && (
         <>
           <LocationPrompt />
           <LocateButton map={map} />
+          {friendShown && (
+            <button
+              type="button"
+              onClick={() => {
+                map.current?.showFriendArea(null);
+                setFriendShown(null);
+              }}
+              className="glass absolute left-4 z-20 min-h-[44px] rounded-full px-4 text-[13px] font-bold text-ink"
+              style={{ bottom: "calc(var(--safe-bottom) + 170px)" }}
+            >
+              Hide {friendShown.replace(/^demo\./, "")}&apos;s map ✕
+            </button>
+          )}
         </>
       )}
 
       <Sheet
         open={sheetOpen}
         title={sheetTitle}
-        onClose={() => (selected ? setSelected(null) : setTab("map"))}
+        onClose={() => {
+          if (selected) setSelected(null);
+          else if (building) closeBuilding();
+          else setTab("map");
+        }}
       >
         {selected ? (
-          <MissionDetail key={selected} slug={selected} waypoint={waypoint} onWaypoint={setWaypoint} onPassed={setPassed} />
+          <MissionDetail key={selected} slug={selected} waypoint={waypoint} onWaypoint={setMissionWaypoint} onPassed={setPassed} />
+        ) : building ? (
+          <BuildingDetail
+            key={buildingKey}
+            building={building}
+            routed={waypoint?.slug === buildingKey ? waypoint : null}
+            onWaypoint={(on) => routeTo(on ? buildingKey : null, building.center)}
+            onOpenMission={openMission}
+          />
         ) : tab === "missions" ? (
           <MissionList onOpen={openMission} />
         ) : tab === "profile" ? (
-          <ProfilePanel denied={denied} onOpenMission={openMission} />
+          <ProfilePanel denied={params.denied} onOpenMission={openMission} />
         ) : (
-          <p className="pb-4 text-[15px] text-ink/70">Crews, friends and faculty turf are coming soon.</p>
+          <CrewPanel prefill={params.add} shownFriend={friendShown} onToggleMap={toggleFriendMap} />
         )}
       </Sheet>
 
@@ -107,6 +182,7 @@ export default function GameScreen() {
         active={tab}
         onChange={(t) => {
           setSelected(null);
+          closeBuilding();
           setTab(t);
         }}
       />

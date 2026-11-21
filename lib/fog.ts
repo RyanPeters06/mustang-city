@@ -8,6 +8,7 @@
 import { cellToChildren, cellToLatLng, cellsToMultiPolygon, gridDisk, latLngToCell, polygonToCells } from "h3-js";
 import type { Feature, FeatureCollection, MultiLineString, Polygon } from "geojson";
 import { CAMPUS_CENTER, LONDON_BOUNDARY, distanceM, type LngLat } from "./geo";
+import { fogRepFromCells, rankFor } from "./rank";
 
 export const H3_RES = 11;
 export const REVEAL_RADIUS_M = 100;
@@ -15,12 +16,7 @@ const RING_K = 5; // res-11 centre spacing ≈ 43 m, so k=5 safely covers a 100 
 const STORAGE_KEY = "mc.cells.v2";
 const LEGACY_KEY = "mc.cells.v1"; // res 10
 
-export const RANKS = [
-  { name: "Frosh", min: 0 },
-  { name: "Local", min: 1000 },
-  { name: "Made", min: 5000 },
-  { name: "Legend of Forest State", min: 15000 },
-] as const;
+export { RANKS } from "./rank";
 
 export type FogSnapshot = { count: number; pct: number; rep: number; rank: string };
 
@@ -42,13 +38,19 @@ function pointInLondon([x, y]: LngLat) {
   return inside;
 }
 
+/** % of London a given number of res-11 cells covers. */
+export const pctFromCells = (n: number) => (n / londonCells()) * 100;
+
+/** Current revealed cells (for account sync). */
+export const getCells = () => (ensureLoaded(), [...cells]);
+
 /** London measured in res-11 cells (res-9 count × 49 children — cheap and accurate enough). */
 function londonCells() {
   if (!londonCellCount) londonCellCount = polygonToCells(LONDON_BOUNDARY, 9, true).length * 49;
   return londonCellCount;
 }
 
-function cellsAround(lat: number, lng: number, radiusM: number) {
+export function cellsAround(lat: number, lng: number, radiusM: number) {
   const out: string[] = [];
   for (const c of gridDisk(latLngToCell(lat, lng, H3_RES), RING_K)) {
     const [clat, clng] = cellToLatLng(c);
@@ -83,8 +85,8 @@ function ensureLoaded() {
 
 function recompute() {
   const count = cells.size;
-  const rep = Math.floor(count / 7); // ≈ 1 Rep per brief-sized (res-10) cell cleared
-  const rank = [...RANKS].reverse().find((r) => rep >= r.min)?.name ?? "Frosh";
+  const rep = fogRepFromCells(count);
+  const { rank } = rankFor(rep);
   snapshot = { count, pct: (count / londonCells()) * 100, rep, rank };
 }
 

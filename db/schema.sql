@@ -25,6 +25,16 @@ CREATE TABLE IF NOT EXISTS users (
   created_at    timestamptz NOT NULL DEFAULT now()
 );
 
+-- Profile + friends fields (feature 003). Idempotent for databases created before them.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS handle text;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS year text;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS emblem text NOT NULL DEFAULT 'mustang';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS accent text NOT NULL DEFAULT '#FF4F8B';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS explored_cells integer NOT NULL DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS mission_count integer NOT NULL DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+CREATE UNIQUE INDEX IF NOT EXISTS users_handle_key ON users (handle);
+
 -- Only hypertable: raw GPS fixes. Feeds reveal, replay and Wrapped.
 CREATE TABLE IF NOT EXISTS location_pings (
   user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
