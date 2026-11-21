@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/fog";
+import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/progress";
 
 export default function Hud() {
   const { rep, rank, pct } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);

@@ -3,7 +3,9 @@
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 import type { Map as MapboxMap, GeoJSONSource } from "mapbox-gl";
-import type { Feature, FeatureCollection } from "geojson";
+import type { Feature, FeatureCollection, LineString } from "geojson";
+import { MISSIONS, approxCenter, missionBySlug, type Mission } from "@/lib/missions";
+import { getSnapshot as getProgress, subscribe as subscribeProgress } from "@/lib/progress";
 import { buildFog, isRevealedAt, subscribe } from "@/lib/fog";
 import { REVEAL_ACCURACY_M, getLastFix, onFix, type Fix } from "@/lib/location";
 import {
@@ -26,17 +28,23 @@ export type MapHandle = {
   center: () => LngLat | null;
   follow: (lngLat: LngLat) => void;
   locate: (lngLat: LngLat) => void;
+  /** Fly to a mission, leaving room for the bottom sheet. */
+  showMission: (slug: string) => void;
+  /** Draw (or clear with null) the glowing waypoint route. */
+  setRoute: (route: LineString | null) => void;
 };
 
 type Props = {
   ref?: Ref<MapHandle>;
   onReady: () => void;
   onUnavailable: (reason: string) => void;
+  onMissionTap: (slug: string) => void;
 };
 
 const reducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const dur = (ms: number) => (reducedMotion() ? 0 : ms);
+const NO_PAD = { top: 0, bottom: 0, left: 0, right: 0 };
 
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
 
@@ -267,6 +275,86 @@ function addGameLayers(map: MapboxMap) {
     },
   });
 
+  // --- Waypoint route (under blips and player) -----------------------------------
+  map.addSource("route", { type: "geojson", data: EMPTY });
+  map.addLayer({
+    id: "route-glow",
+    type: "line",
+    source: "route",
+    slot: "top",
+    layout: { "line-join": "round", "line-cap": "round" },
+    paint: { "line-color": "#ff4f8b", "line-width": 14, "line-blur": 10, "line-opacity": 0.7, "line-emissive-strength": 1 },
+  });
+  map.addLayer({
+    id: "route-core",
+    type: "line",
+    source: "route",
+    slot: "top",
+    layout: { "line-join": "round", "line-cap": "round" },
+    paint: { "line-color": "#ffc857", "line-width": 4, "line-emissive-strength": 1 },
+  });
+
+  // --- Missions: blips, and approximate area rings while a landmark is fogged ------
+  for (const [id, color, glyph] of MISSION_ICONS) map.addImage(id, missionIcon(color, glyph), { pixelRatio: 2 });
+  const { points, areas } = missionData();
+  map.addSource("mission-areas", { type: "geojson", data: areas });
+  map.addSource("missions", { type: "geojson", data: points });
+  map.addLayer({
+    id: "mission-areas-fill",
+    type: "fill",
+    source: "mission-areas",
+    slot: "top",
+    paint: { "fill-color": "#ffc857", "fill-opacity": 0.12, "fill-emissive-strength": 1 },
+  });
+  map.addLayer({
+    id: "mission-areas-line",
+    type: "line",
+    source: "mission-areas",
+    slot: "top",
+    paint: { "line-color": "#ffc857", "line-width": 1.5, "line-dasharray": [2, 2], "line-opacity": 0.8, "line-emissive-strength": 1 },
+  });
+  map.addLayer({
+    id: "mission-area-labels",
+    type: "symbol",
+    source: "mission-areas",
+    slot: "top",
+    minzoom: 12.5,
+    layout: {
+      "text-field": "?",
+      "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
+      "text-size": 18,
+      "text-allow-overlap": true,
+    },
+    paint: { "text-color": "#ffc857", "text-halo-color": "#140a2e", "text-halo-width": 2, "text-emissive-strength": 1 },
+  });
+  map.addLayer({
+    id: "mission-blips",
+    type: "symbol",
+    source: "missions",
+    slot: "top",
+    layout: {
+      "icon-image": ["get", "icon"],
+      "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.7, 16, 1],
+      "icon-allow-overlap": true,
+      "symbol-sort-key": ["case", ["get", "done"], 1, 0],
+      "text-field": ["step", ["zoom"], "", 15.5, ["get", "title"]],
+      "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
+      "text-size": 11,
+      "text-offset": [0, 1.7],
+      "text-anchor": "top",
+      "text-optional": true,
+      "text-max-width": 9,
+    },
+    paint: {
+      "icon-opacity": ["case", ["get", "done"], 0.45, 1],
+      "text-color": "#ffffff",
+      "text-halo-color": "#140a2e",
+      "text-halo-width": 1.6,
+      "text-emissive-strength": 1,
+      "icon-emissive-strength": 1,
+    },
+  });
+
   // --- Player marker: accuracy circle, pulse, arrow (heading known) or dot ----------
   map.addImage("player-pulse", pulsingRing(map), { pixelRatio: 2 });
   map.addImage("player-arrow", arrowImage(), { pixelRatio: 2 });
@@ -320,6 +408,81 @@ function addGameLayers(map: MapboxMap) {
 
   const last = getLastFix();
   if (last) setPlayer(map, last);
+}
+
+const MISSION_ICONS: [string, string, string][] = [
+  ["m-photo", "#ff4f8b", "M4 8h3l2-3h6l2 3h3v11H4z M12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"],
+  ["m-checkin", "#ff8a3d", "M6 21V4 M6 4h11l-2 4 2 4H6"],
+  ["m-bus", "#2ee6d6", "M6 4h12a2 2 0 0 1 2 2v10H4V6a2 2 0 0 1 2-2z M4 11h16 M7 19v-3 M17 19v-3"],
+  ["m-heist", "#7b2ff7", "M4 18h16 M4 18 3 7l5 4 4-6 4 6 5-4-1 11"],
+  ["m-landmark", "#ffc857", "M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"],
+];
+
+const iconFor = (m: Mission) => (m.category ? "m-landmark" : `m-${m.type}`);
+
+/** Round neon blip with a glyph (64×64 @2x). */
+function missionIcon(color: string, glyph: string) {
+  const size = 64;
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d")!;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 12;
+  ctx.beginPath();
+  ctx.arc(size / 2, size / 2, 20, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "#140a2e";
+  ctx.stroke();
+  ctx.translate(size / 2 - 12 * 0.95, size / 2 - 12 * 0.95);
+  ctx.scale(0.95, 0.95);
+  ctx.lineWidth = 2.4;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "#140a2e";
+  ctx.stroke(new Path2D(glyph));
+  return ctx.getImageData(0, 0, size, size);
+}
+
+function circlePolygon([lng, lat]: LngLat, radiusM: number): LngLat[] {
+  const ring: LngLat[] = [];
+  for (let i = 0; i <= 48; i++) {
+    const a = (i / 48) * Math.PI * 2;
+    ring.push([lng + (radiusM * Math.sin(a)) / (111320 * Math.cos((lat * Math.PI) / 180)), lat + (radiusM * Math.cos(a)) / 111320]);
+  }
+  return ring;
+}
+
+/** Blips for every mission, except fogged landmarks which show an approximate area instead. */
+function missionData(): { points: FeatureCollection; areas: FeatureCollection } {
+  const done = getProgress().completions;
+  const points: Feature[] = [];
+  const areas: Feature[] = [];
+  for (const m of MISSIONS) {
+    const hidden = m.category && !done[m.slug] && !isRevealedAt(m.lngLat[1], m.lngLat[0]);
+    if (hidden) {
+      areas.push({
+        type: "Feature",
+        properties: { slug: m.slug },
+        geometry: { type: "Polygon", coordinates: [circlePolygon(approxCenter(m), 150)] },
+      });
+    } else {
+      points.push({
+        type: "Feature",
+        properties: { slug: m.slug, icon: iconFor(m), done: !!done[m.slug], title: m.title },
+        geometry: { type: "Point", coordinates: m.lngLat },
+      });
+    }
+  }
+  return { points: { type: "FeatureCollection", features: points }, areas: { type: "FeatureCollection", features: areas } };
+}
+
+function refreshMissions(map: MapboxMap) {
+  const { points, areas } = missionData();
+  (map.getSource("missions") as GeoJSONSource | undefined)?.setData(points);
+  (map.getSource("mission-areas") as GeoJSONSource | undefined)?.setData(areas);
 }
 
 function setPlayer(map: MapboxMap, { lngLat, heading, accuracy }: Fix) {
@@ -422,29 +585,49 @@ function pulsingRing(map: MapboxMap) {
   };
 }
 
-export default function MapView({ ref, onReady, onUnavailable }: Props) {
+export default function MapView({ ref, onReady, onUnavailable, onMissionTap }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapboxMap | null>(null);
   const followRef = useRef(false);
-  const callbacks = useRef({ onReady, onUnavailable });
+  const callbacks = useRef({ onReady, onUnavailable, onMissionTap });
 
   useEffect(() => {
-    callbacks.current = { onReady, onUnavailable };
+    callbacks.current = { onReady, onUnavailable, onMissionTap };
   });
 
   useImperativeHandle(ref, () => ({
     flyToCampus: () =>
-      mapRef.current?.flyTo({ center: CAMPUS_CENTER, zoom: 16.2, pitch: CAMPUS_PITCH, bearing: -30, duration: dur(2200), essential: true }),
+      mapRef.current?.flyTo({ center: CAMPUS_CENTER, zoom: 16.2, pitch: CAMPUS_PITCH, bearing: -30, padding: NO_PAD, duration: dur(2200), essential: true }),
     flyToCity: () =>
-      mapRef.current?.flyTo({ center: LONDON_CENTER, zoom: 9.85, pitch: 25, bearing: 0, duration: dur(2200), essential: true }),
+      mapRef.current?.flyTo({ center: LONDON_CENTER, zoom: 9.85, pitch: 25, bearing: 0, padding: NO_PAD, duration: dur(2200), essential: true }),
     center: () => {
       const c = mapRef.current?.getCenter();
       return c ? [c.lng, c.lat] : null;
     },
-    follow: (lngLat) => mapRef.current?.easeTo({ center: lngLat, duration: dur(400), essential: true }),
+    follow: (lngLat) => mapRef.current?.easeTo({ center: lngLat, padding: NO_PAD, duration: dur(400), essential: true }),
+    showMission: (slug) => {
+      const m = missionBySlug(slug);
+      const map = mapRef.current;
+      if (!m || !map) return;
+      followRef.current = false;
+      const fogged = m.category && !getProgress().completions[slug] && !isRevealedAt(m.lngLat[1], m.lngLat[0]);
+      map.flyTo({
+        center: fogged ? approxCenter(m) : m.lngLat,
+        zoom: fogged ? 15.2 : 16.4,
+        pitch: CAMPUS_PITCH,
+        // keep the target above the bottom sheet (~55% of the screen)
+        padding: { top: 60, bottom: map.getContainer().clientHeight * 0.5, left: 0, right: 0 },
+        duration: dur(1800),
+        essential: true,
+      });
+    },
+    setRoute: (route) =>
+      (mapRef.current?.getSource("route") as GeoJSONSource | undefined)?.setData(
+        route ? { type: "Feature", properties: {}, geometry: route } : EMPTY,
+      ),
     locate: (lngLat) => {
       followRef.current = true;
-      mapRef.current?.flyTo({ center: lngLat, zoom: Math.max(mapRef.current.getZoom(), 16), duration: dur(1400), essential: true });
+      mapRef.current?.flyTo({ center: lngLat, padding: NO_PAD, zoom: Math.max(mapRef.current.getZoom(), 16), duration: dur(1400), essential: true });
     },
   }));
 
@@ -520,11 +703,23 @@ export default function MapView({ ref, onReady, onUnavailable }: Props) {
             (map.getSource("fog") as GeoJSONSource).setData(fog);
             (map.getSource("fog-edges") as GeoJSONSource).setData(edges);
             (map.getSource("campus-labels") as GeoJSONSource).setData(campusLabelData());
+            refreshMissions(map);
           }, 80);
         }),
       );
 
       // Player: move the marker; follow the player until they pan the map themselves.
+      // Missions: refresh when completions change; tap a blip or a "?" area to open it.
+      cleanups.push(subscribeProgress(() => map.getSource("missions") && refreshMissions(map)));
+      for (const layer of ["mission-blips", "mission-areas-fill"]) {
+        map.on("click", layer, (e) => {
+          const slug = e.features?.[0]?.properties?.slug;
+          if (typeof slug === "string") callbacks.current.onMissionTap(slug);
+        });
+        map.on("mouseenter", layer, () => (map.getCanvas().style.cursor = "pointer"));
+        map.on("mouseleave", layer, () => (map.getCanvas().style.cursor = ""));
+      }
+
       map.on("dragstart", () => {
         followRef.current = false;
       });
@@ -534,11 +729,11 @@ export default function MapView({ ref, onReady, onUnavailable }: Props) {
           setPlayer(map, fix);
           if (first) {
             followRef.current = true;
-            map.flyTo({ center: fix.lngLat, zoom: Math.max(map.getZoom(), 16), duration: dur(1600), essential: true });
+            map.flyTo({ center: fix.lngLat, padding: NO_PAD, zoom: Math.max(map.getZoom(), 16), duration: dur(1600), essential: true });
             lastFollow = performance.now();
           } else if (followRef.current && performance.now() - lastFollow > 450) {
             lastFollow = performance.now();
-            map.easeTo({ center: fix.lngLat, duration: dur(450), essential: true });
+            map.easeTo({ center: fix.lngLat, padding: NO_PAD, duration: dur(450), essential: true });
           }
         }),
       );

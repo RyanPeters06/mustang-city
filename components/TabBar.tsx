@@ -41,6 +41,7 @@ export default function TabBar({ active, onChange }: { active: Tab; onChange: (t
               type="button"
               onClick={() => onChange(t.id)}
               aria-current={on ? "page" : undefined}
+              aria-label={t.label}
               className={`flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl transition-colors ${
                 on ? "bg-pink/15 text-pink" : "text-ink/60 active:text-ink"
               }`}

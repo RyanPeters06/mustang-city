@@ -44,6 +44,10 @@ feel, entirely original in names and assets.
   verification, @uwo.ca-only login and profiles, friends, replay mode.
 - Extended features follow the brief's build order (time-of-day palette, goose boss, tags, AI radio,
   Wrapped, live buses, turf, heists…).
+- Future (post-core): Class Run, where students import their schedule, get waypoints to class
+  buildings and earn Rep for arriving on time. Design in `docs/roadmap.md`.
+- Profiles are a trophy case: curated emblems/accents unlocked by progress, no uploaded avatars
+  or free-text bios; never shows live location (scope in `specs/002-missions-profiles/spec.md`).
 - Terminology: London = Forest State; Western campus = Mustang City; Rep (single currency); ranks
   Frosh → Local → Made → Legend of Forest State; quest-giver = The Goose; mission result moment =
   "MISSION PASSED".

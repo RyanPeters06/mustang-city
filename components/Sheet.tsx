@@ -22,7 +22,7 @@ export default function Sheet({ open, title, onClose, children }: Props) {
             key="sheet"
             role="dialog"
             aria-label={title}
-            className="glass absolute inset-x-0 bottom-0 z-30 flex max-h-[78%] flex-col rounded-t-[28px]"
+            className="absolute inset-x-0 bottom-0 z-30 flex max-h-[78%] flex-col rounded-t-[28px] border-t border-white/10 bg-night/[0.97] shadow-[0_-20px_60px_-10px_rgba(0,0,0,0.6)] backdrop-blur-xl"
             style={{ paddingBottom: "calc(var(--safe-bottom) + 84px)" }}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}

@@ -5,10 +5,19 @@ import { createPortal } from "react-dom";
 import { DEMO_WALK, densify } from "@/lib/geo";
 import { resetFog, revealAround } from "@/lib/fog";
 import { acceptFix } from "@/lib/location";
+import { missionBySlug } from "@/lib/missions";
+import { resetProgress } from "@/lib/progress";
 import type { MapHandle } from "./map/MapView";
+import type { PassedInfo } from "./missions/MissionDetail";
 
 /** Hidden judging controls (press D). Lives outside the phone frame on purpose. */
-export default function DemoPanel({ map }: { map: React.RefObject<MapHandle | null> }) {
+type Props = {
+  map: React.RefObject<MapHandle | null>;
+  selected: string | null;
+  onPassed: (info: PassedInfo) => void;
+};
+
+export default function DemoPanel({ map, selected, onPassed }: Props) {
   const [open, setOpen] = useState(false);
   const [walking, setWalking] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
@@ -62,7 +71,28 @@ export default function DemoPanel({ map }: { map: React.RefObject<MapHandle | nu
       </button>
       <button className={btn} onClick={() => map.current?.flyToCampus()}>Fly to Mustang City</button>
       <button className={btn} onClick={() => map.current?.flyToCity()}>Fly to Forest State</button>
+      <button
+        className={btn}
+        disabled={!selected}
+        onClick={() => {
+          const m = selected ? missionBySlug(selected) : undefined;
+          if (!m) return;
+          stopWalk();
+          // Two fixes: the speed check skips a lone jump, the second confirms the new spot.
+          acceptFix(m.lngLat);
+          setTimeout(() => acceptFix([m.lngLat[0] + 0.00002, m.lngLat[1]]), 1200);
+        }}
+      >
+        {selected ? "Teleport to this mission" : "Teleport (open a mission)"}
+      </button>
+      <button
+        className={btn}
+        onClick={() => onPassed({ slug: selected ?? "goose-sighting", rep: 100, reason: "Demo replay of the pass moment." })}
+      >
+        Play MISSION PASSED
+      </button>
       <button className={btn} onClick={() => { stopWalk(); resetFog(); }}>Reset fog</button>
+      <button className={btn} onClick={resetProgress}>Reset missions</button>
       <p className="pt-1 text-[11px] text-white/50">Press D to hide</p>
     </div>,
     document.body,
