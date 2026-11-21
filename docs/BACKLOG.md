@@ -6,6 +6,7 @@ brief's build plan and cut list (core first). Each item has "Done when" checks t
 Status marks: `[ ]` todo · `[x]` done · `[~]` blocked (reason in the line) · `[>]` in progress
 
 ## Needs from Ryan (unblocks items below)
+Full list with decisions: [docs/IDEAS.md §7](IDEAS.md#7-needs-from-ryan). Ideas awaiting review live in `docs/IDEAS.md` (not built).
 - `GEMINI_API_KEY` — photo checks, goose dialogue, radio host
 - Auth0 app + `AUTH0_*`, `APP_BASE_URL` — sign-in, friends, leaderboards
 - `DATABASE_URL` (Tiger Data) + `npm run db:schema && npm run db:seed` — accounts, friends, leaderboards, turf, tags (re-run db:schema for `tag_votes`)
