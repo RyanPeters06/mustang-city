@@ -157,6 +157,15 @@ function frameBuilding(map: MapboxMap, ring: LngLat[]) {
   );
 }
 
+/** Blips + labels: hidden during the intro dive so nothing pops in mid-flight, faded back in on landing. */
+const OVERLAY_SYMBOLS = ["mission-blips", "mission-area-labels", "tag-pins", "collectible-pins", "campus-labels", "district-labels", "bus-labels", "bus-dots"];
+function setOverlays(map: MapboxMap, on: boolean) {
+  for (const id of OVERLAY_SYMBOLS) {
+    if (!map.getLayer(id)) continue;
+    map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
+  }
+}
+
 function collectCampusBuildings(map: MapboxMap) {
   const campus = new Map<string, Feature>();
   const mission = new Map<string, Feature>();
@@ -1176,12 +1185,18 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
   });
 
   useImperativeHandle(ref, () => ({
-    prepareIntro: () => mapRef.current?.jumpTo({ center: LONDON_CENTER, zoom: 9.4, pitch: 0, bearing: 0, padding: NO_PAD }),
+    prepareIntro: () => {
+      const map = mapRef.current;
+      if (!map) return;
+      setOverlays(map, false);
+      map.jumpTo({ center: LONDON_CENTER, zoom: 9.4, pitch: 0, bearing: 0, padding: NO_PAD });
+    },
     skipIntro: () => introRef.current?.skip(),
     playIntro: (onStep) => {
       const map = mapRef.current;
       const end = { center: CAMPUS_CENTER, zoom: 16.2, pitch: CAMPUS_PITCH, bearing: -30, padding: NO_PAD };
       if (!map || reducedMotion()) {
+        if (map) setOverlays(map, true);
         map?.jumpTo(end);
         onStep("done");
         return Promise.resolve();
@@ -1196,6 +1211,7 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
           timers.forEach(clearTimeout);
           map.off("moveend", onMoveEnd);
           introRef.current = null;
+          setOverlays(map, true);
           onStep("done");
           resolve();
         };

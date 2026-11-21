@@ -65,8 +65,8 @@ export default function Radar() {
 
   return (
     <div
-      className="pointer-events-none absolute right-4 z-20"
-      style={{ top: "calc(var(--safe-top) + 84px)", width: SIZE, height: SIZE }}
+      className="rise-in pointer-events-none absolute right-4 z-20"
+      style={{ top: "calc(var(--safe-top) + 84px)", width: SIZE, height: SIZE, animationDelay: "80ms" }}
       role="img"
       aria-label={`Radar: ${blips.length} things within ${RANGE_M} metres`}
     >

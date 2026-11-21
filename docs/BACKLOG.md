@@ -59,7 +59,7 @@ palette, control stack, building framing, postcard loading screen, unified butto
 
 - [x] **Wrapped timelapse art** — replace hard hex cells with soft glowing blobs (smoothed regions + bloom), sunset
   gradient by time; same treatment for the share card.
-- [ ] **Intro flight + landing polish** — smoother camera curve, captions in the new type style, HUD/tab bar/stack
+- [x] **Intro flight + landing polish** — smoother camera curve, captions in the new type style, HUD/tab bar/stack
   stagger in with springs, no pop-in of labels/blips during the dive.
 - [x] **3D model day/night look** — window glow keyed to the light preset per material (separate emissive for
   night), softer roof colour by day, subtle ambient occlusion band at the base.

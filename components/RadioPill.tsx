@@ -16,8 +16,8 @@ export default function RadioPill() {
         onClick={() => (r.on ? radioOff() : radioOn())}
         aria-pressed={r.on}
         aria-label={r.on ? `Turn ${STATION} off` : `Turn on ${STATION}`}
-        className={`glass absolute right-4 z-20 flex h-12 w-12 items-center justify-center rounded-full active:scale-95 ${r.on ? "text-gold" : "text-ink/80"}`}
-        style={{ bottom: "calc(var(--safe-bottom) + 288px)" }}
+        className={`rise-in glass absolute right-4 z-20 flex h-12 w-12 items-center justify-center rounded-full active:scale-95 ${r.on ? "text-gold" : "text-ink/80"}`}
+        style={{ animationDelay: "160ms",  bottom: "calc(var(--safe-bottom) + 288px)" }}
       >
         <span className="flex h-4 items-end gap-[2.5px]" aria-hidden>
           {[0, 1, 2, 3].map((i) => (
