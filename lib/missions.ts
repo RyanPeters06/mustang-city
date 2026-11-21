@@ -278,6 +278,37 @@ export const MISSIONS: Mission[] = [
     sourceUrl: "https://en.wikipedia.org/wiki/University_College_(University_of_Western_Ontario)",
     sourceName: "Wikipedia",
   },
+  // ---- Heists (feature 016): need 3+ players at the spot within 15 minutes ----
+  {
+    slug: "alumni-hall-heist",
+    title: "The Encore",
+    briefing: "Big job, big room. I need three of you at the hall at the same time. Not two. Three.",
+    type: "heist",
+    lngLat: [-81.2748, 43.006],
+    radiusM: 120,
+    criteria: "Three or more players check in at Alumni Hall within 15 minutes.",
+    rep: 300,
+  },
+  {
+    slug: "thompson-heist",
+    title: "Cold Cash",
+    briefing: "The rink is colder than my heart. Bring a crew of three and get in and out together.",
+    type: "heist",
+    lngLat: [-81.2756, 43.0028],
+    radiusM: 120,
+    criteria: "Three or more players check in at Thompson Arena within 15 minutes.",
+    rep: 300,
+  },
+  {
+    slug: "ivey-heist",
+    title: "The Business Plan",
+    briefing: "These folks plan everything. So do I. Three of you, one building, fifteen minutes.",
+    type: "heist",
+    lngLat: [-81.2774, 43.0042],
+    radiusM: 120,
+    criteria: "Three or more players check in at the Ivey Business School within 15 minutes.",
+    rep: 300,
+  },
   // ---- Mustang City starters ----
   {
     slug: "middlesex-study-spot",

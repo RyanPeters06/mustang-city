@@ -19,7 +19,6 @@ const bySlug = (slug: string) => MISSIONS.find((m) => m.slug === slug);
 const londonHour = (ms: number) =>
   Number(new Intl.DateTimeFormat("en-CA", { hour: "numeric", hour12: false, timeZone: "America/Toronto" }).format(ms));
 const progress = (have: number, need: number): BadgeStatus => ({ earned: have >= need, have: Math.min(have, need), need });
-const notYet = (system: string): BadgeStatus => ({ earned: false, have: 0, need: 1, lockedNote: `Unlocks when ${system} launch` });
 
 export const BADGES: Badge[] = [
   {
@@ -79,7 +78,7 @@ export const BADGES: Badge[] = [
     description: "Complete 3 heists",
     glyph: "M4 18h16M4 18 3 7l5 4 4-6 4 6 5-4-1 11",
     color: "#7B2FF7",
-    evaluate: () => notYet("heists"),
+    evaluate: (i) => progress(count(i, (slug) => bySlug(slug)?.type === "heist"), 3),
   },
   {
     code: "route-6-regular",

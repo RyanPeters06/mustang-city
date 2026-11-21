@@ -42,7 +42,7 @@ Full list with decisions: [docs/IDEAS.md §7](IDEAS.md#7-needs-from-ryan). Ideas
 - [x] **Live buses + route collection** — LTC GTFS static + GTFS-RT in an API route, buses animate on the map,
   mission cards show next arrival; ride detection; "Every Route" progress. *Done when:* live buses move
   (or cached last-good feed with a "delayed" label).
-- [ ] **Faculty turf + heists** — districts tinted by faculty with most Rep; heist missions needing 3+ players
+- [x] **Faculty turf + heists** — districts tinted by faculty with most Rep; heist missions needing 3+ players
   within radius/time window. *Done when:* turf colours update from DB; a 3-account heist completes.
 - [ ] **Polish pack** — poster-style mission cards (canvas + Web Share), hidden collectibles, radar HUD,
   fog decay (6 months), student-written missions with Gemini screening, live weather overlay.

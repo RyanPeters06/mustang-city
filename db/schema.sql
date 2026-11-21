@@ -105,6 +105,7 @@ CREATE TABLE IF NOT EXISTS heist_attempts (
   photo_url   text,
   status      heist_status NOT NULL DEFAULT 'open'
 );
+CREATE INDEX IF NOT EXISTS heist_attempts_open ON heist_attempts (mission_id, started_at DESC) WHERE status = 'open';
 
 CREATE TABLE IF NOT EXISTS friendships (
   user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,

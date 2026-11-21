@@ -10,6 +10,7 @@ import { TYPE_COLOR } from "./MissionList";
 import LoreCard from "./LoreCard";
 import GoosePortrait from "./GoosePortrait";
 import NextBus from "./NextBus";
+import HeistPanel from "./HeistPanel";
 import { getRides, getServerRides, subscribeRides } from "@/lib/rides";
 import { useBriefing } from "@/lib/useBriefing";
 
@@ -120,7 +121,7 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
         <>
           <p className="text-[13px] text-ink/60">
             <span className="font-semibold text-ink/80">Objective:</span>{" "}
-            {m.type === "photo" ? m.criteria : m.type === "bus" ? "Arrive by bus." : "Get inside the circle and check in."}
+            {m.type === "photo" ? m.criteria : m.type === "bus" ? "Arrive by bus." : m.type === "heist" ? "Get a crew of 3 inside the circle within 15 minutes." : "Get inside the circle and check in."}
           </p>
 
           <NextBus at={m.lngLat} />
@@ -141,7 +142,17 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
           )}
 
           <div className="grid gap-2.5">
-            {!fix ? (
+            {m.type === "heist" ? (
+              <HeistPanel
+                m={m}
+                fix={fix && accurate ? { lngLat: fix.lngLat, accuracy: fix.accuracy } : null}
+                inRange={inRange}
+                onComplete={() => {
+                  completeMission({ slug, rep: m.rep, reason: "Heist crew complete." });
+                  onPassed({ slug, rep: m.rep, reason: "Heist crew complete." });
+                }}
+              />
+            ) : !fix ? (
               <button type="button" onClick={startWatching} className={`${primary} bg-teal text-night`}>
                 Turn on location
               </button>

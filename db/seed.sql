@@ -76,6 +76,12 @@ ON CONFLICT (slug) DO NOTHING;
 
 -- Starter missions around Mustang City.
 INSERT INTO missions (slug, title, briefing, type, lat, lng, radius_m, criteria, rep_reward, is_official) VALUES
+('alumni-hall-heist', 'The Encore', 'Big job, big room. I need three of you at the hall at the same time. Not two. Three.', 'heist',
+  43.006, -81.2748, 120, 'Three or more players check in at Alumni Hall within 15 minutes.', 300, true),
+('thompson-heist', 'Cold Cash', 'The rink is colder than my heart. Bring a crew of three and get in and out together.', 'heist',
+  43.0028, -81.2756, 120, 'Three or more players check in at Thompson Arena within 15 minutes.', 300, true),
+('ivey-heist', 'The Business Plan', 'These folks plan everything. So do I. Three of you, one building, fifteen minutes.', 'heist',
+  43.0042, -81.2774, 120, 'Three or more players check in at the Ivey Business School within 15 minutes.', 300, true),
 ('middlesex-study-spot', 'The Secret Study Spot', 'There''s a quiet corner in Middlesex nobody talks about. Find it.', 'photo',
   43.00936, -81.27025, 60, 'Photo shows an indoor study space inside a stone university building.', 100, true),
 ('goose-sighting', 'Meet The Family', 'The Goose has cousins everywhere. Photograph one. Keep your distance.', 'photo',

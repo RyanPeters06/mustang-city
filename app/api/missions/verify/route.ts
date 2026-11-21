@@ -21,6 +21,9 @@ export async function POST(req: Request) {
 
   const mission = body.slug ? missionBySlug(body.slug) : undefined;
   if (!mission) return NextResponse.json({ error: "not-found", message: "That mission doesn't exist." }, { status: 404 });
+  if (mission.type === "heist") {
+    return NextResponse.json({ error: "heist", message: "Heists need a crew. Use Join heist." }, { status: 400 });
+  }
 
   const { lat, lng, accuracy } = body;
   if (typeof lat !== "number" || typeof lng !== "number" || typeof accuracy !== "number") {

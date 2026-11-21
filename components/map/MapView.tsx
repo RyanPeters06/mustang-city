@@ -12,6 +12,8 @@ import { buildFog, isRevealedAt, subscribe } from "@/lib/fog";
 import { REVEAL_ACCURACY_M, getLastFix, onFix, type Fix } from "@/lib/location";
 import { getTags, subscribeTags } from "@/lib/tags";
 import { onBusFrame, subscribeBuses } from "@/lib/buses";
+import { getTurf, subscribeTurf } from "@/lib/turf";
+import { facultyColor } from "@/lib/faculty";
 import { LTC, routeById } from "@/lib/ltcData";
 import type { Vehicle } from "@/lib/ltc";
 import {
@@ -390,6 +392,20 @@ function addGameLayers(map: MapboxMap) {
   // --- Neighbourhoods (City of London planning districts): outlines + names ---------
   map.addSource("districts", { type: "geojson", data: districtShapes() });
   map.addSource("district-labels", { type: "geojson", data: districtLabels() });
+  // Faculty turf: neighbourhoods tinted by the faculty that has cleared the most of them.
+  map.addSource("turf", { type: "geojson", data: turfData() });
+  map.addLayer({
+    id: "turf-fill",
+    type: "fill",
+    source: "turf",
+    slot: "top",
+    maxzoom: 14,
+    paint: {
+      "fill-color": ["get", "color"],
+      "fill-opacity": ["interpolate", ["linear"], ["zoom"], 9.4, 0.3, 12.5, 0.2, 14, 0],
+      "fill-emissive-strength": 1,
+    },
+  });
   map.addLayer({
     id: "district-lines",
     type: "line",
@@ -802,6 +818,17 @@ function raiseDistrict(map: MapboxMap, index: number) {
   requestAnimationFrame(() => map.setPaintProperty("district-selected-fill", "fill-extrusion-height", 450));
 }
 
+function turfData(): FeatureCollection {
+  const rows = getTurf().rows;
+  return {
+    type: "FeatureCollection",
+    features: rows.flatMap((r) => {
+      const d = DISTRICTS.find((x) => x.name === r.district);
+      return d ? [{ type: "Feature" as const, properties: { color: facultyColor(r.faculty) }, geometry: { type: "MultiPolygon" as const, coordinates: d.polygons } }] : [];
+    }),
+  };
+}
+
 function districtShapes(): FeatureCollection {
   const unlocked = getProgress().districts;
   return {
@@ -1147,6 +1174,7 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
           }
         }),
       );
+      cleanups.push(subscribeTurf(() => (map.getSource("turf") as GeoJSONSource | undefined)?.setData(turfData())));
       // Buses: glide every frame between 15 s updates.
       cleanups.push(onBusFrame((vs) => (map.getSource("buses") as GeoJSONSource | undefined)?.setData(busData(vs))));
       cleanups.push(subscribeBuses(() => {}));
