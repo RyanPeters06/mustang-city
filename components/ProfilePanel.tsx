@@ -6,11 +6,20 @@ import { MISSIONS, missionBySlug } from "@/lib/missions";
 import Emblem from "./profile/Emblem";
 import ProfileEditor from "./profile/ProfileEditor";
 import LoreCard from "./missions/LoreCard";
+import Replays from "./profile/Replays";
 
 type User = { name?: string; email?: string; picture?: string };
 type Account = { kind: "loading" } | { kind: "signed-in"; user: User } | { kind: "signed-out" } | { kind: "unavailable" };
 
-export default function ProfilePanel({ denied, onOpenMission }: { denied: boolean; onOpenMission: (slug: string) => void }) {
+export default function ProfilePanel({
+  denied,
+  onOpenMission,
+  onPlayReplay,
+}: {
+  denied: boolean;
+  onOpenMission: (slug: string) => void;
+  onPlayReplay: () => void;
+}) {
   const snap = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const [account, setAccount] = useState<Account>({ kind: "loading" });
   const [editing, setEditing] = useState(false);
@@ -147,6 +156,8 @@ export default function ProfilePanel({ denied, onOpenMission }: { denied: boolea
           </ul>
         )}
       </section>
+
+      <Replays onPlay={onPlayReplay} />
 
       {archive.length > 0 && (
         <section>

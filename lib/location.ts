@@ -13,13 +13,19 @@ export const REVEAL_ACCURACY_M = 50;
 const MAX_SPEED_MS = 45;
 
 export type LocationStatus = "idle" | "locating" | "watching" | "denied" | "unavailable";
-export type Fix = { lngLat: LngLat; heading: number | null; accuracy: number; ts: number };
+export type FixSource = "gps" | "demo" | "replay";
+export type Fix = { lngLat: LngLat; heading: number | null; accuracy: number; ts: number; source: FixSource };
 export type LocationState = { status: LocationStatus; accuracy: number | null };
 
 let watchId: number | null = null;
 let current: Fix | null = null; // latest position shown on the map
 let lastGood: Fix | null = null; // latest fix accurate enough to clear fog (speed check)
 let compassHeading: number | null = null;
+let replaying = false;
+/** While true, live GPS fixes are ignored so a replay can drive the marker. */
+export const setReplaying = (on: boolean) => {
+  replaying = on;
+};
 let state: LocationState = { status: "idle", accuracy: null };
 const fixListeners = new Set<(fix: Fix, first: boolean) => void>();
 const stateListeners = new Set<() => void>();
@@ -55,8 +61,11 @@ function emit(fix: Fix, first: boolean) {
  * Push a position through the same pipeline as GPS (live GPS and the demo walk both use this).
  * Returns true if it cleared fog.
  */
-export function acceptFix(lngLat: LngLat, opts: { accuracy?: number; course?: number | null; ts?: number } = {}) {
-  const { accuracy = 5, course = null, ts = Date.now() } = opts;
+export function acceptFix(
+  lngLat: LngLat,
+  opts: { accuracy?: number; course?: number | null; ts?: number; source?: FixSource } = {},
+) {
+  const { accuracy = 5, course = null, ts = Date.now(), source = "demo" } = opts;
   const prev = current;
 
   let heading: number | null = compassHeading;
@@ -65,7 +74,7 @@ export function acceptFix(lngLat: LngLat, opts: { accuracy?: number; course?: nu
     heading = distanceM(prev.lngLat, lngLat) > 4 ? bearing(prev.lngLat, lngLat) : prev.heading;
   }
 
-  const fix: Fix = { lngLat, heading, accuracy, ts };
+  const fix: Fix = { lngLat, heading, accuracy, ts, source };
   current = fix;
   setState({ status: "watching", accuracy: Math.round(accuracy) });
 
@@ -123,7 +132,8 @@ export function startWatching() {
     (pos) => {
       const { latitude, longitude, accuracy, heading, speed } = pos.coords;
       const course = heading !== null && (speed ?? 0) > 0.5 ? heading : null;
-      acceptFix([longitude, latitude], { accuracy, course, ts: pos.timestamp });
+      if (replaying) return; // a replay owns the marker until it stops
+      acceptFix([longitude, latitude], { accuracy, course, ts: pos.timestamp, source: "gps" });
     },
     (err) => {
       // Timeouts / temporary signal loss: keep watching, the next fix will come.

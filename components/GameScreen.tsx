@@ -15,6 +15,7 @@ import MissionDetail, { type PassedInfo } from "./missions/MissionDetail";
 import MissionPassed from "./missions/MissionPassed";
 import CrewPanel from "./crew/CrewPanel";
 import BuildingDetail from "./buildings/BuildingDetail";
+import ReplayBar from "./ReplayBar";
 import { missionBySlug } from "@/lib/missions";
 import { getLastFix } from "@/lib/location";
 import { walkingRoute } from "@/lib/directions";
@@ -172,7 +173,7 @@ export default function GameScreen() {
         ) : tab === "missions" ? (
           <MissionList onOpen={openMission} />
         ) : tab === "profile" ? (
-          <ProfilePanel denied={params.denied} onOpenMission={openMission} />
+          <ProfilePanel denied={params.denied} onOpenMission={openMission} onPlayReplay={() => setTab("map")} />
         ) : (
           <CrewPanel prefill={params.add} shownFriend={friendShown} onToggleMap={toggleFriendMap} />
         )}
@@ -187,6 +188,7 @@ export default function GameScreen() {
         }}
       />
       <LoadingScreen state={mapState} reason={reason} />
+      <ReplayBar />
       <MissionPassed info={passed} onDone={clearPassed} />
       <DemoPanel map={map} selected={selected} onPassed={setPassed} />
     </main>

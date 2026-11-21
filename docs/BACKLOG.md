@@ -12,7 +12,7 @@ Status marks: `[ ]` todo · `[x]` done · `[~]` blocked (reason in the line) · 
 
 ## Queue
 
-- [ ] **Replay mode (core #6)** — record the live GPS trace to the device (and `location_pings` when signed in);
+- [x] **Replay mode (core #6)** — record the live GPS trace to the device (and `location_pings` when signed in);
   "Replays" list in Profile; play any trace back at 1×/4×/16× so fog clears on screen; demo panel can load
   a bundled sample walk. *Done when:* a recorded 2-minute walk replays at 16× with fog clearing and the
   arrow following; replay never writes new reveals twice.
@@ -23,6 +23,8 @@ Status marks: `[ ]` todo · `[x]` done · `[~]` blocked (reason in the line) · 
 - [ ] **Neighbourhood unlocks** — London neighbourhood polygons (OSM `place=neighbourhood|suburb` or City of
   London open data, record the source), unlock at 30% of a neighbourhood's cells, +50 Rep, toast, list on
   Profile, large stylised district names at city zoom. *Done when:* demo walk through Old East Village unlocks it.
+- [ ] **Server ping log** — write live GPS fixes to the `location_pings` hypertable when signed in (batched),
+  so replays/Wrapped survive device changes. *Done when:* a signed-in walk appears in `location_pings`; no-op without DB.
 - [ ] **Leaderboards** — weekly + all-time, filter friends / faculty / all Western, by Rep and % explored
   (continuous aggregate for weekly Rep). *Done when:* two test accounts rank correctly; degrades without DB.
 - [ ] **Time-of-day palette** — suncalc sunrise/sunset for London drives `lightPreset` (dawn/day/dusk/night),

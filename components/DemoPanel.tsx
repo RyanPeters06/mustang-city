@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { DEMO_WALK, densify } from "@/lib/geo";
 import { resetFog, revealAround } from "@/lib/fog";
 import { acceptFix } from "@/lib/location";
+import { SAMPLE_TRACE_ID, playTrace } from "@/lib/replay";
 import { missionBySlug } from "@/lib/missions";
 import { resetProgress } from "@/lib/progress";
 import type { MapHandle } from "./map/MapView";
@@ -84,6 +85,15 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
         }}
       >
         {selected ? "Teleport to this mission" : "Teleport (open a mission)"}
+      </button>
+      <button
+        className={btn}
+        onClick={() => {
+          stopWalk();
+          playTrace(SAMPLE_TRACE_ID, 48);
+        }}
+      >
+        Replay sample walk (48×)
       </button>
       <button
         className={btn}
