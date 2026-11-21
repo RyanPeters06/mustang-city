@@ -19,6 +19,7 @@ import ReplayBar from "./ReplayBar";
 import AreaBanner from "./AreaBanner";
 import Celebrations from "./Celebrations";
 import TagButton from "./tags/TagButton";
+import RadioPill from "./RadioPill";
 import TagDetail from "./tags/TagDetail";
 import TagComposer from "./tags/TagComposer";
 import DistrictDetail from "./districts/DistrictDetail";
@@ -174,6 +175,7 @@ export default function GameScreen() {
           <LocationPrompt />
           <LocateButton map={map} />
           <TagButton onClick={() => setTagSheet("new")} />
+          <RadioPill />
           {friendShown && (
             <button
               type="button"

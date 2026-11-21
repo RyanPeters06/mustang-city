@@ -35,7 +35,7 @@ Full list with decisions: [docs/IDEAS.md §7](IDEAS.md#7-needs-from-ryan). Ideas
   briefings show the portrait; no facts are added to landmark text.
 - [x] **Geo-pinned tags** — leave a note/photo on your current cell; others see it once their fog there is
   cleared; upvotes (+10 Rep). *Done when:* tag created by A appears for B only after B reveals that cell.
-- [ ] **AI radio host** — tap-to-start radio; Gemini script from current neighbourhood + nearby landmarks,
+- [x] **AI radio host** — tap-to-start radio; Gemini script from current neighbourhood + nearby landmarks,
   Gemini TTS voice; never autoplay. *Done when:* entering a new neighbourhood queues a 15-second segment.
 - [ ] **Graduation Wrapped** — Spotify-Wrapped-style recap (fog timelapse from replay data, stats,
   percentile), shareable card via Web Share. *Done when:* Wrapped renders from current progress and shares an image.

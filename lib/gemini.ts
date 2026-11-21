@@ -125,3 +125,41 @@ export async function screenTag(note: string, jpegBase64?: string): Promise<{ ok
   const parsed = JSON.parse(interaction.output_text ?? "{}") as { ok?: unknown; reason?: unknown };
   return { ok: parsed.ok === true, reason: typeof parsed.reason === "string" ? parsed.reason.slice(0, 160) : "" };
 }
+
+const TTS_MODEL = "gemini-3.8-flash-tts";
+
+/** ~15-second radio-host segment from stored, sourced facts only (brief → Accuracy rule). */
+export async function writeRadioScript(district: string, facts: string[]): Promise<string | null> {
+  const prompt = [
+    "You are the late-night host of Forest FM, an original radio station in a campus exploration game set in",
+    "London, Ontario (called Forest State in the game; Western's campus is Mustang City).",
+    "Write ONE spoken segment, 30–40 words (about 15 seconds), warm and a little dramatic, no hashtags or emoji.",
+    `The listener just entered the neighbourhood: ${district}.`,
+    facts.length ? `Facts you may use (use at most one, word it naturally, add nothing):\n- ${facts.join("\n- ")}` : "No facts available: just welcome them and tease exploring.",
+    "Never invent names, dates, numbers or events. Reply with the segment text only.",
+  ].join("\n");
+  const interaction = await ai().interactions.create({
+    model: MODEL,
+    input: [{ type: "text", text: prompt }],
+    generation_config: { thinking_level: "low" },
+    store: false,
+  });
+  const text = interaction.output_text?.trim();
+  if (!text || text.length > 400) return null;
+  // Same idea as the briefing guard: no numbers that aren't in the facts.
+  const allowed = new Set((facts.join(" ") + " " + district).match(/\d+/g) ?? []);
+  return (text.match(/\d+/g) ?? []).every((n) => allowed.has(n)) ? text : null;
+}
+
+/** Voice a script with Gemini TTS. Returns base64 audio + mime type, or null. */
+export async function speak(script: string): Promise<{ data: string; mime: string } | null> {
+  const interaction = await ai().interactions.create({
+    model: TTS_MODEL,
+    input: [{ type: "text", text: script }],
+    response_format: { type: "audio", mime_type: "audio/mp3" },
+    generation_config: { speech_config: [{ voice: process.env.RADIO_VOICE || "Puck", language: "en-US" }] },
+    store: false,
+  });
+  const audio = interaction.output_audio;
+  return audio?.data ? { data: audio.data, mime: audio.mime_type ?? "audio/mp3" } : null;
+}

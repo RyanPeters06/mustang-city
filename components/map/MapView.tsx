@@ -454,14 +454,24 @@ function addGameLayers(map: MapboxMap) {
     type: "fill",
     source: "mission-areas",
     slot: "top",
-    paint: { "fill-color": "#ffc857", "fill-opacity": 0.12, "fill-emissive-strength": 1 },
+    paint: {
+      "fill-color": "#ffc857",
+      "fill-opacity": ["interpolate", ["linear"], ["zoom"], 12, 0.14, 16, 0.05],
+      "fill-emissive-strength": 1,
+    },
   });
   map.addLayer({
     id: "mission-areas-line",
     type: "line",
     source: "mission-areas",
     slot: "top",
-    paint: { "line-color": "#ffc857", "line-width": 1.5, "line-dasharray": [2, 2], "line-opacity": 0.8, "line-emissive-strength": 1 },
+    paint: {
+      "line-color": "#ffc857",
+      "line-width": 1.2,
+      "line-dasharray": [2, 2],
+      "line-opacity": ["interpolate", ["linear"], ["zoom"], 12, 0.8, 16, 0.45],
+      "line-emissive-strength": 1,
+    },
   });
   map.addLayer({
     id: "mission-area-labels",
@@ -678,7 +688,7 @@ function missionData(): { points: FeatureCollection; areas: FeatureCollection } 
       areas.push({
         type: "Feature",
         properties: { slug: m.slug },
-        geometry: { type: "Polygon", coordinates: [circlePolygon(approxCenter(m), 150)] },
+        geometry: { type: "Polygon", coordinates: [circlePolygon(approxCenter(m), 110)] }, // ≥ max offset (90 m): still contains the spot
       });
     } else {
       points.push({
