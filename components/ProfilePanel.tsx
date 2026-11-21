@@ -8,6 +8,7 @@ import ProfileEditor from "./profile/ProfileEditor";
 import LoreCard from "./missions/LoreCard";
 import Replays from "./profile/Replays";
 import BadgeGrid from "./profile/BadgeGrid";
+import Neighbourhoods from "./profile/Neighbourhoods";
 import { badgeByCode } from "@/lib/badges";
 
 type User = { name?: string; email?: string; picture?: string };
@@ -165,6 +166,8 @@ export default function ProfilePanel({
       </section>
 
       <BadgeGrid snap={snap} />
+
+      <Neighbourhoods snap={snap} />
 
       <Replays onPlay={onPlayReplay} />
 

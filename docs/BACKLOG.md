@@ -20,7 +20,7 @@ Status marks: `[ ]` todo · `[x]` done · `[~]` blocked (reason in the line) · 
   brief's six badges (Cartographer, Goose Whisperer, Night Owl, Heister, Route 6 Regular, Every Route) with a Badges grid
   on Profile; titles selectable under the name. *Done when:* crossing 1,000 Rep (via demo controls) shows the
   toast once; earned badges persist.
-- [ ] **Neighbourhood unlocks** — London neighbourhood polygons (OSM `place=neighbourhood|suburb` or City of
+- [x] **Neighbourhood unlocks** — London neighbourhood polygons (OSM `place=neighbourhood|suburb` or City of
   London open data, record the source), unlock at 30% of a neighbourhood's cells, +50 Rep, toast, list on
   Profile, large stylised district names at city zoom. *Done when:* demo walk through Old East Village unlocks it.
 - [ ] **Server ping log** — write live GPS fixes to the `location_pings` hypertable when signed in (batched),

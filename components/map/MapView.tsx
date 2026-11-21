@@ -7,6 +7,7 @@ import type { Feature, FeatureCollection, LineString, MultiPolygon, Polygon } fr
 import { cellsToMultiPolygon } from "h3-js";
 import { MISSIONS, approxCenter, missionBySlug, type Mission } from "@/lib/missions";
 import { getSnapshot as getProgress, subscribe as subscribeProgress } from "@/lib/progress";
+import { DISTRICTS } from "@/lib/districts";
 import { buildFog, isRevealedAt, subscribe } from "@/lib/fog";
 import { REVEAL_ACCURACY_M, getLastFix, onFix, type Fix } from "@/lib/location";
 import {
@@ -315,6 +316,47 @@ function addGameLayers(map: MapboxMap) {
     paint: { "line-color": "#2ee6d6", "line-width": 1.5, "line-opacity": 0.9, "line-emissive-strength": 1 },
   });
 
+  // --- Neighbourhoods (City of London planning districts): outlines + names ---------
+  map.addSource("districts", { type: "geojson", data: districtShapes() });
+  map.addSource("district-labels", { type: "geojson", data: districtLabels() });
+  map.addLayer({
+    id: "district-lines",
+    type: "line",
+    source: "districts",
+    slot: "top",
+    minzoom: 10,
+    maxzoom: 15,
+    paint: {
+      "line-color": ["case", ["get", "unlocked"], "#ffc857", "#f6efff"],
+      "line-opacity": ["case", ["get", "unlocked"], 0.55, 0.14],
+      "line-width": 1,
+      "line-dasharray": [3, 2],
+      "line-emissive-strength": 1,
+    },
+  });
+  map.addLayer({
+    id: "district-labels",
+    type: "symbol",
+    source: "district-labels",
+    slot: "top",
+    minzoom: 10.6,
+    maxzoom: 14,
+    layout: {
+      "text-field": ["upcase", ["get", "name"]],
+      "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
+      "text-size": ["interpolate", ["linear"], ["zoom"], 10.6, 10, 13, 15],
+      "text-letter-spacing": 0.22,
+      "text-max-width": 7,
+      "text-padding": 6,
+    },
+    paint: {
+      "text-color": ["case", ["get", "unlocked"], "#ffc857", "rgba(246,239,255,0.5)"],
+      "text-halo-color": "#140a2e",
+      "text-halo-width": 1.6,
+      "text-emissive-strength": 1,
+    },
+  });
+
   // --- Waypoint route (under blips and player) -----------------------------------
   map.addSource("route", { type: "geojson", data: EMPTY });
   map.addLayer({
@@ -537,6 +579,35 @@ function missionData(): { points: FeatureCollection; areas: FeatureCollection } 
     }
   }
   return { points: { type: "FeatureCollection", features: points }, areas: { type: "FeatureCollection", features: areas } };
+}
+
+function districtShapes(): FeatureCollection {
+  const unlocked = getProgress().districts;
+  return {
+    type: "FeatureCollection",
+    features: DISTRICTS.map((d) => ({
+      type: "Feature",
+      properties: { name: d.name, unlocked: !!unlocked[d.name] },
+      geometry: { type: "MultiPolygon", coordinates: d.polygons },
+    })),
+  };
+}
+
+function districtLabels(): FeatureCollection {
+  const unlocked = getProgress().districts;
+  return {
+    type: "FeatureCollection",
+    features: DISTRICTS.map((d) => ({
+      type: "Feature",
+      properties: { name: d.name, unlocked: !!unlocked[d.name] },
+      geometry: { type: "Point", coordinates: d.label },
+    })),
+  };
+}
+
+function refreshDistricts(map: MapboxMap) {
+  (map.getSource("districts") as GeoJSONSource | undefined)?.setData(districtShapes());
+  (map.getSource("district-labels") as GeoJSONSource | undefined)?.setData(districtLabels());
 }
 
 function refreshMissions(map: MapboxMap) {
@@ -792,7 +863,18 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
 
       // Player: move the marker; follow the player until they pan the map themselves.
       // Missions: refresh when completions change; tap a blip or a "?" area to open it.
-      cleanups.push(subscribeProgress(() => map.getSource("missions") && refreshMissions(map)));
+      let districtKey = "";
+      cleanups.push(
+        subscribeProgress(() => {
+          if (!map.getSource("missions")) return;
+          refreshMissions(map);
+          const key = Object.keys(getProgress().districts).join("|");
+          if (key !== districtKey) {
+            districtKey = key;
+            refreshDistricts(map);
+          }
+        }),
+      );
       // One tap handler: mission blips / "?" areas win over the building underneath them.
       map.on("click", (e) => {
         const box: [[number, number], [number, number]] = [

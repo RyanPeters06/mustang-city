@@ -82,7 +82,7 @@ export default function Celebrations({ paused = false }: { paused?: boolean }) {
           </motion.p>
         </motion.button>
       )}
-      {c?.kind === "badge" && (
+      {(c?.kind === "badge" || c?.kind === "district") && (
         <motion.button
           key={c.id}
           type="button"
@@ -101,7 +101,9 @@ export default function Celebrations({ paused = false }: { paused?: boolean }) {
               </svg>
             </span>
             <span className="min-w-0">
-              <span className="block text-[11px] font-bold tracking-[0.18em] text-gold uppercase">Badge unlocked</span>
+              <span className="block text-[11px] font-bold tracking-[0.18em] text-gold uppercase">
+                {c.kind === "district" ? "Neighbourhood unlocked" : "Badge unlocked"}
+              </span>
               <span className="block truncate text-[16px] font-bold text-ink">{c.title}</span>
               <span className="block truncate text-[12px] text-ink/60">{c.subtitle}</span>
             </span>

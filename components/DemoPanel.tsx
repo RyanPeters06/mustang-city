@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { DEMO_WALK, densify } from "@/lib/geo";
-import { resetFog, revealAround } from "@/lib/fog";
+import { resetFog, revealAround, revealMany } from "@/lib/fog";
+import { districtAt, districtSamplePoints } from "@/lib/districts";
 import { acceptFix } from "@/lib/location";
 import { SAMPLE_TRACE_ID, playTrace } from "@/lib/replay";
 import { missionBySlug } from "@/lib/missions";
@@ -102,6 +103,16 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
         Play MISSION PASSED
       </button>
       <button className={btn} onClick={() => { stopWalk(); resetFog(); }}>Reset fog</button>
+      <button
+        className={btn}
+        onClick={() => {
+          const c = map.current?.center();
+          const name = c ? districtAt(c) : null;
+          if (name && c) revealMany(districtSamplePoints(name, 0.33, c));
+        }}
+      >
+        Explore district at centre (demo)
+      </button>
       <button className={btn} onClick={() => addDemoRep(500)}>+500 Rep (demo)</button>
       <button className={btn} onClick={resetProgress}>Reset missions + demo Rep</button>
       <p className="pt-1 text-[11px] text-white/50">Press D to hide</p>

@@ -6,6 +6,7 @@ import { getSnapshot as getFogSnapshot, subscribe as subscribeFog } from "./fog"
 import { RANKS, rankFor } from "./rank";
 import { BADGES } from "./badges";
 import { celebrate } from "./celebrate";
+import { DISTRICT_REP, getDistrictStats } from "./districts";
 
 export { rankFor };
 import { MISSIONS } from "./missions";
@@ -63,6 +64,7 @@ type Stored = {
   badges: Record<string, number>; // code → earned at
   lastRank: string | null; // last rank celebrated (null = not yet initialised)
   demoRep: number; // demo-controls only
+  districts: Record<string, number>; // unlocked district name → at
 };
 
 export type ProgressSnapshot = {
@@ -72,13 +74,14 @@ export type ProgressSnapshot = {
   missionCount: number;
   badges: Record<string, number>;
   demoRep: number;
+  districts: Record<string, number>;
   rep: number;
   rank: string;
   nextRank: { name: string; min: number } | null;
   pct: number;
 };
 
-let data: Stored = { completions: {}, profile: DEFAULT_PROFILE, badges: {}, lastRank: null, demoRep: 0 };
+let data: Stored = { completions: {}, profile: DEFAULT_PROFILE, badges: {}, lastRank: null, demoRep: 0, districts: {} };
 let loaded = false;
 let snapshot: ProgressSnapshot | null = null;
 const listeners = new Set<() => void>();
@@ -96,6 +99,7 @@ function ensureLoaded() {
         badges: parsed.badges ?? {},
         lastRank: parsed.lastRank ?? null,
         demoRep: parsed.demoRep ?? 0,
+        districts: parsed.districts ?? {},
       };
     }
   } catch {
@@ -131,6 +135,20 @@ function checkMilestones(silent = false) {
     changed = true;
     if (!silent) celebrate({ id: `badge-${b.code}`, kind: "badge", title: b.name, subtitle: b.description, color: b.color, glyph: b.glyph });
   }
+  for (const d of getDistrictStats()) {
+    if (!d.eligible || data.districts[d.name]) continue;
+    data.districts = { ...data.districts, [d.name]: Date.now() };
+    changed = true;
+    if (!silent)
+      celebrate({
+        id: `district-${d.name}`,
+        kind: "district",
+        title: d.name,
+        subtitle: `Neighbourhood unlocked · +${DISTRICT_REP} Rep`,
+        color: "#FFC857",
+        glyph: "M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Zm0-8.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
+      });
+  }
   if (changed) save(false);
 }
 
@@ -164,7 +182,8 @@ export function getSnapshot(): ProgressSnapshot {
     const fog = getFogSnapshot();
     const list = Object.values(data.completions);
     const missionRep = list.reduce((s, c) => s + c.rep, 0);
-    const rep = fog.rep + missionRep + data.demoRep;
+    const districtRep = Object.keys(data.districts).length * DISTRICT_REP;
+    const rep = fog.rep + missionRep + data.demoRep + districtRep;
     snapshot = {
       completions: data.completions,
       profile: data.profile,
@@ -172,6 +191,7 @@ export function getSnapshot(): ProgressSnapshot {
       missionCount: list.length,
       badges: data.badges,
       demoRep: data.demoRep,
+      districts: data.districts,
       rep,
       pct: fog.pct,
       ...rankFor(rep),
@@ -187,6 +207,7 @@ const SERVER: ProgressSnapshot = {
   missionCount: 0,
   badges: {},
   demoRep: 0,
+  districts: {},
   rep: 0,
   rank: "Frosh",
   nextRank: RANKS[1],

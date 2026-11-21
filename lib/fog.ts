@@ -131,6 +131,22 @@ export function revealAround(lat: number, lng: number, radiusM = REVEAL_RADIUS_M
   return added;
 }
 
+/** Reveal many positions with a single change notification (demo + bulk imports). */
+export function revealMany(points: [number, number][], radiusM = REVEAL_RADIUS_M) {
+  ensureLoaded();
+  let added = 0;
+  for (const [lng, lat] of points) {
+    for (const c of cellsAround(lat, lng, radiusM)) {
+      if (!cells.has(c)) {
+        cells.add(c);
+        added++;
+      }
+    }
+  }
+  if (added) changed();
+  return added;
+}
+
 export function isRevealedAt(lat: number, lng: number) {
   ensureLoaded();
   return cells.has(latLngToCell(lat, lng, H3_RES));
