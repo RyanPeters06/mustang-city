@@ -29,7 +29,7 @@ Status marks: `[ ]` todo · `[x]` done · `[~]` blocked (reason in the line) · 
   (continuous aggregate for weekly Rep). *Done when:* two test accounts rank correctly; degrades without DB.
 - [x] **Time-of-day palette** — suncalc sunrise/sunset for London drives `lightPreset` (dawn/day/dusk/night),
   re-evaluated every 10 min. *Done when:* forcing the clock to sunset switches to dusk without reload.
-- [ ] **The Goose quest-giver** — original goose crime-boss portrait (SVG, original art), appears on mission
+- [x] **The Goose quest-giver** — original goose crime-boss portrait (SVG, original art), appears on mission
   briefings; Gemini rewrites briefings in character from stored text (fallback to stored text). *Done when:*
   briefings show the portrait; no facts are added to landmark text.
 - [ ] **Geo-pinned tags** — leave a note/photo on your current cell; others see it once their fog there is

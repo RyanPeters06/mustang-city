@@ -8,6 +8,8 @@ import { useLastFix } from "@/lib/useLastFix";
 import { preparePhoto } from "@/lib/photo";
 import { TYPE_COLOR } from "./MissionList";
 import LoreCard from "./LoreCard";
+import GoosePortrait from "./GoosePortrait";
+import { useBriefing } from "@/lib/useBriefing";
 
 export type PassedInfo = { slug: string; rep: number; thumb?: string; reason: string };
 
@@ -27,6 +29,7 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
   const fix = useLastFix(800);
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const fileRef = useRef<HTMLInputElement>(null);
+  const briefing = useBriefing(slug, m.briefing);
 
   const distance = missionDistance(m, fix?.lngLat ?? null);
   const accurate = !!fix && fix.accuracy <= REVEAL_ACCURACY_M;
@@ -85,11 +88,15 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
       </div>
 
       {/* The Goose's briefing */}
-      <blockquote className="relative rounded-2xl bg-white/[0.05] p-4 pl-5">
-        <span className="absolute top-3 bottom-3 left-0 w-1 rounded-full bg-pink" aria-hidden />
-        <p className="text-[11px] font-bold tracking-[0.16em] text-pink uppercase">The Goose</p>
-        <p className="mt-1 text-[15px] leading-snug text-ink/90">“{m.briefing}”</p>
-      </blockquote>
+      <figure className="flex items-start gap-3 rounded-2xl bg-white/[0.05] p-3">
+        <GoosePortrait size={60} className="shrink-0 rounded-2xl ring-1 ring-pink/50" />
+        <blockquote className="min-w-0 pt-0.5">
+          <p className="text-[11px] font-bold tracking-[0.16em] text-pink uppercase">The Goose</p>
+          <p key={briefing} className="mt-1 animate-[fadein_300ms_ease-out] text-[15px] leading-snug text-ink/90">
+            “{briefing}”
+          </p>
+        </blockquote>
+      </figure>
 
       {done ? (
         <>

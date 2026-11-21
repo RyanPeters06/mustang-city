@@ -142,3 +142,11 @@ select {
     transition-duration: 0.01ms !important;
   }
 }
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-\[fadein_300ms_ease-out\] { animation: none; }
+}
