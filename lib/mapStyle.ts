@@ -1,17 +1,47 @@
 /** Mapbox Standard configuration for the Forest State sunset look. */
 
+import * as SunCalc from "suncalc";
+
 export type LightPreset = "dawn" | "day" | "dusk" | "night";
 
-/** Light preset from London, ON local time (fixed windows; suncalc-accurate timing is a later feature). */
+const LONDON_LAT = 42.9849;
+const LONDON_LNG = -81.2453;
+const MIN = 60_000;
+
+/**
+ * Light preset from the real sun over London, ON (brief → Time-of-day palette):
+ * dawn from 30 min before sunrise to 45 min after, golden "dusk" from 60 min before sunset to
+ * 30 min after, night outside that, day in between.
+ */
 export function londonLightPreset(now = new Date()): LightPreset {
-  const hour = Number(
-    new Intl.DateTimeFormat("en-CA", { hour: "numeric", hour12: false, timeZone: "America/Toronto" }).format(now),
-  );
-  if (hour >= 6 && hour < 8) return "dawn";
-  if (hour >= 8 && hour < 16) return "day";
-  if (hour >= 16 && hour < 19) return "dusk";
+  const t = SunCalc.getTimes(now, LONDON_LAT, LONDON_LNG);
+  const ms = now.getTime();
+  const sunrise = t.sunrise?.getTime() ?? NaN;
+  const sunset = t.sunset?.getTime() ?? NaN;
+  if (Number.isNaN(sunrise) || Number.isNaN(sunset)) return "day";
+  if (ms >= sunrise - 30 * MIN && ms < sunrise + 45 * MIN) return "dawn";
+  if (ms >= sunset - 60 * MIN && ms < sunset + 30 * MIN) return "dusk";
+  if (ms >= sunrise + 45 * MIN && ms < sunset - 60 * MIN) return "day";
   return "night";
 }
+
+/** Today's sunrise/sunset in London (for UI copy). */
+export const londonSunTimes = (now = new Date()) => SunCalc.getTimes(now, LONDON_LAT, LONDON_LNG);
+
+// ---- Demo override (demo panel) ----------------------------------------------------
+let override: LightPreset | null = null;
+const listeners = new Set<() => void>();
+export const getLightOverride = () => override;
+export function setLightOverride(p: LightPreset | null) {
+  override = p;
+  listeners.forEach((l) => l());
+}
+export function subscribeLight(l: () => void) {
+  listeners.add(l);
+  return () => listeners.delete(l);
+}
+/** The preset the map should show right now (override wins). */
+export const currentLightPreset = () => override ?? londonLightPreset();
 
 export function basemapConfig(lightPreset: LightPreset) {
   return {

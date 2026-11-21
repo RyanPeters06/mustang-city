@@ -23,7 +23,7 @@ import {
   distanceM,
   type LngLat,
 } from "@/lib/geo";
-import { ATMOSPHERE, CAMPUS_PITCH, CAMPUS_ZOOM, CITY_PITCH, basemapConfig, londonLightPreset } from "@/lib/mapStyle";
+import { ATMOSPHERE, CAMPUS_PITCH, CAMPUS_ZOOM, CITY_PITCH, basemapConfig, currentLightPreset, subscribeLight } from "@/lib/mapStyle";
 
 export type MapHandle = {
   flyToCampus: () => void;
@@ -803,7 +803,7 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
       const map = new mapboxgl.Map({
         container: containerRef.current,
         style: "mapbox://styles/mapbox/standard",
-        config: { basemap: basemapConfig(londonLightPreset()) },
+        config: { basemap: basemapConfig(currentLightPreset()) },
         center: CAMPUS_CENTER,
         zoom: 13.4,
         pitch: CITY_PITCH,
@@ -914,6 +914,18 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
           }
         }),
       );
+
+      // Lighting follows the real sun over London; re-check every 10 minutes (or on demo override).
+      let preset = currentLightPreset();
+      const applyLight = () => {
+        const next = currentLightPreset();
+        if (next === preset || !map.isStyleLoaded()) return;
+        preset = next;
+        map.setConfigProperty("basemap", "lightPreset", next);
+      };
+      const lightTimer = setInterval(applyLight, 10 * 60_000);
+      cleanups.push(() => clearInterval(lightTimer));
+      cleanups.push(subscribeLight(applyLight));
 
       const ro = new ResizeObserver(() => map.resize());
       ro.observe(containerRef.current);

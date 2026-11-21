@@ -9,6 +9,7 @@ import { acceptFix } from "@/lib/location";
 import { SAMPLE_TRACE_ID, playTrace } from "@/lib/replay";
 import { missionBySlug } from "@/lib/missions";
 import { addDemoRep, resetProgress } from "@/lib/progress";
+import { getLightOverride, setLightOverride, type LightPreset } from "@/lib/mapStyle";
 import type { MapHandle } from "./map/MapView";
 import type { PassedInfo } from "./missions/MissionDetail";
 
@@ -22,6 +23,7 @@ type Props = {
 export default function DemoPanel({ map, selected, onPassed }: Props) {
   const [open, setOpen] = useState(false);
   const [walking, setWalking] = useState(false);
+  const [light, setLight] = useState<LightPreset | null>(getLightOverride());
   const timer = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
   useEffect(() => {
@@ -113,6 +115,21 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
       >
         Explore district at centre (demo)
       </button>
+      <div className="grid grid-cols-5 gap-1 pt-1">
+        {(["auto", "dawn", "day", "dusk", "night"] as const).map((p) => (
+          <button
+            key={p}
+            className={`rounded-md px-1 py-1.5 text-[10px] font-bold uppercase ${light === (p === "auto" ? null : p) ? "bg-pink text-black" : "bg-white/10 text-white"}`}
+            onClick={() => {
+              const next = p === "auto" ? null : p;
+              setLightOverride(next);
+              setLight(next);
+            }}
+          >
+            {p}
+          </button>
+        ))}
+      </div>
       <button className={btn} onClick={() => addDemoRep(500)}>+500 Rep (demo)</button>
       <button className={btn} onClick={resetProgress}>Reset missions + demo Rep</button>
       <p className="pt-1 text-[11px] text-white/50">Press D to hide</p>
