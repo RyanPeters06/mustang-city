@@ -1,6 +1,6 @@
 "use client";
 /** Graduation Wrapped: stats + fog timelapse from the player's own data (no invented numbers). */
-import { cellToBoundary, getHexagonAreaAvg } from "h3-js";
+import { cellToBoundary, cellToLatLng, getHexagonAreaAvg } from "h3-js";
 import { cellsAround, getCells } from "./fog";
 import { getRecordedTraces } from "./replay";
 import { getSnapshot } from "./progress";
@@ -84,6 +84,7 @@ export function drawFog(ctx: CanvasRenderingContext2D, w: number, h: number, cel
   ctx.fillRect(0, 0, w, h);
   if (!cells.length) return;
   const rings = cells.map((c) => cellToBoundary(c)); // [lat, lng][]
+  const cellCenters = cells.map((c) => cellToLatLng(c));
   let [minX, minY, maxX, maxY] = [180, 90, -180, -90];
   for (const r of rings) for (const [lat, lng] of r) [minX, minY, maxX, maxY] = [Math.min(minX, lng), Math.min(minY, lat), Math.max(maxX, lng), Math.max(maxY, lat)];
   const cx = (minX + maxX) / 2;
@@ -110,26 +111,32 @@ export function drawFog(ctx: CanvasRenderingContext2D, w: number, h: number, cel
   ctx.stroke();
 
   const n = Math.min(upTo, rings.length);
-  ctx.shadowBlur = 0;
+  // Soft glowing blobs (no hexagons): each cell is a radial light, blended additively so neighbours melt together.
+  const cellPx = Math.max(3, Math.hypot(px(rings[0][0][1]) - px(rings[0][3][1]), py(rings[0][0][0]) - py(rings[0][3][0])));
+  const r = cellPx * 1.6;
+  ctx.globalCompositeOperation = "lighter";
   for (let i = 0; i < n; i++) {
     const t = rings.length > 1 ? i / (rings.length - 1) : 1;
-    // gold (oldest) → pink → purple (newest)
-    const hue = t < 0.5 ? 40 - t * 2 * 70 : 330 - (t - 0.5) * 2 * 60;
-    ctx.fillStyle = `hsla(${(hue + 360) % 360}, 95%, ${62 - t * 8}%, 0.9)`;
-    ctx.beginPath();
-    rings[i].forEach(([lat, lng], j) => (j ? ctx.lineTo(px(lng), py(lat)) : ctx.moveTo(px(lng), py(lat))));
-    ctx.closePath();
-    ctx.fill();
+    // gold (oldest) → orange → pink (newest)
+    const [cr, cg, cb] = t < 0.5 ? [255, 200 - t * 2 * 80, 87 - t * 2 * 10] : [255, 120 - (t - 0.5) * 2 * 41, 77 + (t - 0.5) * 2 * 62];
+    const [lat, lng] = cellCenters[i];
+    const x = px(lng), y = py(lat);
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, `rgba(${cr | 0},${cg | 0},${cb | 0},0.3)`);
+    g.addColorStop(0.5, `rgba(${cr | 0},${cg | 0},${cb | 0},0.24)`);
+    g.addColorStop(1, `rgba(${cr | 0},${cg | 0},${cb | 0},0)`);
+    ctx.fillStyle = g;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
   }
-  // glow pass on the newest few
-  ctx.shadowColor = "rgba(255,79,139,0.9)";
-  ctx.shadowBlur = 18;
-  for (let i = Math.max(0, n - 12); i < n; i++) {
-    ctx.fillStyle = "rgba(255,240,250,0.9)";
-    ctx.beginPath();
-    rings[i].forEach(([lat, lng], j) => (j ? ctx.lineTo(px(lng), py(lat)) : ctx.moveTo(px(lng), py(lat))));
-    ctx.closePath();
-    ctx.fill();
+  // the newest few sparkle white-hot
+  for (let i = Math.max(0, n - 8); i < n; i++) {
+    const [lat, lng] = cellCenters[i];
+    const x = px(lng), y = py(lat);
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r * 0.8);
+    g.addColorStop(0, "rgba(255,240,250,0.7)");
+    g.addColorStop(1, "rgba(255,240,250,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
   }
-  ctx.shadowBlur = 0;
+  ctx.globalCompositeOperation = "source-over";
 }

@@ -122,6 +122,17 @@ function replacedByModel(g: Feature["geometry"]) {
     }),
   );
 }
+/** Night/dusk = glowing windows; dawn/day = reflective glass (separate `-day` glb, loaded on demand). */
+const isNightLook = (preset: string) => preset === "night" || preset === "dusk";
+const modelIdExpr = (preset: string) => (isNightLook(preset) ? ["get", "model"] : ["concat", ["get", "model"], "-day"]) as never;
+function applyModelVariant(map: MapboxMap, preset: string) {
+  const suffix = isNightLook(preset) ? "" : "-day";
+  for (const m of MODELS) {
+    const id = m.id + suffix;
+    if (!map.hasModel(id)) map.addModel(id, new URL(m.url.replace(/\.glb$/, `${suffix}.glb`), window.location.origin).href);
+  }
+  if (map.getLayer("campus-models")) map.setLayoutProperty("campus-models", "model-id", modelIdExpr(preset));
+}
 /** Windows glow at night, barely by day. */
 const modelGlow = (preset: string) => (preset === "night" ? 1 : preset === "dusk" || preset === "dawn" ? 0.7 : 0.12);
 
@@ -230,7 +241,7 @@ function addGameLayers(map: MapboxMap) {
   });
   // Hide the basemap's own buildings (and its trees) where our models stand.
   map.addLayer({ id: "model-clip", type: "clip", source: "model-footprints", layout: { "clip-layer-types": ["model"], "clip-layer-scope": ["basemap"] } });
-  for (const m of MODELS) map.addModel(m.id, new URL(m.url, window.location.origin).href);
+  applyModelVariant(map, currentLightPreset());
   map.addSource("campus-models", {
     type: "geojson",
     data: {
@@ -244,7 +255,7 @@ function addGameLayers(map: MapboxMap) {
     source: "campus-models",
     slot: "middle",
     minzoom: 15,
-    layout: { "model-id": ["get", "model"] },
+    layout: { "model-id": modelIdExpr(currentLightPreset()) },
     paint: {
       "model-scale": [1, 1, 1],
       "model-emissive-strength": modelGlow(currentLightPreset()),
@@ -1460,6 +1471,7 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
         preset = next;
         map.setConfigProperty("basemap", "lightPreset", next);
         if (map.getLayer("campus-models")) map.setPaintProperty("campus-models", "model-emissive-strength", modelGlow(next));
+        applyModelVariant(map, next);
       };
       const lightTimer = setInterval(applyLight, 10 * 60_000);
       cleanups.push(() => clearInterval(lightTimer));

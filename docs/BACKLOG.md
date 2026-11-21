@@ -57,11 +57,11 @@ Context: Ryan asked for a super clean, smooth, cohesive UI reminiscent of GTA 6'
 sunset palette, full-bleed loading art) without "polygon vibes". Passes 1–2 shipped (design reset, feathered fog,
 palette, control stack, building framing, postcard loading screen, unified buttons). Next:
 
-- [ ] **Wrapped timelapse art** — replace hard hex cells with soft glowing blobs (smoothed regions + bloom), sunset
+- [x] **Wrapped timelapse art** — replace hard hex cells with soft glowing blobs (smoothed regions + bloom), sunset
   gradient by time; same treatment for the share card.
 - [ ] **Intro flight + landing polish** — smoother camera curve, captions in the new type style, HUD/tab bar/stack
   stagger in with springs, no pop-in of labels/blips during the dive.
-- [ ] **3D model day/night look** — window glow keyed to the light preset per material (separate emissive for
+- [x] **3D model day/night look** — window glow keyed to the light preset per material (separate emissive for
   night), softer roof colour by day, subtle ambient occlusion band at the base.
 - [ ] **Typography pass** — one condensed display face for titles + one UI face; fewer letter-spaced caps labels;
   consistent sizes (12/14/16/20/30).

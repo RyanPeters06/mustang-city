@@ -206,7 +206,19 @@ const PALETTE = {
   plant: { color: "#8c84a3", rough: 0.8, metal: 0.2 },
 };
 
+/** Daytime look: windows/glass/clocks reflect the sky instead of glowing. */
+const DAY = {
+  window: { color: "#7b8bb0", rough: 0.2, metal: 0.35 },
+  glassWall: { color: "#86a0c8", rough: 0.12, metal: 0.45 },
+  clock: { color: "#f6efff", rough: 0.5 },
+};
+
 async function writeGlb(builders, file) {
+  await writeOne(builders, file, PALETTE);
+  await writeOne(builders, `${file}-day`, { ...PALETTE, ...DAY });
+}
+
+async function writeOne(builders, file, palette) {
   const doc = new Document();
   const buf = doc.createBuffer();
   const scene = doc.createScene();
@@ -215,7 +227,7 @@ async function writeGlb(builders, file) {
   for (const [bi, builder] of list.entries()) {
   const mesh = doc.createMesh(`${file}-${bi}`);
   for (const [name, p] of builder.parts) {
-    const spec = PALETTE[name];
+    const spec = palette[name];
     let mat = mats.get(name);
     if (!mat) {
       mat = doc.createMaterial(name).setBaseColorFactor([...hex(spec.color), 1]).setRoughnessFactor(spec.rough).setMetallicFactor(spec.metal ?? 0).setDoubleSided(true);
