@@ -1,0 +1,245 @@
+run the next steps for me:
+2. In Claude Code, run `/speckit-constitution`, then `/speckit-specify` with docs/product-brief.md, then `/speckit-plan`, `/speckit-tasks` and `/speckit-implement` for the Friday-night tasks.
+3. Run `/impeccable init` once the map screen exists.
+
+---
+
+after you're done walk me through how to register my domain: 
+
+<pasted_content id="99cc">
+[porkbun](https://porkbun.com/account/domains)
+
+* [products](https://porkbun.com/account/domainsSpeedy?fo=1&oid=12647918)
+* [transfer](https://porkbun.com/account/transfers)
+* [Black Friday](https://porkbun.com/event/blackfriday)
+* [About](https://porkbun.com/account/domainsSpeedy?fo=1&oid=12647918)
+* [Resources](https://porkbun.com/account/domainsSpeedy?fo=1&oid=12647918)
+
+* [ACCOUNT](https://porkbun.com/account/domainsSpeedy?fo=1&oid=12647918)
+
+Suggestion  Two-factor authentication adds a second step at sign-in and is the best way to keep your account safe. [How it works](https://kb.porkbun.com/article/19-how-to-enable-two-factor-authentication)
+Dismiss
+DNS Powered by Cloudflare
+[Switch to classic view](https://porkbun.com/account/domainsSpeedy?fo=1&oid=12647918#)×
+Filter records
+[Delete all records](https://porkbun.com/account/domainsSpeedy?fo=1&oid=12647918#)
+Add Record
+ManualQuick Setup
+Type A – Address recordAAAA – IPv6 address recordALIAS – CNAME flattening recordCAA – Certification Authority AuthorizationCNAME – Canonical name recordDS – Delegation signer recordHTTPS – HTTPS Service RecordMX – Mail exchange recordNS – Name server recordSRV – Service recordSSHFP – Secure Shell fingerprint recordSVCB – Service Binding RecordTLSA – TLS Authentication RecordTXT – Text record
+Host
+Leave blank for root domain. Use * for wildcard.
+Answer / Value
+TTL
+Notes (private, optional — does not affect DNS)
+[ Need help? How to edit DNS records](https://kb.porkbun.com/article/68-how-to-edit-dns-records)
+Edit Authoritative Nameservers
+ ·  [Switch to classic view](https://porkbun.com/account/domainsSpeedy?fo=1&oid=12647918#)
+×
+Enter the nameservers you would like to use for your domain in the text area below. Put one nameserver per line, please.
+Please note: Although we update your nameservers immediately, this change can take up to 48 hours to propagate due to DNS caching.
+
+
+Nameservers (one per line)
+Domain Management
+Logged in as: ryan006
+
+Register a New Domain
+[AI Search](https://porkbun.com/checkout/ai) | [Auction Search](https://porkbun.com/auctions) | [Marketplace Search](https://porkbun.com/marketplace)
+
+
+×
+One quick question
+How did you first hear about Porkbun?
+A news article or reviewChatGPT, Claude, or another AI assistantX, Bluesky, or another social networkYouTubeRedditHacker NewsA podcast or newsletterProton (Mail, VPN, or Drive)Google or another search engineA hackathon or eventA friend, coworker, or word of mouthSomething else
+Submit
+Displaying ? ?
+name
+website
+email
+renew
+lock
+whois
+market
+expires
+New Domain!
+mustangcity.rodeo
+|
+2027-11-21
+364 d
+Registration
+Registry Create Date
+2026-11-21T02:32:59.544Z
+Registry Expire Date
+2027-11-21T02:32:59.544Z
+Renewal
+estimated
+$10.81 USD
+Auto Renew
+toggle auto renew for mustangcity.rodeo
+[Add Renewal to Cart](https://porkbun.com/account/domainsSpeedy?fo=1&oid=12647918#)
+Domain Lock
+toggle domain lock for mustangcity.rodeo
+Contact Privacy
+Using Privacy
+Contacts
+Registrant Contact
+Ryan Peters
+1519 Evans Boulevard
+London, Ontario N6M 0A8, CA
++1.5194940447
+petersryan006@gmail.com
+Statuses
+[clientTransferProhibited ](http://icann.org/epp#clientTransferProhibited)
+[clientDeleteProhibited ](http://icann.org/epp#clientDeleteProhibited)
+[serverTransferProhibited](http://icann.org/epp#serverTransferProhibited)
+DNS & Nameservers
+Nameservers
+curitiba.ns.porkbun.com
+fortaleza.ns.porkbun.com
+maceio.ns.porkbun.com
+salvador.ns.porkbun.com
+DNS Records
+2 records set
+Glue Records
+Registry DNSSEC
+0 records
+Porkbun DNSSEC
+toggle domain dnssec for mustangcity.rodeo
+Your Cloudflare
+URL Forwarding
+Not Set
+Park Domain
+Products & Services
+SSL
+Nothing Yet
+Email Hosting
+Web Hosting
+API Access
+toggle auto renew for mustangcity.rodeo
+Transfers & Lifecycle
+Registrar Transfer
+Account Transfer
+Refund Registration
+Delete Domain
+Marketplace
+Porkbun Marketplace
+none
+Afternic Settings
+These settings affect the data we put into the Afternic formatted CSV file you can download from the "Bulk Actions" menu.
+Main Category
+ Acronyms Business Careers Computers Education Family Life Financial Health Home Photography Recreation Reference Region Shopping Society Special Events Sports Travel Uncategorized
+The top level category name used when downloading an Afternic CSV file.
+Sub Category
+The second level category name used when downloading an Afternic CSV file.
+CSV Download
+Include Do not include
+Whether or not to include the domain in the Afternic CSV file.
+Advanced
+Dejigamaflipper
+Displaying ? ?.
+
+
+ porkbun
+Porkbun is an amazingly awesome ICANN accredited domain name registrar based out of the Pacific Northwest. We're different, we're easy, and we're affordable. Use us, you won't be sorry. If you don't use us we'll be sad, but we'll still love you.
+Get Pork-Puns In Your Inbox
+Stay in the loop on all things Porkbun by signing up for our newsletter!
+Email address
+
+11575 SW Pacific Hwy PMB 40649
+Tigard, OR 97223, US
+If you're looking for support, you might be able to answer your own question using our [Knowledge Base](https://kb.porkbun.com/).
+Reach our USA-Based phone support team:
+1.855.PORKBUN (1.855.767.5286)
+Every day, 9AM - 5PM Pacific Time
+Weekends and holidays included.
+support@porkbun.com
+24 / 7 / 365 Email Support
+Chat Support
+Every day, 9AM - 5PM Pacific Time
+Weekends and holidays included.
+If chat is full, you'll see an email option instead.
+
+Products
+[Domain Names](https://porkbun.com/products/domains)
+[Greatest Deals](https://porkbun.com/products/deals)
+[Local Marketplace](https://porkbun.com/marketplace)
+[Domain Auctions](https://porkbun.com/auctions)
+[Expired Closeouts](https://porkbun.com/closeouts)
+[3rd Party Aftermarket](https://porkbun.com/aftermarket)
+[Web Hosting](https://porkbun.com/products/web_hosting)
+[Link In Bio](https://porkbun.com/products/webhosting/managedLinks)
+[Articulation Sitebuilder](https://porkbun.com/products/webhosting/articulation)
+[Cloud for WordPress](https://porkbun.com/products/webhosting/cloudWordPress)
+[cPanel Hosting](https://porkbun.com/products/webhosting/cPanelHosting)
+[Static Hosting](https://porkbun.com/products/webhosting/secureStaticHosting)
+[Easy PHP](https://porkbun.com/products/webhosting/managedPHP)
+[Email Hosting](https://porkbun.com/products/email)
+[WHOIS Privacy](https://porkbun.com/products/whois_privacy)
+[DNS Management](https://porkbun.com/products/dns_management)
+[SSL Certificates](https://porkbun.com/products/ssl)
+[Email Forwarding](https://porkbun.com/products/email_forwarding)
+[URL Forwarding](https://porkbun.com/products/url_forwarding)
+[Domain Transfer](https://porkbun.com/transfer)
+[API Access](https://porkbun.com/api/json/v3/documentation)
+[MCP Server](https://porkbun.com/mcp)
+[For AI Agents](https://porkbun.com/ai-agents)
+[Terraform & DNS as Code](https://porkbun.com/terraform)
+Support
+[Contact Us](https://porkbun.com/contact)
+[Knowledge Base](https://kb.porkbun.com/)
+[Payment Options](https://porkbun.com/support/payment_options)
+[Security](https://porkbun.com/security)
+[Report Abuse](https://porkbun.com/abuse)
+Tools
+[Domain Search](https://porkbun.com/checkout/search)
+[RDAP (WHOIS)](https://porkbun.com/whois)
+[Password Generator](https://porkbun.com/tools/password)
+[DMARC Generator](https://porkbun.com/tools/dmarc_generator)
+[What's My IP Address?](https://porkbun.com/tools/whats_my_ip_address)
+[Service Status](https://status.porkbun.com/)
+Clear Saved Coupons
+External Tools
+[nTLDData – New gTLD Statistics](https://ntlddata.com/)
+Our Company
+[About Us](https://porkbun.com/about)
+[Our Official Blog](https://blog.porkbun.com/)
+[Careers](https://porkbun.com/careers)
+[Branding Guidelines](https://porkbun.design/)
+[Policies and Legal](https://porkbun.com/legal)
+[Data Disclosure Policy](https://porkbun.com/legal/agreement/data_disclosure_policy)
+[Bug Bounty Program](https://porkbun.com/products/bug_bounty)
+[Awesomeness](https://porkbun.com/awesome)
+
+PRIVACY
+Your Privacy Choices
+[Privacy Policy](https://porkbun.com/legal/agreement/privacy_policy)
+
+Account
+[Settings / Billing](https://porkbun.com/account)
+[View Orders](https://porkbun.com/account/orders)
+[Messages](https://porkbun.com/account/messages)
+[API Access](https://porkbun.com/account/api)
+[Simple Domain List](https://porkbun.com/account/domainList)
+[Logout](https://porkbun.com/account/domainsSpeedy?fo=1&oid=12647918#)
+
+Nonsense
+[Don't like our name?](https://porkbun.com/single-tear.html)
+[The Buniverse](https://porkbun.com/buniverse.html)
+[Porkbun the Game](https://porkapult.com/)
+
+Copyright © Porkbun LLC. All rights reserved.
+Porkbun is a [Top Level Design](https://toplevel.design/) Company
+Made in the USA 🇺🇸
+WARNING: This site has been known to cause a mind blowing experience. We recommend you prepare yourself mentally and if possible be sitting down. Side effects may include saving money, letting out a chuckle, and sporadic oinking.
+AI-Powered Support Assistant
+Online
+Hi there! 👋
+I'm your hopefully not annoying AI support assistant. Ask me anything!
+If I can't help, you can connect with our human support team.
+Transfer domainEmail forwardingTurn off Auto-RenewEnable 2FA
+Type your question
+
+Talk to a real human
+AI assistant writing for someone? Say so, and see what you can do directly: [porkbun.com/llms/support](https://porkbun.com/llms/support)
+Powered by Claude AI + Helpscout
+</pasted_content id="99cc">
