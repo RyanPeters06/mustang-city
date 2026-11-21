@@ -4,6 +4,7 @@
  * from OpenStreetMap (© OpenStreetMap contributors, ODbL), simplified to 91 points.
  */
 import londonBoundary from "./data/londonBoundary.json";
+import campusBoundary from "./data/campusBoundary.json";
 import campusBuildings from "./data/campusBuildings.json";
 
 export type LngLat = [number, number];
@@ -65,13 +66,18 @@ export const MISSION_BUILDINGS: { name: string; point: LngLat }[] = [
   { name: "D.B. Weldon Library", point: [-81.27565, 43.00789] },
 ];
 
+/** Western's real campus boundary (OSM landuse=university), the edge of Mustang City. */
+export const CAMPUS_RING = campusBoundary.ring as LngLat[];
+
 export function inCampus([lng, lat]: LngLat) {
-  return (
-    lng >= CAMPUS_BBOX.west &&
-    lng <= CAMPUS_BBOX.east &&
-    lat >= CAMPUS_BBOX.south &&
-    lat <= CAMPUS_BBOX.north
-  );
+  if (lng < CAMPUS_BBOX.west - 0.01 || lng > CAMPUS_BBOX.east + 0.01 || lat < CAMPUS_BBOX.south - 0.01 || lat > CAMPUS_BBOX.north + 0.01) return false;
+  let inside = false;
+  for (let i = 0, j = CAMPUS_RING.length - 1; i < CAMPUS_RING.length; j = i++) {
+    const [xi, yi] = CAMPUS_RING[i];
+    const [xj, yj] = CAMPUS_RING[j];
+    if (yi > lat !== yj > lat && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
 }
 
 /** Scripted demo walk: UCC → UC Hill → Middlesex → Natural Science → Weldon → Thames bank. */

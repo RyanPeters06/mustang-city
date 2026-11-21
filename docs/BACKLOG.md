@@ -13,6 +13,8 @@ Full list with decisions: [docs/IDEAS.md §7](IDEAS.md#7-needs-from-ryan). Ideas
 
 ## Queue
 
+- [x] **Mustang City pre-explored with a sharp real campus border + detailed models for every campus building** (Ryan, Nov 21)
+
 - [x] **Replay mode (core #6)** — record the live GPS trace to the device (and `location_pings` when signed in);
   "Replays" list in Profile; play any trace back at 1×/4×/16× so fog clears on screen; demo panel can load
   a bundled sample walk. *Done when:* a recorded 2-minute walk replays at 16× with fog clearing and the
@@ -49,6 +51,26 @@ Full list with decisions: [docs/IDEAS.md §7](IDEAS.md#7-needs-from-ryan). Ideas
 - [x] **Hero 3D model: Middlesex College** (+ University College and 19 campus-core buildings, spec 019) — low-poly glTF via Mapbox `model` layer at z ≥ 16 (see
   `specs/003-friends-buildings/research.md`). *Done when:* model replaces the extrusion, stays at 60 fps.
 - [x] **Class Run** — schedule import + class waypoints + on-time Rep (design in `docs/roadmap.md`).
+
+## UI polish plan (documented Nov 21 — queued after Mustang City work; not built yet)
+Context: Ryan asked for a super clean, smooth, cohesive UI reminiscent of GTA 6's art direction (postcard art,
+sunset palette, full-bleed loading art) without "polygon vibes". Passes 1–2 shipped (design reset, feathered fog,
+palette, control stack, building framing, postcard loading screen, unified buttons). Next:
+
+- [ ] **Wrapped timelapse art** — replace hard hex cells with soft glowing blobs (smoothed regions + bloom), sunset
+  gradient by time; same treatment for the share card.
+- [ ] **Intro flight + landing polish** — smoother camera curve, captions in the new type style, HUD/tab bar/stack
+  stagger in with springs, no pop-in of labels/blips during the dive.
+- [ ] **3D model day/night look** — window glow keyed to the light preset per material (separate emissive for
+  night), softer roof colour by day, subtle ambient occlusion band at the base.
+- [ ] **Typography pass** — one condensed display face for titles + one UI face; fewer letter-spaced caps labels;
+  consistent sizes (12/14/16/20/30).
+- [ ] **Motion pass** — shared easing tokens; spring sheets with velocity; tab-switch cross-fade; reduced-motion audit.
+- [ ] **Empty/first-run states** — friendly first-run pointers, empty states with a next action, "Set your name"
+  onboarding card.
+- [ ] **Map legend + blip toggles** — brief §Map; one tidy panel instead of more floating chips.
+- [ ] **Accessibility audit** — contrast on glass, 44 pt targets, VoiceOver labels for map controls, Dynamic Type.
+- [ ] **Comic-panel cover art** — drop Ryan's panels into the loading screen when supplied (docs/COVER_ART.md).
 
 ## Done
 - [x] Friday foundation (spec 001) · [x] Missions & profiles (spec 002) · [x] Friends & building cards (spec 003)

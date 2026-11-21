@@ -202,6 +202,8 @@ const PALETTE = {
   concrete: { color: "#aaa2b4", rough: 0.95 },
   glassWall: { color: "#3b4a6e", rough: 0.15, metal: 0.4, emissive: "#3a6fa8" },
   frame: { color: "#c9cdd6", rough: 0.6, metal: 0.2 },
+  brick: { color: "#b98478", rough: 0.95 },
+  plant: { color: "#8c84a3", rough: 0.8, metal: 0.2 },
 };
 
 async function writeGlb(builders, file) {
@@ -351,6 +353,75 @@ const manifest = [];
   }
   await writeGlb(builders, "campus-core");
   manifest.push({ id: "campus-core", name: "Campus core", url: "/models/campus-core.glb", anchor, footprint, heights });
+}
+
+// ================= Every other building inside Mustang City =================
+{
+  const all = JSON.parse(fs.readFileSync("scripts/models/campus-all.json", "utf8"));
+  const taken = manifest.flatMap((m) => m.footprint);
+  const inR = ([x, y], r) => {
+    let a = false;
+    for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+      const [xi, yi] = r[i], [xj, yj] = r[j];
+      if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) a = !a;
+    }
+    return a;
+  };
+  const rest = all.filter((b) => {
+    const c = centroid(b.rings[0]);
+    return !taken.some((t) => inR(c, t) || t.some((v) => inR(v, b.rings[0])));
+  });
+  const pts = rest.flatMap((b) => b.rings[0].slice(0, -1));
+  const anchor = [pts.reduce((s2, p) => s2 + p[0], 0) / pts.length, pts.reduce((s2, p) => s2 + p[1], 0) / pts.length];
+  const builders = [];
+  const footprint = [];
+  const heights = [];
+  let B = new Builder(anchor);
+  let tris = 0;
+  const area = (r) => {
+    let a = 0;
+    for (let i = 0; i < r.length - 1; i++) a += r[i][0] * r[i + 1][1] - r[i + 1][0] * r[i][1];
+    return Math.abs(a / 2);
+  };
+  for (const b of rest) {
+    const outer = ccw(b.rings[0]);
+    const ring = outer.map((p) => B.en(p));
+    const A = area(ring);
+    const H = Math.max(b.height, 3);
+    const y0 = Math.min(b.minHeight ?? 0, H - 1);
+    const style = A < 40 || H < 3.5 ? "shed" : b.residence ? "brick" : H >= 18 ? "glass" : "sandstone";
+    if (style === "glass") {
+      B.walls("frame", ring, y0, H);
+      B.curtain("glassWall", "frame", ring, H);
+    } else {
+      const mat = style === "brick" ? "brick" : "sandstone";
+      B.walls(mat, ring, y0, H);
+      if (style !== "shed") B.windows("window", ring, H, { every: 3.4, lancet: style === "sandstone", h: 1.3, first: Math.max(1.1, y0 + 1.1) });
+    }
+    if (style !== "shed") B.walls(style === "glass" ? "frame" : "trim", ring, H, H + 0.55, 0); // parapet rim
+    B.cap("roof", [ring], H);
+    // rooftop mechanical units on big roofs (deterministic placement)
+    if (A > 700 && style !== "shed") {
+      const c = ring.slice(0, -1).reduce((s2, p) => [s2[0] + p[0] / (ring.length - 1), s2[1] + p[1] / (ring.length - 1)], [0, 0]);
+      const units = A > 2500 ? 3 : A > 1400 ? 2 : 1;
+      for (let u = 0; u < units; u++) {
+        const off = [(u - (units - 1) / 2) * 7, (u % 2) * 4 - 2];
+        const pos = [c[0] + off[0], c[1] + off[1]];
+        if (inR(pos, ring)) B.box("plant", pos, [4.5, 3], H, H + 1.8);
+      }
+    }
+    footprint.push(outer);
+    heights.push(H);
+    tris = [...B.parts.values()].reduce((s2, p) => s2 + p.I.length / 3, 0);
+    if (tris > 9000) {
+      builders.push(B);
+      B = new Builder(anchor);
+    }
+  }
+  if (B.parts.size) builders.push(B);
+  await writeGlb(builders, "campus-rest");
+  manifest.push({ id: "campus-rest", name: "Mustang City", url: "/models/campus-rest.glb", anchor, footprint, heights });
+  console.log(`campus-rest: ${rest.length} buildings`);
 }
 
 fs.writeFileSync("lib/data/campusModels.json", JSON.stringify(manifest));

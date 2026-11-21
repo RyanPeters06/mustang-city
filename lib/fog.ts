@@ -7,8 +7,17 @@
  */
 import { cellToChildren, cellToLatLng, cellsToMultiPolygon, gridDisk, latLngToCell, polygonToCells } from "h3-js";
 import type { Feature, FeatureCollection, MultiLineString, Polygon } from "geojson";
-import { CAMPUS_CENTER, LONDON_BOUNDARY, distanceM, type LngLat } from "./geo";
+import { CAMPUS_CENTER, CAMPUS_RING, LONDON_BOUNDARY, distanceM, type LngLat } from "./geo";
 import { fogRepFromCells, rankFor } from "./rank";
+import polygonClipping from "polygon-clipping";
+
+/**
+ * Mustang City (Western's real campus boundary, OSM) is always explored. Its cells are revealed for
+ * drawing/visibility but never counted toward Rep, % explored, districts or account sync — you didn't walk them.
+ */
+let campusCells: Set<string> | null = null;
+const getCampusCells = () => (campusCells ??= new Set(polygonToCells([CAMPUS_RING], H3_RES, true)));
+export const inCampusArea = (lat: number, lng: number) => getCampusCells().has(latLngToCell(lat, lng, H3_RES));
 
 export const H3_RES = 11;
 export const REVEAL_RADIUS_M = 100;
@@ -84,7 +93,7 @@ function ensureLoaded() {
 }
 
 function recompute() {
-  const count = cells.size;
+  const count = cells.size; // player-revealed only (campus cells live in their own set)
   const rep = fogRepFromCells(count);
   const { rank } = rankFor(rep);
   snapshot = { count, pct: (count / londonCells()) * 100, rep, rank };
@@ -149,7 +158,8 @@ export function revealMany(points: [number, number][], radiusM = REVEAL_RADIUS_M
 
 export function isRevealedAt(lat: number, lng: number) {
   ensureLoaded();
-  return cells.has(latLngToCell(lat, lng, H3_RES));
+  const c = latLngToCell(lat, lng, H3_RES);
+  return cells.has(c) || getCampusCells().has(c);
 }
 
 export function resetFog() {
@@ -179,26 +189,57 @@ function smoothRing(ring: LngLat[], passes = 2): LngLat[] {
   return [...pts, pts[0]];
 }
 
+/** Metres from p to the campus boundary line. */
+function distToCampusEdge([x, y]: LngLat) {
+  const k = Math.cos((y * Math.PI) / 180);
+  let best = Infinity;
+  for (let i = 1; i < CAMPUS_RING.length; i++) {
+    const [ax, ay] = CAMPUS_RING[i - 1];
+    const [bx, by] = CAMPUS_RING[i];
+    const dx = (bx - ax) * k, dy = by - ay;
+    const t = dx || dy ? Math.max(0, Math.min(1, (((x - ax) * k) * dx + (y - ay) * dy) / (dx * dx + dy * dy))) : 0;
+    best = Math.min(best, Math.hypot((x - ax) * k - t * dx, y - ay - t * dy) * 111320);
+  }
+  return best;
+}
+/** Split rings into polylines, dropping segments that run along the campus border (kept crisp). */
+function offCampusRuns(rings: LngLat[][]): LngLat[][] {
+  const runs: LngLat[][] = [];
+  for (const r of rings) {
+    let run: LngLat[] = [];
+    for (let i = 1; i < r.length; i++) {
+      const mid: LngLat = [(r[i - 1][0] + r[i][0]) / 2, (r[i - 1][1] + r[i][1]) / 2];
+      if (distToCampusEdge(mid) < 1.5) {
+        if (run.length > 1) runs.push(run);
+        run = [];
+        continue;
+      }
+      if (!run.length) run.push(r[i - 1]);
+      run.push(r[i]);
+    }
+    if (run.length > 1) runs.push(run);
+  }
+  return runs;
+}
+
 export function buildFog(): { fog: FeatureCollection<Polygon>; edges: Feature<MultiLineString> } {
   ensureLoaded();
-  const regions = cells.size ? cellsToMultiPolygon([...cells], true) : [];
+  // Player-walked area: hexagons smoothed into soft blobs.
+  const player = (cells.size ? cellsToMultiPolygon([...cells], true) : []).map((region) =>
+    (region as LngLat[][]).map((r) => smoothRing(r)),
+  );
+  // Revealed = player blobs ∪ Mustang City (exact, sharp campus boundary).
+  const campus: LngLat[][][] = [[CAMPUS_RING]];
+  const revealed = (player.length ? polygonClipping.union(campus as never, player as never) : campus) as LngLat[][][];
+  // Soft fog edge only where the player walked outside campus; the campus border stays crisp.
+  const softEdges = (player.length ? polygonClipping.difference(player as never, campus as never) : []) as LngLat[][][];
+
   const holes: LngLat[][] = [];
   const islands: Feature<Polygon>[] = [];
-  const edgeLines: LngLat[][] = [];
-
-  for (const region of regions) {
-    const [rawOuter, ...rawInner] = region as LngLat[][];
-    const outer = smoothRing(rawOuter);
-    const inner = rawInner.map((r) => smoothRing(r));
+  for (const [outer, ...inner] of revealed) {
     holes.push(outer);
-    edgeLines.push(outer);
-    for (const loop of inner) {
-      // Unexplored pocket fully surrounded by explored cells — still fogged.
-      islands.push({ type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [loop] } });
-      edgeLines.push(loop);
-    }
+    for (const loop of inner) islands.push({ type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [loop] } });
   }
-
   return {
     fog: {
       type: "FeatureCollection",
@@ -207,6 +248,6 @@ export function buildFog(): { fog: FeatureCollection<Polygon>; edges: Feature<Mu
         ...islands,
       ],
     },
-    edges: { type: "Feature", properties: {}, geometry: { type: "MultiLineString", coordinates: edgeLines } },
+    edges: { type: "Feature", properties: {}, geometry: { type: "MultiLineString", coordinates: offCampusRuns(softEdges.flat()) } },
   };
 }

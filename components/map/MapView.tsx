@@ -22,6 +22,7 @@ import type { Vehicle } from "@/lib/ltc";
 import {
   CAMPUS_BUILDINGS,
   CAMPUS_CENTER,
+  CAMPUS_RING,
   LONDON_BOUNDARY,
   LONDON_CENTER,
   MAX_BOUNDS,
@@ -351,6 +352,35 @@ function addGameLayers(map: MapboxMap) {
       "fill-extrusion-opacity": 0.32,
       "fill-extrusion-vertical-gradient": true,
       "fill-extrusion-emissive-strength": 1,
+    },
+  });
+
+  // --- Mustang City border: Western's real campus boundary, always explored, crisp neon edge ---
+  map.addSource("campus-border", { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: CAMPUS_RING } } });
+  map.addLayer({
+    id: "campus-border-glow",
+    type: "line",
+    source: "campus-border",
+    slot: "top",
+    layout: { "line-join": "miter" },
+    paint: {
+      "line-color": "#ff6f91",
+      "line-width": ["interpolate", ["linear"], ["zoom"], 11, 4, 16, 14],
+      "line-blur": ["interpolate", ["linear"], ["zoom"], 11, 4, 16, 12],
+      "line-opacity": 0.55,
+      "line-emissive-strength": 1,
+    },
+  });
+  map.addLayer({
+    id: "campus-border-line",
+    type: "line",
+    source: "campus-border",
+    slot: "top",
+    layout: { "line-join": "miter" },
+    paint: {
+      "line-color": "#ffd58a",
+      "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1.2, 16, 2.6],
+      "line-emissive-strength": 1,
     },
   });
 
