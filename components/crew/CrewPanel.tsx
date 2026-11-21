@@ -88,6 +88,33 @@ function CrewList({ prefill, shownFriend, onToggleMap }: Props) {
     if (res.ok) onToggleMap(f, ((await res.json()) as { cells: string[] }).cells);
   }
 
+  // Crew map (brief → Crews: shared fog map) = union of every friend's cleared cells.
+  const CREW: FriendRow = { handle: "crew", name: "Crew", faculty: null, year: null, emblem: "compass", accent: "#2EE6D6", rep: 0, cells: 0, missions: 0 };
+  async function toggleCrewMap(friends: FriendRow[], demo: boolean) {
+    if (shownFriend === "crew") return onToggleMap(CREW, null);
+    const lists_ = demo
+      ? friends.map((f) => demoCells(f.handle))
+      : await Promise.all(
+          friends.map((f) =>
+            fetch(`/api/friends/${f.handle}/cells`, { cache: "no-store" })
+              .then((r) => (r.ok ? (r.json() as Promise<{ cells: string[] }>) : { cells: [] }))
+              .then((j) => j.cells)
+              .catch(() => [] as string[]),
+          ),
+        );
+    onToggleMap(CREW, [...new Set(lists_.flat())]);
+  }
+  const crewButton = (friends: FriendRow[], demo: boolean) =>
+    friends.length > 1 && (
+      <button
+        type="button"
+        onClick={() => void toggleCrewMap(friends, demo)}
+        className="mb-3 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border border-teal/30 bg-teal/10 text-[14px] font-bold text-teal"
+      >
+        {shownFriend === "crew" ? "Hide the crew map" : `Show the whole crew's map (${friends.length})`}
+      </button>
+    );
+
   const mine = { rep: me.rep, pct: me.pct, missions: me.missionCount };
   const h = "mb-2 text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase";
   const field = "min-w-0 flex-1 rounded-xl border border-white/12 bg-white/[0.06] px-3.5 py-3 text-[16px] text-ink outline-none focus:border-pink";
@@ -172,11 +199,14 @@ function CrewList({ prefill, shownFriend, onToggleMap }: Props) {
                 {lists.outgoing.length > 0 && ` Waiting on ${lists.outgoing.map((o) => "@" + o.handle).join(", ")}.`}
               </p>
             ) : (
+              <>
+              {crewButton(lists.friends, false)}
               <ul className="space-y-3">
                 {lists.friends.map((f) => (
                   <FriendCard key={f.handle} f={f} mine={mine} shown={shownFriend === f.handle} onMap={() => toggleMap(f, false)} onRemove={() => act(f.handle, "remove")} />
                 ))}
               </ul>
+              </>
             )}
           </section>
         </>
@@ -203,6 +233,7 @@ function CrewList({ prefill, shownFriend, onToggleMap }: Props) {
           <section>
             <h3 className={h}>Demo crew</h3>
             <p className="-mt-1 mb-2 text-[12px] text-ink/60">Sample players so you can try comparing. Not real accounts.</p>
+            {crewButton(demoFriends(), true)}
             <ul className="space-y-3">
               {demoFriends().map((f) => (
                 <FriendCard key={f.handle} f={f} mine={mine} shown={shownFriend === f.handle} onMap={() => toggleMap(f, true)} demo />

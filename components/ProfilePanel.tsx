@@ -2,13 +2,14 @@
 
 import TagsSection from "./profile/TagsSection";
 import CollectiblesSection from "./profile/CollectiblesSection";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/progress";
 import { MISSIONS, missionBySlug } from "@/lib/missions";
 import Emblem from "./profile/Emblem";
 import ProfileEditor from "./profile/ProfileEditor";
 import LoreCard from "./missions/LoreCard";
 import Replays from "./profile/Replays";
+import { walkStats } from "@/lib/walkStats";
 import BadgeGrid from "./profile/BadgeGrid";
 import Neighbourhoods from "./profile/Neighbourhoods";
 import { badgeByCode } from "@/lib/badges";
@@ -51,6 +52,9 @@ export default function ProfilePanel({
       alive = false;
     };
   }, []);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const walk = useMemo(() => walkStats(), [snap.pct, snap.rep]);
 
   if (editing)
     return (
@@ -131,6 +135,34 @@ export default function ProfilePanel({
         <Stat value={rep.toLocaleString()} label="Rep" color="text-orange" />
         <Stat value={`${pct < 10 ? pct.toFixed(2) : pct.toFixed(1)}%`} label="Explored" color="text-teal" />
         <Stat value={`${missionCount}/${MISSIONS.length}`} label="Missions" color="text-pink" />
+      </section>
+
+      {/* Walking (brief → Sun Life health track): from real recorded walks only */}
+      <section className="rounded-2xl bg-white/[0.04] px-4 py-3">
+        <div className="flex items-baseline justify-between">
+          <h3 className="text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">Walking</h3>
+          <span className="text-[12px] text-ink/60">{walk.walksWeek ? `${walk.walksWeek} walk${walk.walksWeek === 1 ? "" : "s"} this week` : "Real walks only"}</span>
+        </div>
+        <div className="mt-2 grid grid-cols-3 gap-2 text-center">
+          <div>
+            <p className="text-[20px] font-bold text-teal tabular-nums">
+              {walk.kmWeek.toFixed(1)}
+              <span className="ml-0.5 text-[12px] font-semibold">km</span>
+            </p>
+            <p className="text-[12px] text-ink/60">this week</p>
+          </div>
+          <div>
+            <p className="text-[20px] font-bold text-gold tabular-nums">{walk.newPlacesWeek}</p>
+            <p className="text-[12px] text-ink/60">new places</p>
+          </div>
+          <div>
+            <p className="text-[20px] font-bold text-ink tabular-nums">
+              {walk.kmTotal.toFixed(1)}
+              <span className="ml-0.5 text-[12px] font-semibold">km</span>
+            </p>
+            <p className="text-[12px] text-ink/60">all time</p>
+          </div>
+        </div>
       </section>
 
       {showcase.length > 0 && (

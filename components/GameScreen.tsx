@@ -18,6 +18,7 @@ import MissionPassed from "./missions/MissionPassed";
 import CrewPanel from "./crew/CrewPanel";
 import BuildingDetail from "./buildings/BuildingDetail";
 import ReplayBar from "./ReplayBar";
+import InstallHint from "./InstallHint";
 import AreaBanner from "./AreaBanner";
 import Celebrations from "./Celebrations";
 import TagButton from "./tags/TagButton";
@@ -304,6 +305,7 @@ export default function GameScreen({ cover = null }: { cover?: CoverArt }) {
       <AreaBanner />
       <ReplayBar />
       <Onboarding ready={mapState === "ready" && entered} />
+      <InstallHint ready={mapState === "ready" && entered} />
       <Celebrations paused={passed !== null} />
       <MissionPassed info={passed} onDone={clearPassed} />
       <AnimatePresence>{wrapped && <Wrapped key="wrapped" onClose={() => setWrapped(false)} />}</AnimatePresence>
