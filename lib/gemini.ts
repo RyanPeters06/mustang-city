@@ -186,3 +186,40 @@ export async function screenMission(title: string, briefing: string, place: stri
   const parsed = JSON.parse(interaction.output_text ?? "{}") as { ok?: unknown; reason?: unknown };
   return { ok: parsed.ok === true, reason: typeof parsed.reason === "string" ? parsed.reason.slice(0, 160) : "" };
 }
+
+const SCHEDULE_SCHEMA = {
+  type: "object",
+  properties: {
+    rows: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          course: { type: "string", description: "course code and section, e.g. CS 1026A 001" },
+          location: { type: "string", description: "building name or code plus room, exactly as shown" },
+          days: { type: "array", items: { type: "string", enum: ["SU", "MO", "TU", "WE", "TH", "FR", "SA"] } },
+          start: { type: "string", description: "24h HH:MM" },
+          end: { type: "string", description: "24h HH:MM" },
+        },
+        required: ["course", "location", "days", "start", "end"],
+      },
+    },
+  },
+  required: ["rows"],
+};
+
+/** Read a timetable screenshot into rows (student confirms each before saving). */
+export async function readTimetable(jpegBase64: string) {
+  const interaction = await ai().interactions.create({
+    model: MODEL,
+    input: [
+      { type: "text", text: "This is a university class timetable. Extract every weekly class meeting. Copy text exactly; do not guess missing values (use empty strings). Reply as JSON." },
+      { type: "image", data: jpegBase64, mime_type: "image/jpeg" },
+    ],
+    response_format: { type: "text", mime_type: "application/json", schema: SCHEDULE_SCHEMA },
+    generation_config: { thinking_level: "low" },
+    store: false,
+  });
+  const parsed = JSON.parse(interaction.output_text ?? "{}") as { rows?: { course: string; location: string; days: string[]; start: string; end: string }[] };
+  return (parsed.rows ?? []).slice(0, 30);
+}

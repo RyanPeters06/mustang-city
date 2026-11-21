@@ -7,6 +7,7 @@ import { RANKS, rankFor } from "./rank";
 import { BADGES } from "./badges";
 import { getRides, subscribeRides } from "./rides";
 import { COLLECTIBLES, COLLECTIBLE_REP } from "./collectibles";
+import { CLASS_RUN_REP } from "./schedule";
 import { celebrate } from "./celebrate";
 import { DISTRICT_REP, getDistrictStats } from "./districts";
 
@@ -68,6 +69,7 @@ type Stored = {
   demoRep: number; // demo-controls only
   districts: Record<string, number>; // unlocked district name → at
   finds?: Record<string, number>; // collectible id → found at
+  classRuns?: Record<string, number>; // `${meetingId}|${date}` → arrived on time at
 };
 
 export type ProgressSnapshot = {
@@ -79,6 +81,7 @@ export type ProgressSnapshot = {
   demoRep: number;
   districts: Record<string, number>;
   finds: Record<string, number>;
+  classRuns: Record<string, number>;
   rep: number;
   rank: string;
   nextRank: { name: string; min: number } | null;
@@ -105,6 +108,7 @@ function ensureLoaded() {
         demoRep: parsed.demoRep ?? 0,
         districts: parsed.districts ?? {},
         finds: parsed.finds ?? {},
+        classRuns: parsed.classRuns ?? {},
       };
     }
   } catch {
@@ -135,7 +139,7 @@ function checkMilestones(silent = false) {
   }
 
   const r = getRides();
-  const input = { completions: data.completions, pct: snap.pct, rides: r.rides, totalRoutes: r.total };
+  const input = { completions: data.completions, pct: snap.pct, rides: r.rides, totalRoutes: r.total, classRuns: data.classRuns ?? {} };
   for (const b of BADGES) {
     if (data.badges[b.code] || !b.evaluate(input).earned) continue;
     data.badges = { ...data.badges, [b.code]: Date.now() };
@@ -191,7 +195,8 @@ export function getSnapshot(): ProgressSnapshot {
     const missionRep = list.reduce((s, c) => s + c.rep, 0);
     const districtRep = Object.keys(data.districts).length * DISTRICT_REP;
     const findRep = Object.keys(data.finds ?? {}).length * COLLECTIBLE_REP;
-    const rep = fog.rep + missionRep + data.demoRep + districtRep + findRep;
+    const classRep = Object.keys(data.classRuns ?? {}).length * CLASS_RUN_REP;
+    const rep = fog.rep + missionRep + data.demoRep + districtRep + findRep + classRep;
     snapshot = {
       completions: data.completions,
       profile: data.profile,
@@ -201,6 +206,7 @@ export function getSnapshot(): ProgressSnapshot {
       demoRep: data.demoRep,
       districts: data.districts,
       finds: data.finds ?? {},
+      classRuns: data.classRuns ?? {},
       rep,
       pct: fog.pct,
       ...rankFor(rep),
@@ -218,6 +224,7 @@ const SERVER: ProgressSnapshot = {
   demoRep: 0,
   districts: {},
   finds: {},
+  classRuns: {},
   rep: 0,
   rank: "Frosh",
   nextRank: RANKS[1],
@@ -278,6 +285,15 @@ export function findCollectible(id: string) {
   ensureLoaded();
   if (data.finds?.[id] || !COLLECTIBLES.some((c) => c.id === id)) return false;
   data.finds = { ...(data.finds ?? {}), [id]: Date.now() };
+  save();
+  return true;
+}
+
+/** Class Run: arrived on time (once per class meeting). */
+export function recordClassRun(key: string) {
+  ensureLoaded();
+  if (data.classRuns?.[key]) return false;
+  data.classRuns = { ...(data.classRuns ?? {}), [key]: Date.now() };
   save();
   return true;
 }

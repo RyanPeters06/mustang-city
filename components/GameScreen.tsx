@@ -29,6 +29,11 @@ import DistrictDetail from "./districts/DistrictDetail";
 import CollectibleDetail from "./CollectibleDetail";
 import Radar from "./Radar";
 import WeatherOverlay from "./WeatherOverlay";
+import NextClassCard from "./classrun/NextClassCard";
+import ScheduleManager from "./classrun/ScheduleManager";
+import { CLASS_RUN_REP, onClassRun, startClassRunWatch } from "@/lib/schedule";
+import { recordClassRun } from "@/lib/progress";
+import { celebrate } from "@/lib/celebrate";
 import { startCollectibleWatch } from "@/lib/collectibleWatch";
 import { COLLECTIBLES } from "@/lib/collectibles";
 import { missionBySlug } from "@/lib/missions";
@@ -75,14 +80,28 @@ export default function GameScreen() {
   const [district, setDistrict] = useState<string | null>(null);
   const [wrapped, setWrapped] = useState(false);
   const [collectible, setCollectible] = useState<string | null>(null);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
 
   // Start the account check (and sync) as soon as the app opens.
   useEffect(() => {
     startPingLog();
     startCollectibleWatch();
+    startClassRunWatch();
+    const offRun = onClassRun((m, key) => {
+      if (recordClassRun(key))
+        celebrate({
+          id: `class-${key}`,
+          kind: "class",
+          title: `${m.course} · ${m.building}`,
+          subtitle: `Made it before ${m.start} · +${CLASS_RUN_REP} Rep`,
+          color: "#2ee6d6",
+          glyph: "M4 5h16v15H4zM4 9h16M8 3v4M16 3v4M8 14l3 3 5-6",
+        });
+    });
     const off = subscribeAccount(() => {});
     return () => {
       off();
+      offRun();
     };
   }, []);
   useEffect(() => {
@@ -138,8 +157,10 @@ export default function GameScreen() {
   }, []);
 
   const clearPassed = useCallback(() => setPassed(null), []);
-  const sheetOpen = collectible !== null || district !== null || tagSheet !== null || selected !== null || building !== null || tab !== "map";
-  const sheetTitle = collectible
+  const sheetOpen = scheduleOpen || collectible !== null || district !== null || tagSheet !== null || selected !== null || building !== null || tab !== "map";
+  const sheetTitle = scheduleOpen
+    ? "Class Run"
+    : collectible
     ? (COLLECTIBLES.find((c) => c.id === collectible)?.name ?? "Collectible")
     : district
     ? district
@@ -196,6 +217,7 @@ export default function GameScreen() {
           <LocateButton map={map} />
           <TagButton onClick={() => setTagSheet("new")} />
           <RadioPill />
+          <NextClassCard onWaypoint={routeTo} routed={waypoint?.slug ?? null} />
           <TransitChip />
           {friendShown && (
             <button
@@ -217,7 +239,8 @@ export default function GameScreen() {
         open={sheetOpen}
         title={sheetTitle}
         onClose={() => {
-          if (collectible) setCollectible(null);
+          if (scheduleOpen) setScheduleOpen(false);
+          else if (collectible) setCollectible(null);
           else if (district) closeDistrict();
           else if (tagSheet) setTagSheet(null);
           else if (selected) setSelected(null);
@@ -225,7 +248,9 @@ export default function GameScreen() {
           else setTab("map");
         }}
       >
-        {collectible ? (
+        {scheduleOpen ? (
+          <ScheduleManager />
+        ) : collectible ? (
           <CollectibleDetail id={collectible} />
         ) : district ? (
           <DistrictDetail key={district} name={district} onOpenMission={openMission} />
@@ -246,7 +271,7 @@ export default function GameScreen() {
         ) : tab === "missions" ? (
           <MissionList onOpen={openMission} onPassed={setPassed} />
         ) : tab === "profile" ? (
-          <ProfilePanel denied={params.denied} onOpenMission={openMission} onOpenTag={setTagSheet} onOpenWrapped={() => setWrapped(true)} onOpenCollectible={setCollectible} onPlayReplay={() => setTab("map")} />
+          <ProfilePanel denied={params.denied} onOpenMission={openMission} onOpenTag={setTagSheet} onOpenWrapped={() => setWrapped(true)} onOpenCollectible={setCollectible} onOpenSchedule={() => setScheduleOpen(true)} onPlayReplay={() => setTab("map")} />
         ) : (
           <CrewPanel prefill={params.add} shownFriend={friendShown} onToggleMap={toggleFriendMap} />
         )}
@@ -256,6 +281,7 @@ export default function GameScreen() {
         visible={entered}
         active={tab}
         onChange={(t) => {
+          setScheduleOpen(false);
           setCollectible(null);
           closeDistrict();
           setTagSheet(null);

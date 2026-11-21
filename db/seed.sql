@@ -106,7 +106,8 @@ INSERT INTO badges (code, name, description) VALUES
 ('route-6-regular', 'Route 6 Regular', 'Ride the same route on 10 different days'),
 ('every-route', 'Every Route', 'Ride all LTC routes'),
 ('cartographer', 'Cartographer', 'Explore 25% of London'),
-('heister', 'Heister', 'Complete 3 heists')
+('heister', 'Heister', 'Complete 3 heists'),
+('perfect-attendance', 'Perfect Attendance', 'Get to 5 classes on time in one week')
 ON CONFLICT (code) DO NOTHING;
 
 -- Hidden collectibles (feature 017): one sourced fact each (lib/collectibles.ts has the sources).

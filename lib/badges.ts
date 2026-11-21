@@ -1,8 +1,9 @@
 /** Badge definitions (brief → Progression + Landmark missions). Pure: evaluated from progress data. */
 import { MISSIONS } from "./missions";
 import type { Completion } from "./progress";
+import { onTimeThisWeek } from "./schedule";
 
-export type BadgeInput = { completions: Record<string, Completion>; pct: number; rides?: Record<string, number[]>; totalRoutes?: number };
+export type BadgeInput = { completions: Record<string, Completion>; pct: number; rides?: Record<string, number[]>; totalRoutes?: number; classRuns?: Record<string, number> };
 export type BadgeStatus = { earned: boolean; have: number; need: number; lockedNote?: string };
 
 export type Badge = {
@@ -98,6 +99,14 @@ export const BADGES: Badge[] = [
     glyph: "M3 12h18M12 3v18M5 5l14 14M19 5 5 19",
     color: "#FF4F8B",
     evaluate: (i) => progress(Object.keys(i.rides ?? {}).length, i.totalRoutes ?? 38),
+  },
+  {
+    code: "perfect-attendance",
+    name: "Perfect Attendance",
+    description: "Get to 5 classes on time in one week",
+    glyph: "M4 5h16v15H4zM4 9h16M8 3v4M16 3v4M8 14l3 3 5-6",
+    color: "#2EE6D6",
+    evaluate: (i) => progress(onTimeThisWeek(i.classRuns ?? {}), 5),
   },
 ];
 

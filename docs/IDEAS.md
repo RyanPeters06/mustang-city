@@ -110,6 +110,12 @@ Still to try (logged):
 - [ ] Condensed UI typeface for labels (e.g. Barlow Condensed / Oswald from Google Fonts) to pair with Anton.
 - [ ] Rank-up screen in the same letterbox style as the intro.
 
+## 6b. Logged during builds (not built)
+- [ ] Class Run "Found It" badge: every new class building reached in the first week of term (needs term dates).
+- [ ] Sync collectible finds + class runs to the account (tables exist: `collectible_finds`; class tables in roadmap).
+- [ ] Student jobs on the map as blips + waypoint (currently list-only in the Missions tab).
+- [ ] Legend panel with blip-type toggles (brief §Map).
+
 ## 7. Needs from Ryan
 
 | Need | Unblocks | Status |
@@ -119,7 +125,8 @@ Still to try (logged):
 | Auth0 tenant + `AUTH0_*`, `APP_BASE_URL` | Sign-in, friends, leaderboards, server tags | needed |
 | `DATABASE_URL` (Tiger Data) + `npm run db:schema && npm run db:seed` | Accounts, tags (`tag_votes`), new missions in DB | needed |
 | Decision: merge `claude/file-editing-offline-9q9lv2` → `main` (or let me push to `main`) | Vercel deploy of all this work | decision |
-| Approve 3D model route (§3) | Middlesex College hero model | decision |
+| Approve 3D model route (§3) | Middlesex College hero model (backlog item marked blocked) | decision |
+| Check live weather on the deployed site (Open-Meteo returned 429 to the cloud build machine) | HUD temperature + rain/snow | check |
 | Pick a music route (§4) | Pause-screen music | decision |
 | Photos of Middlesex College / UC (any angle) | Option 3 hand-built models, textures | optional |
 | Check live buses on the deployed site (LTC realtime host `gtfs.ltconline.ca` reset connections from the cloud build machine; static schedule works) | Live buses status chip should say "Live" | check |
