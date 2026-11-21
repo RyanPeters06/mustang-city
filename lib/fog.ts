@@ -97,6 +97,11 @@ export function revealAt(lat: number, lng: number) {
   return added;
 }
 
+export function isRevealedAt(lat: number, lng: number) {
+  ensureLoaded();
+  return cells.has(latLngToCell(lat, lng, H3_RES));
+}
+
 export function resetFog() {
   ensureLoaded();
   cells = new Set(defaultCells());

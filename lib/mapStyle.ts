@@ -19,8 +19,10 @@ export function basemapConfig(lightPreset: LightPreset) {
     showPointOfInterestLabels: false,
     showTransitLabels: false,
     showPedestrianRoads: false,
-    showPlaceLabels: true,
+    // Off: towns outside London would float on the sea. Our own island/district names replace them.
+    showPlaceLabels: false,
     showRoadLabels: false,
+    showAdminBoundaries: false,
     show3dObjects: true,
     colorLand: "#2a1748",
     colorWater: "#4a22b0",

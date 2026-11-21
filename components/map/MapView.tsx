@@ -4,9 +4,20 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 import type { Map as MapboxMap, GeoJSONSource } from "mapbox-gl";
 import type { Feature, FeatureCollection } from "geojson";
-import { buildFog, subscribe } from "@/lib/fog";
+import { buildFog, isRevealedAt, subscribe } from "@/lib/fog";
 import { onFix } from "@/lib/location";
-import { CAMPUS_CENTER, LONDON_CENTER, MISSION_BUILDINGS, inCampus, type LngLat } from "@/lib/geo";
+import {
+  CAMPUS_BUILDINGS,
+  CAMPUS_CENTER,
+  LONDON_BOUNDARY,
+  LONDON_CENTER,
+  MAX_BOUNDS,
+  MISSION_BUILDINGS,
+  SEA_RING,
+  inCampus,
+  ringIsCounterClockwise,
+  type LngLat,
+} from "@/lib/geo";
 import { ATMOSPHERE, CAMPUS_PITCH, CAMPUS_ZOOM, CITY_PITCH, basemapConfig, londonLightPreset } from "@/lib/mapStyle";
 
 export type MapHandle = {
@@ -14,6 +25,7 @@ export type MapHandle = {
   flyToCity: () => void;
   center: () => LngLat | null;
   follow: (lngLat: LngLat) => void;
+  locate: (lngLat: LngLat) => void;
 };
 
 type Props = {
@@ -137,35 +149,222 @@ function addGameLayers(map: MapboxMap) {
     },
   });
 
-  // --- Player -----------------------------------------------------------------
-  map.addSource("player", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+  // --- Island: open sea around Forest State, glowing coastline + surf rings ----------
+  map.addSource("sea", {
+    type: "geojson",
+    data: { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [SEA_RING, LONDON_BOUNDARY] } },
+  });
+  map.addSource("coast", {
+    type: "geojson",
+    data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: LONDON_BOUNDARY } },
+  });
   map.addLayer({
-    id: "player-halo",
-    type: "circle",
-    source: "player",
+    id: "sea",
+    type: "fill",
+    source: "sea",
     slot: "top",
+    paint: { "fill-color": "#1b0d45", "fill-emissive-strength": 1 },
+  });
+  // line-offset is relative to line direction; flip so surf always sits out at sea.
+  const out = ringIsCounterClockwise(LONDON_BOUNDARY) ? 1 : -1;
+  for (const [i, offset] of [14, 30, 50].entries()) {
+    map.addLayer({
+      id: `surf-${i}`,
+      type: "line",
+      source: "coast",
+      slot: "top",
+      layout: { "line-join": "round" },
+      paint: {
+        "line-color": "#2ee6d6",
+        "line-width": 1.2,
+        "line-opacity": 0.35 - i * 0.1,
+        "line-offset": out * offset,
+        "line-emissive-strength": 1,
+      },
+    });
+  }
+  map.addLayer({
+    id: "coast-glow",
+    type: "line",
+    source: "coast",
+    slot: "top",
+    layout: { "line-join": "round" },
     paint: {
-      "circle-radius": 20,
-      "circle-color": "#2ee6d6",
-      "circle-opacity": 0.22,
-      "circle-pitch-alignment": "map",
-      "circle-emissive-strength": 1,
+      "line-color": "#ff4f8b",
+      "line-width": 18,
+      "line-blur": 16,
+      "line-opacity": 0.55,
+      "line-emissive-strength": 1,
     },
   });
   map.addLayer({
-    id: "player-dot",
-    type: "circle",
-    source: "player",
+    id: "coast-line",
+    type: "line",
+    source: "coast",
     slot: "top",
-    paint: {
-      "circle-radius": 7,
-      "circle-color": "#2ee6d6",
-      "circle-stroke-color": "#ffffff",
-      "circle-stroke-width": 2,
-      "circle-pitch-alignment": "map",
-      "circle-emissive-strength": 1,
+    layout: { "line-join": "round" },
+    paint: { "line-color": "#ffd1e3", "line-width": 1.5, "line-emissive-strength": 1 },
+  });
+
+  // --- Island + campus names at overview zoom ------------------------------------
+  map.addSource("island-names", {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: [
+        { type: "Feature", properties: { name: "FOREST STATE", size: 1 }, geometry: { type: "Point", coordinates: LONDON_CENTER } },
+        { type: "Feature", properties: { name: "MUSTANG CITY", size: 0.6 }, geometry: { type: "Point", coordinates: CAMPUS_CENTER } },
+      ],
     },
   });
+  map.addLayer({
+    id: "island-names",
+    type: "symbol",
+    source: "island-names",
+    slot: "top",
+    maxzoom: 14.5,
+    layout: {
+      "text-field": ["get", "name"],
+      "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
+      "text-size": ["*", ["get", "size"], ["interpolate", ["linear"], ["zoom"], 9.5, 20, 13, 30]],
+      "text-letter-spacing": 0.25,
+      "text-allow-overlap": true,
+    },
+    paint: {
+      "text-color": ["case", ["==", ["get", "name"], "FOREST STATE"], "#ff4f8b", "#ffc857"],
+      "text-halo-color": "#140a2e",
+      "text-halo-width": 2,
+      "text-halo-blur": 1,
+      "text-opacity": ["interpolate", ["linear"], ["zoom"], 13.5, 1, 14.5, 0],
+      "text-emissive-strength": 1,
+    },
+  });
+
+  // --- Campus building names (dimmed while still under fog) ----------------------
+  map.addSource("campus-labels", { type: "geojson", data: campusLabelData() });
+  map.addLayer({
+    id: "campus-labels",
+    type: "symbol",
+    source: "campus-labels",
+    slot: "top",
+    minzoom: 15,
+    layout: {
+      "text-field": ["get", "name"],
+      "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
+      "text-size": ["interpolate", ["linear"], ["zoom"], 15, 10, 18, 15],
+      "text-transform": "uppercase",
+      "text-letter-spacing": 0.06,
+      "text-max-width": 8,
+      "text-padding": 4,
+      "symbol-z-elevate": true,
+      "symbol-sort-key": ["case", ["get", "revealed"], 0, 1],
+    },
+    paint: {
+      "text-color": ["case", ["get", "revealed"], "#fff1c9", "rgba(246,239,255,0.4)"],
+      "text-halo-color": "#140a2e",
+      "text-halo-width": 1.6,
+      "text-emissive-strength": 1,
+    },
+  });
+
+  // --- Player pointer: pulsing ring + heading arrow ------------------------------
+  map.addImage("player-pulse", pulsingRing(map), { pixelRatio: 2 });
+  map.addImage("player-arrow", arrowImage(), { pixelRatio: 2 });
+  map.addSource("player", { type: "geojson", data: EMPTY });
+  map.addLayer({
+    id: "player-pulse",
+    type: "symbol",
+    source: "player",
+    slot: "top",
+    layout: {
+      "icon-image": "player-pulse",
+      "icon-allow-overlap": true,
+      "icon-ignore-placement": true,
+      "icon-pitch-alignment": "map",
+    },
+  });
+  map.addLayer({
+    id: "player-arrow",
+    type: "symbol",
+    source: "player",
+    slot: "top",
+    layout: {
+      "icon-image": "player-arrow",
+      "icon-rotate": ["get", "heading"],
+      "icon-rotation-alignment": "map",
+      "icon-pitch-alignment": "map",
+      "icon-allow-overlap": true,
+      "icon-ignore-placement": true,
+    },
+  });
+}
+
+function campusLabelData(): FeatureCollection {
+  return {
+    type: "FeatureCollection",
+    features: CAMPUS_BUILDINGS.map((b) => ({
+      type: "Feature",
+      properties: { name: b.name, revealed: isRevealedAt(b.lat, b.lng) },
+      geometry: { type: "Point", coordinates: [b.lng, b.lat] },
+    })),
+  };
+}
+
+/** Teal navigation arrow (64×64 @2x), pointing north before rotation. */
+function arrowImage() {
+  const size = 64;
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d")!;
+  ctx.translate(size / 2, size / 2);
+  ctx.shadowColor = "rgba(46,230,214,0.9)";
+  ctx.shadowBlur = 10;
+  ctx.beginPath();
+  ctx.moveTo(0, -22);
+  ctx.lineTo(16, 18);
+  ctx.lineTo(0, 9);
+  ctx.lineTo(-16, 18);
+  ctx.closePath();
+  ctx.fillStyle = "#2ee6d6";
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineJoin = "round";
+  ctx.stroke();
+  return ctx.getImageData(0, 0, size, size);
+}
+
+/** Animated expanding teal ring (Mapbox StyleImageInterface). */
+function pulsingRing(map: MapboxMap) {
+  const size = 160;
+  const reduced = reducedMotion();
+  let ctx: CanvasRenderingContext2D | null = null;
+  return {
+    width: size,
+    height: size,
+    data: new Uint8ClampedArray(size * size * 4),
+    onAdd() {
+      const c = document.createElement("canvas");
+      c.width = c.height = size;
+      ctx = c.getContext("2d", { willReadFrequently: true });
+    },
+    render() {
+      if (!ctx) return false;
+      const t = reduced ? 0.35 : (performance.now() % 1600) / 1600;
+      ctx.clearRect(0, 0, size, size);
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, 18 + t * 56, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(46,230,214,${0.35 * (1 - t)})`;
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = `rgba(46,230,214,${0.8 * (1 - t)})`;
+      ctx.stroke();
+      this.data = ctx.getImageData(0, 0, size, size).data;
+      if (!reduced) map.triggerRepaint();
+      return true;
+    },
+  };
 }
 
 export default function MapView({ ref, onReady, onUnavailable }: Props) {
@@ -181,12 +380,14 @@ export default function MapView({ ref, onReady, onUnavailable }: Props) {
     flyToCampus: () =>
       mapRef.current?.flyTo({ center: CAMPUS_CENTER, zoom: 16.2, pitch: CAMPUS_PITCH, bearing: -30, duration: dur(2200), essential: true }),
     flyToCity: () =>
-      mapRef.current?.flyTo({ center: LONDON_CENTER, zoom: 12, pitch: CITY_PITCH, bearing: -15, duration: dur(2200), essential: true }),
+      mapRef.current?.flyTo({ center: LONDON_CENTER, zoom: 9.85, pitch: 25, bearing: 0, duration: dur(2200), essential: true }),
     center: () => {
       const c = mapRef.current?.getCenter();
       return c ? [c.lng, c.lat] : null;
     },
     follow: (lngLat) => mapRef.current?.easeTo({ center: lngLat, duration: dur(400), essential: true }),
+    locate: (lngLat) =>
+      mapRef.current?.flyTo({ center: lngLat, zoom: Math.max(mapRef.current.getZoom(), 16), duration: dur(1400), essential: true }),
   }));
 
   useEffect(() => {
@@ -214,7 +415,8 @@ export default function MapView({ ref, onReady, onUnavailable }: Props) {
         pitch: CITY_PITCH,
         bearing: -20,
         maxPitch: 70,
-        minZoom: 10,
+        minZoom: 9.4,
+        maxBounds: MAX_BOUNDS,
         attributionControl: false,
       });
       mapRef.current = map;
@@ -259,15 +461,16 @@ export default function MapView({ ref, onReady, onUnavailable }: Props) {
             const { fog, edges } = buildFog();
             (map.getSource("fog") as GeoJSONSource).setData(fog);
             (map.getSource("fog-edges") as GeoJSONSource).setData(edges);
+            (map.getSource("campus-labels") as GeoJSONSource).setData(campusLabelData());
           }, 150);
         }),
       );
 
       cleanups.push(
-        onFix(({ lngLat }) => {
+        onFix(({ lngLat, heading }) => {
           (map.getSource("player") as GeoJSONSource | undefined)?.setData({
             type: "Feature",
-            properties: {},
+            properties: { heading: heading ?? 0 },
             geometry: { type: "Point", coordinates: lngLat },
           });
         }),

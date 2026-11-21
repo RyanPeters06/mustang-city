@@ -2,7 +2,7 @@
  * Live location → fog reveal. Fixes stay out of React state (Constitution V).
  * Drops fixes with accuracy worse than 50 m or implying impossible speed.
  */
-import { distanceM, type LngLat } from "./geo";
+import { bearing, distanceM, type LngLat } from "./geo";
 import { revealAt } from "./fog";
 
 const MAX_ACCURACY_M = 50;
@@ -35,8 +35,14 @@ export function onFix(l: (fix: Fix) => void) {
   return () => fixListeners.delete(l);
 }
 
+export const getLastFix = () => last;
+
 /** Push a fix through the same pipeline as GPS (used by live GPS and the demo walk). */
 export function acceptFix(lngLat: LngLat, heading: number | null = null, ts = Date.now()) {
+  // No compass heading (laptops, standing still)? Use direction of travel, else keep the last one.
+  if (heading === null || Number.isNaN(heading)) {
+    heading = last && distanceM(last.lngLat, lngLat) > 3 ? bearing(last.lngLat, lngLat) : (last?.heading ?? 0);
+  }
   const fix = { lngLat, heading, ts };
   last = fix;
   revealAt(lngLat[1], lngLat[0]);

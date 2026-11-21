@@ -9,6 +9,7 @@ import Sheet from "./Sheet";
 import LocationPrompt from "./LocationPrompt";
 import ProfilePanel from "./ProfilePanel";
 import DemoPanel from "./DemoPanel";
+import LocateButton from "./LocateButton";
 
 const TITLES: Record<Exclude<Tab, "map">, string> = { missions: "Missions", crew: "Crew", profile: "Profile" };
 
@@ -41,7 +42,12 @@ export default function GameScreen() {
         }}
       />
       <Hud />
-      {mapState === "ready" && <LocationPrompt />}
+      {mapState === "ready" && (
+        <>
+          <LocationPrompt />
+          <LocateButton map={map} />
+        </>
+      )}
 
       <Sheet open={tab !== "map"} title={tab === "map" ? "" : TITLES[tab]} onClose={() => setTab("map")}>
         {tab === "profile" ? (

@@ -1,28 +1,52 @@
 /**
  * Geography constants for Forest State (London, ON) and Mustang City (Western campus).
- * Coordinates are [lng, lat]. The London boundary is a hand-simplified outline of the
- * city's municipal extent — good enough for fog + % explored; swap for open data later.
+ * Coordinates are [lng, lat]. The London boundary is the City of London's municipal outline
+ * from OpenStreetMap (© OpenStreetMap contributors, ODbL), simplified to 91 points.
  */
+import londonBoundary from "./data/londonBoundary.json";
+import campusBuildings from "./data/campusBuildings.json";
 
 export type LngLat = [number, number];
 
-export const LONDON_BOUNDARY: LngLat[] = [
-  [-81.395, 43.012],
-  [-81.37, 43.055],
-  [-81.31, 43.078],
-  [-81.235, 43.083],
-  [-81.17, 43.068],
-  [-81.12, 43.04],
-  [-81.105, 42.99],
-  [-81.13, 42.935],
-  [-81.2, 42.905],
-  [-81.29, 42.9],
-  [-81.355, 42.925],
-  [-81.39, 42.965],
-  [-81.395, 43.012],
+export const LONDON_BOUNDARY = londonBoundary as LngLat[];
+
+/** Named Western buildings (OpenStreetMap), used for campus labels. */
+export const CAMPUS_BUILDINGS = campusBuildings as { name: string; lng: number; lat: number; residence: boolean }[];
+
+/** Camera can't leave Forest State: London's extent plus a strip of sea. */
+export const MAX_BOUNDS: [LngLat, LngLat] = [
+  [-81.8, 42.4],
+  [-80.7, 43.5],
 ];
 
-export const LONDON_CENTER: LngLat = [-81.2453, 42.9849];
+/** A box of open sea around the island; London is cut out of it. */
+export const SEA_RING: LngLat[] = [
+  [-82.5, 42.2],
+  [-79.9, 42.2],
+  [-79.9, 43.7],
+  [-82.5, 43.7],
+  [-82.5, 42.2],
+];
+
+/** Signed area > 0 means counter-clockwise (used to push surf rings outward). */
+export function ringIsCounterClockwise(ring: LngLat[]) {
+  let sum = 0;
+  for (let i = 0; i < ring.length - 1; i++) sum += ring[i][0] * ring[i + 1][1] - ring[i + 1][0] * ring[i][1];
+  return sum > 0;
+}
+
+/** Compass bearing in degrees from a to b. */
+export function bearing([lng1, lat1]: LngLat, [lng2, lat2]: LngLat) {
+  const toRad = Math.PI / 180;
+  const y = Math.sin((lng2 - lng1) * toRad) * Math.cos(lat2 * toRad);
+  const x =
+    Math.cos(lat1 * toRad) * Math.sin(lat2 * toRad) -
+    Math.sin(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.cos((lng2 - lng1) * toRad);
+  return (Math.atan2(y, x) / toRad + 360) % 360;
+}
+
+/** Middle of the island (boundary bbox centre) — the "Fly to Forest State" overview target. */
+export const LONDON_CENTER: LngLat = [-81.2489, 42.9488];
 
 /** Western University main campus. */
 export const CAMPUS_CENTER: LngLat = [-81.2737, 43.0096];
