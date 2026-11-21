@@ -15,10 +15,25 @@ let vehicles: Feed<Vehicle[]> = null;
 let trips: Feed<Arrival[]> = null;
 const fixture = () => process.env.LTC_FIXTURE === "1" && process.env.NODE_ENV !== "production";
 
-async function fetchFeed(url: string) {
+// gtfs.ltconline.ca resets TLS handshakes from many networks but serves the same public feed over
+// plain HTTP. We fetch server-side (no mixed content, nothing secret), so try HTTPS, then HTTP,
+// and remember which one worked.
+let preferHttp = false;
+async function fetchOnce(url: string) {
   const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(6000) });
   if (!res.ok) throw new Error(`LTC ${res.status}`);
   return GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(new Uint8Array(await res.arrayBuffer()));
+}
+async function fetchFeed(url: string) {
+  const http = url.replace(/^https:/, "http:");
+  if (preferHttp) return fetchOnce(http);
+  try {
+    return await fetchOnce(url);
+  } catch {
+    const feed = await fetchOnce(http);
+    preferHttp = true;
+    return feed;
+  }
 }
 const num = (v: unknown) => (typeof v === "number" ? v : v && typeof v === "object" && "toNumber" in v ? (v as { toNumber(): number }).toNumber() : 0);
 
