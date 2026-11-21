@@ -83,7 +83,7 @@ export default function HeistPanel({ m, fix, inRange, onComplete }: Props) {
         </div>
         <div className="mt-2 flex gap-2" aria-label={`${members} of ${HEIST_CREW} crew in`}>
           {Array.from({ length: HEIST_CREW }, (_, i) => (
-            <span key={i} className={`h-10 flex-1 border ${i < members ? "border-purple bg-purple/40" : "border-white/15 bg-white/[0.03]"}`}>
+            <span key={i} className={`h-10 flex-1 rounded-xl border ${i < members ? "border-purple bg-purple/40" : "border-white/15 bg-white/[0.03]"}`}>
               <span className="flex h-full items-center justify-center text-[16px]">{i < members ? "✓" : ""}</span>
             </span>
           ))}

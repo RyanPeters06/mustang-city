@@ -65,7 +65,7 @@ export default function ProfilePanel({
 
   const { profile, completions, rep, rank, nextRank, pct, missionCount } = snap;
   const fallbackName = account.kind === "signed-in" ? (account.user.name ?? account.user.email?.split("@")[0]) : undefined;
-  const name = profile.name || fallbackName || "Unnamed Mustang";
+  const name = profile.name || fallbackName || "Set your name";
   const done = Object.values(completions).sort((a, b) => b.at - a.at);
   const showcase = profile.showcase.map((s) => completions[s]).filter((c) => c?.thumb);
   const archive = MISSIONS.filter((m) => m.category && completions[m.slug]);

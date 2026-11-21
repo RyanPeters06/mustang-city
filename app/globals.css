@@ -137,9 +137,9 @@ select {
 
 /* Frosted night glass used by HUD, tab bar and sheets */
 .glass {
-  background: rgb(18 11 38 / 0.72);
-  backdrop-filter: blur(20px) saturate(1.5);
-  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  background: rgb(18 11 38 / 0.84);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
   border: 1px solid rgb(255 255 255 / 0.09);
   box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.55);
 }

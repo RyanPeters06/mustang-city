@@ -173,7 +173,7 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
                 type="button"
                 disabled={phase.kind === "working"}
                 onClick={() => fileRef.current?.click()}
-                className={`${primary} bg-pink text-night shadow-[0_10px_40px_-8px_rgba(255,79,139,0.9)] disabled:opacity-50`}
+                className={`${primary} btn-sunset`}
               >
                 {phase.kind === "error" ? "Retake photo" : "Take photo"}
               </button>

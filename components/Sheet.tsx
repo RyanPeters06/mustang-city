@@ -39,7 +39,9 @@ export default function Sheet({ open, title, onClose, children }: Props) {
               <div className="h-[5px] w-10 rounded-full bg-white/20" />
             </div>
             <h2 className="font-display px-6 pt-2 text-[30px] leading-none tracking-[0.005em] text-ink uppercase">{title}</h2>
-            <div className="overflow-y-auto px-6 pt-4">{children}</div>
+            <div key={title} className="animate-[fadein_220ms_ease-out] overflow-y-auto px-6 pt-4">
+              {children}
+            </div>
           </motion.section>
         </>
       )}

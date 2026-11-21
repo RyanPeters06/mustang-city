@@ -179,8 +179,8 @@ function Composer({ mode, fix, onPosted }: { mode: Mode; fix: { lngLat: [number,
   return (
     <div className="hud-panel mb-3 space-y-2 p-3">
       <p className="text-[12px] text-ink/60">The job is pinned where you&apos;re standing. The Goose screens every job before it goes live.</p>
-      <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 50))} placeholder="Job title" className="w-full border border-white/12 bg-white/[0.05] px-3 py-2.5 text-[16px] text-ink placeholder:text-ink/35 focus:border-teal focus:outline-none" />
-      <textarea value={briefing} onChange={(e) => setBriefing(e.target.value.slice(0, 140))} rows={3} placeholder="What should they do here?" className="w-full resize-none border border-white/12 bg-white/[0.05] px-3 py-2.5 text-[16px] text-ink placeholder:text-ink/35 focus:border-teal focus:outline-none" />
+      <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 50))} placeholder="Job title" className="w-full rounded-xl border border-white/12 bg-white/[0.05] px-3 py-2.5 text-[16px] text-ink placeholder:text-ink/35 focus:border-teal focus:outline-none" />
+      <textarea value={briefing} onChange={(e) => setBriefing(e.target.value.slice(0, 140))} rows={3} placeholder="What should they do here?" className="w-full resize-none rounded-xl border border-white/12 bg-white/[0.05] px-3 py-2.5 text-[16px] text-ink placeholder:text-ink/35 focus:border-teal focus:outline-none" />
       {error && <p role="alert" className="text-[13px] text-pink">{error}</p>}
       <button type="button" disabled={busy} onClick={post} className="flex min-h-[48px] w-full items-center justify-center bg-teal text-[14px] font-bold text-night disabled:opacity-50 rounded-full">
         {busy ? "Screening…" : "Post job"}

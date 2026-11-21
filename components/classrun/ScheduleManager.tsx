@@ -36,7 +36,7 @@ export default function ScheduleManager() {
   const ics = useRef<HTMLInputElement>(null);
   const shot = useRef<HTMLInputElement>(null);
 
-  const field = "w-full border border-white/12 bg-white/[0.05] px-3 py-2.5 text-[16px] text-ink placeholder:text-ink/35 focus:border-teal focus:outline-none";
+  const field = "w-full rounded-xl border border-white/12 bg-white/[0.05] px-3 py-2.5 text-[16px] text-ink placeholder:text-ink/35 focus:border-teal focus:outline-none";
   const valid = (d: Draft) => d.course.trim() && d.building && d.days.length && /^\d{2}:\d{2}$/.test(d.start);
 
   return (
