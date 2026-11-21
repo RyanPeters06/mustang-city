@@ -23,7 +23,7 @@ Status marks: `[ ]` todo · `[x]` done · `[~]` blocked (reason in the line) · 
 - [x] **Neighbourhood unlocks** — London neighbourhood polygons (OSM `place=neighbourhood|suburb` or City of
   London open data, record the source), unlock at 30% of a neighbourhood's cells, +50 Rep, toast, list on
   Profile, large stylised district names at city zoom. *Done when:* demo walk through Old East Village unlocks it.
-- [ ] **Server ping log** — write live GPS fixes to the `location_pings` hypertable when signed in (batched),
+- [x] **Server ping log** — write live GPS fixes to the `location_pings` hypertable when signed in (batched),
   so replays/Wrapped survive device changes. *Done when:* a signed-in walk appears in `location_pings`; no-op without DB.
 - [ ] **Leaderboards** — weekly + all-time, filter friends / faculty / all Western, by Rep and % explored
   (continuous aggregate for weekly Rep). *Done when:* two test accounts rank correctly; degrades without DB.

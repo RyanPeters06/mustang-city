@@ -22,6 +22,7 @@ import { missionBySlug } from "@/lib/missions";
 import { getLastFix } from "@/lib/location";
 import { walkingRoute } from "@/lib/directions";
 import { subscribeAccount } from "@/lib/account";
+import { startPingLog } from "@/lib/pingLog";
 import type { LngLat } from "@/lib/geo";
 import type { FriendRow } from "@/app/api/friends/route";
 
@@ -57,6 +58,7 @@ export default function GameScreen() {
 
   // Start the account check (and sync) as soon as the app opens.
   useEffect(() => {
+    startPingLog();
     const off = subscribeAccount(() => {});
     return () => {
       off();
