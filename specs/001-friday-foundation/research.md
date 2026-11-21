@@ -61,3 +61,13 @@
 ## R9. London boundary
 - **Decision**: hand-simplified ~12-vertex polygon around the City of London's municipal extent.
   Open question in the brief (open data vs hand-drawn) stays open for neighbourhoods.
+
+## R10. Location + reveal revision (after live testing, 2026-11-21)
+- **Decision**: fog cells moved to H3 **res 11** (~25 m); every cell whose centre is within **100 m**
+  of an accepted fix is revealed, so the cleared area reads as a circle (res-10 ring-1 was a lumpy
+  65–180 m hexagon). Saved res-10 cells migrate to their res-11 children.
+- Every fix moves the marker (with an accuracy circle); only fixes ≤ 50 m accuracy clear fog. Speed
+  check compares with the previous accurate fix, so one GPS spike is skipped without blocking later fixes.
+- GPS timeouts no longer stop tracking. Heading: compass (iOS permission on the Enable tap) → GPS
+  course → direction of travel; unknown heading shows a dot instead of a north-pointing arrow.
+- Map flies to the first fix and follows the player until they pan; the locate button resumes follow.

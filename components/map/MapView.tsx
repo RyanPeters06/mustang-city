@@ -5,7 +5,7 @@ import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 import type { Map as MapboxMap, GeoJSONSource } from "mapbox-gl";
 import type { Feature, FeatureCollection } from "geojson";
 import { buildFog, isRevealedAt, subscribe } from "@/lib/fog";
-import { onFix } from "@/lib/location";
+import { REVEAL_ACCURACY_M, getLastFix, onFix, type Fix } from "@/lib/location";
 import {
   CAMPUS_BUILDINGS,
   CAMPUS_CENTER,
@@ -267,10 +267,28 @@ function addGameLayers(map: MapboxMap) {
     },
   });
 
-  // --- Player pointer: pulsing ring + heading arrow ------------------------------
+  // --- Player marker: accuracy circle, pulse, arrow (heading known) or dot ----------
   map.addImage("player-pulse", pulsingRing(map), { pixelRatio: 2 });
   map.addImage("player-arrow", arrowImage(), { pixelRatio: 2 });
+  map.addImage("player-dot", dotImage(), { pixelRatio: 2 });
   map.addSource("player", { type: "geojson", data: EMPTY });
+  map.addLayer({
+    id: "player-accuracy",
+    type: "circle",
+    source: "player",
+    slot: "top",
+    paint: {
+      // metres → pixels at London's latitude (512-px tiles): px = m * 2^z / 57245
+      "circle-radius": ["interpolate", ["exponential", 2], ["zoom"], 0, 0, 22, ["*", ["get", "accuracy"], 73.27]],
+      "circle-color": "#2ee6d6",
+      "circle-opacity": 0.1,
+      "circle-stroke-color": "#2ee6d6",
+      "circle-stroke-opacity": 0.45,
+      "circle-stroke-width": 1,
+      "circle-pitch-alignment": "map",
+      "circle-emissive-strength": 1,
+    },
+  });
   map.addLayer({
     id: "player-pulse",
     type: "symbol",
@@ -282,21 +300,58 @@ function addGameLayers(map: MapboxMap) {
       "icon-ignore-placement": true,
       "icon-pitch-alignment": "map",
     },
+    paint: { "icon-opacity": ["case", ["get", "weak"], 0.4, 1] },
   });
   map.addLayer({
-    id: "player-arrow",
+    id: "player-marker",
     type: "symbol",
     source: "player",
     slot: "top",
     layout: {
-      "icon-image": "player-arrow",
+      "icon-image": ["case", ["get", "hasHeading"], "player-arrow", "player-dot"],
       "icon-rotate": ["get", "heading"],
       "icon-rotation-alignment": "map",
       "icon-pitch-alignment": "map",
       "icon-allow-overlap": true,
       "icon-ignore-placement": true,
     },
+    paint: { "icon-opacity": ["case", ["get", "weak"], 0.6, 1] },
   });
+
+  const last = getLastFix();
+  if (last) setPlayer(map, last);
+}
+
+function setPlayer(map: MapboxMap, { lngLat, heading, accuracy }: Fix) {
+  (map.getSource("player") as GeoJSONSource | undefined)?.setData({
+    type: "Feature",
+    properties: {
+      heading: heading ?? 0,
+      hasHeading: heading !== null,
+      accuracy,
+      weak: accuracy > REVEAL_ACCURACY_M, // too rough to clear fog: marker dims
+    },
+    geometry: { type: "Point", coordinates: lngLat },
+  });
+}
+
+/** Teal dot with white rim (heading unknown). */
+function dotImage() {
+  const size = 48;
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d")!;
+  ctx.shadowColor = "rgba(46,230,214,0.9)";
+  ctx.shadowBlur = 8;
+  ctx.beginPath();
+  ctx.arc(size / 2, size / 2, 11, 0, Math.PI * 2);
+  ctx.fillStyle = "#2ee6d6";
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = "#ffffff";
+  ctx.stroke();
+  return ctx.getImageData(0, 0, size, size);
 }
 
 function campusLabelData(): FeatureCollection {
@@ -370,6 +425,7 @@ function pulsingRing(map: MapboxMap) {
 export default function MapView({ ref, onReady, onUnavailable }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapboxMap | null>(null);
+  const followRef = useRef(false);
   const callbacks = useRef({ onReady, onUnavailable });
 
   useEffect(() => {
@@ -386,8 +442,10 @@ export default function MapView({ ref, onReady, onUnavailable }: Props) {
       return c ? [c.lng, c.lat] : null;
     },
     follow: (lngLat) => mapRef.current?.easeTo({ center: lngLat, duration: dur(400), essential: true }),
-    locate: (lngLat) =>
-      mapRef.current?.flyTo({ center: lngLat, zoom: Math.max(mapRef.current.getZoom(), 16), duration: dur(1400), essential: true }),
+    locate: (lngLat) => {
+      followRef.current = true;
+      mapRef.current?.flyTo({ center: lngLat, zoom: Math.max(mapRef.current.getZoom(), 16), duration: dur(1400), essential: true });
+    },
   }));
 
   useEffect(() => {
@@ -462,17 +520,26 @@ export default function MapView({ ref, onReady, onUnavailable }: Props) {
             (map.getSource("fog") as GeoJSONSource).setData(fog);
             (map.getSource("fog-edges") as GeoJSONSource).setData(edges);
             (map.getSource("campus-labels") as GeoJSONSource).setData(campusLabelData());
-          }, 150);
+          }, 80);
         }),
       );
 
+      // Player: move the marker; follow the player until they pan the map themselves.
+      map.on("dragstart", () => {
+        followRef.current = false;
+      });
+      let lastFollow = 0;
       cleanups.push(
-        onFix(({ lngLat, heading }) => {
-          (map.getSource("player") as GeoJSONSource | undefined)?.setData({
-            type: "Feature",
-            properties: { heading: heading ?? 0 },
-            geometry: { type: "Point", coordinates: lngLat },
-          });
+        onFix((fix, first) => {
+          setPlayer(map, fix);
+          if (first) {
+            followRef.current = true;
+            map.flyTo({ center: fix.lngLat, zoom: Math.max(map.getZoom(), 16), duration: dur(1600), essential: true });
+            lastFollow = performance.now();
+          } else if (followRef.current && performance.now() - lastFollow > 450) {
+            lastFollow = performance.now();
+            map.easeTo({ center: fix.lngLat, duration: dur(450), essential: true });
+          }
         }),
       );
 

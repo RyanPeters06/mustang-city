@@ -17,7 +17,7 @@ Next.js (App Router) + TypeScript + Tailwind v4, Motion, Mapbox GL JS (Standard 
 ## Code map
 - `components/GameScreen.tsx` — the one screen: map + HUD + tab bar + sheet + demo panel (press D).
 - `components/map/MapView.tsx` — the single Mapbox instance; fog/player/campus layers; 45°↔60° camera switch.
-- `lib/fog.ts` — revealed H3 cells (localStorage), `revealAt`, fog polygon builder, % explored.
+- `lib/fog.ts` — revealed H3 res-11 cells (localStorage), `revealAround` (100 m radius), fog polygon builder, % explored.
 - `lib/location.ts` — GPS watcher; `acceptFix` is the shared path for GPS and demo walks.
 - `lib/auth0.ts` + `proxy.ts` — Auth0 v4 (null/no-op when env missing); `auth0/uwo-only-action.js` for the dashboard.
 - `db/schema.sql`, `db/seed.sql`, `npm run db:schema|db:seed`.

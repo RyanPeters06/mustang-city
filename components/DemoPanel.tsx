@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { DEMO_WALK, densify } from "@/lib/geo";
-import { resetFog, revealAt } from "@/lib/fog";
+import { resetFog, revealAround } from "@/lib/fog";
 import { acceptFix } from "@/lib/location";
 import type { MapHandle } from "./map/MapView";
 
@@ -38,8 +38,7 @@ export default function DemoPanel({ map }: { map: React.RefObject<MapHandle | nu
     setWalking(true);
     timer.current = setInterval(() => {
       if (i >= path.length) return stopWalk();
-      acceptFix(path[i]);
-      if (i % 3 === 0) map.current?.follow(path[i]);
+      acceptFix(path[i]); // the map follows the player itself
       i++;
     }, 160);
   };
@@ -56,7 +55,7 @@ export default function DemoPanel({ map }: { map: React.RefObject<MapHandle | nu
         className={btn}
         onClick={() => {
           const c = map.current?.center();
-          if (c) revealAt(c[1], c[0]);
+          if (c) revealAround(c[1], c[0]);
         }}
       >
         Reveal here

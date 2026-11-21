@@ -1,13 +1,19 @@
 /**
  * Fog of war: revealed H3 cells, persisted on the device, rendered as ONE polygon
  * (London boundary with explored holes) — never thousands of hexes (Constitution V).
+ *
+ * Resolution 11 (~25 m cells) so the cleared area around the player reads as a circle:
+ * every cell whose centre lies within REVEAL_RADIUS_M of an accepted fix is revealed.
  */
-import { cellsToMultiPolygon, gridDisk, latLngToCell, polygonToCells } from "h3-js";
+import { cellToChildren, cellToLatLng, cellsToMultiPolygon, gridDisk, latLngToCell, polygonToCells } from "h3-js";
 import type { Feature, FeatureCollection, MultiLineString, Polygon } from "geojson";
-import { CAMPUS_CENTER, LONDON_BOUNDARY, type LngLat } from "./geo";
+import { CAMPUS_CENTER, LONDON_BOUNDARY, distanceM, type LngLat } from "./geo";
 
-export const H3_RES = 10;
-const STORAGE_KEY = "mc.cells.v1";
+export const H3_RES = 11;
+export const REVEAL_RADIUS_M = 100;
+const RING_K = 5; // res-11 centre spacing ≈ 43 m, so k=5 safely covers a 100 m radius
+const STORAGE_KEY = "mc.cells.v2";
+const LEGACY_KEY = "mc.cells.v1"; // res 10
 
 export const RANKS = [
   { name: "Frosh", min: 0 },
@@ -20,19 +26,40 @@ export type FogSnapshot = { count: number; pct: number; rep: number; rank: strin
 
 let cells = new Set<string>();
 let loaded = false;
-let londonCells: Set<string> | null = null;
+let londonCellCount = 0;
 let snapshot: FogSnapshot = { count: 0, pct: 0, rep: 0, rank: "Frosh" };
 const listeners = new Set<() => void>();
 let persistTimer: ReturnType<typeof setTimeout> | undefined;
 
-function london() {
-  if (!londonCells) londonCells = new Set(polygonToCells(LONDON_BOUNDARY, H3_RES, true));
-  return londonCells;
+function pointInLondon([x, y]: LngLat) {
+  const ring = LONDON_BOUNDARY;
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i];
+    const [xj, yj] = ring[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+/** London measured in res-11 cells (res-9 count × 49 children — cheap and accurate enough). */
+function londonCells() {
+  if (!londonCellCount) londonCellCount = polygonToCells(LONDON_BOUNDARY, 9, true).length * 49;
+  return londonCellCount;
+}
+
+function cellsAround(lat: number, lng: number, radiusM: number) {
+  const out: string[] = [];
+  for (const c of gridDisk(latLngToCell(lat, lng, H3_RES), RING_K)) {
+    const [clat, clng] = cellToLatLng(c);
+    if (distanceM([lng, lat], [clng, clat]) <= radiusM && pointInLondon([clng, clat])) out.push(c);
+  }
+  return out;
 }
 
 function defaultCells() {
   const [lng, lat] = CAMPUS_CENTER;
-  return gridDisk(latLngToCell(lat, lng, H3_RES), 2);
+  return cellsAround(lat, lng, 150);
 }
 
 function ensureLoaded() {
@@ -41,7 +68,13 @@ function ensureLoaded() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     const saved: unknown = raw ? JSON.parse(raw) : null;
-    cells = new Set(Array.isArray(saved) && saved.length ? (saved as string[]) : defaultCells());
+    if (Array.isArray(saved) && saved.length) {
+      cells = new Set(saved as string[]);
+    } else {
+      // Migrate res-10 cells from the first build: each becomes its 7 res-11 children.
+      const legacy: unknown = JSON.parse(localStorage.getItem(LEGACY_KEY) ?? "null");
+      cells = new Set(Array.isArray(legacy) && legacy.length ? (legacy as string[]).flatMap((c) => cellToChildren(c, H3_RES)) : defaultCells());
+    }
   } catch {
     cells = new Set(defaultCells());
   }
@@ -50,9 +83,9 @@ function ensureLoaded() {
 
 function recompute() {
   const count = cells.size;
-  const rep = count; // 1 Rep per cleared cell (brief → Progression)
+  const rep = Math.floor(count / 7); // ≈ 1 Rep per brief-sized (res-10) cell cleared
   const rank = [...RANKS].reverse().find((r) => rep >= r.min)?.name ?? "Frosh";
-  snapshot = { count, pct: (count / london().size) * 100, rep, rank };
+  snapshot = { count, pct: (count / londonCells()) * 100, rep, rank };
 }
 
 function changed() {
@@ -82,13 +115,12 @@ export function getSnapshot() {
 const SERVER_SNAPSHOT: FogSnapshot = { count: 0, pct: 0, rep: 0, rank: "Frosh" };
 export const getServerSnapshot = () => SERVER_SNAPSHOT;
 
-/** Reveal the cell at a position plus its ring-1 neighbours. Returns number of new cells. */
-export function revealAt(lat: number, lng: number) {
+/** Clear fog within `radiusM` of a position. Returns the number of newly revealed cells. */
+export function revealAround(lat: number, lng: number, radiusM = REVEAL_RADIUS_M) {
   ensureLoaded();
-  const inLondon = london();
   let added = 0;
-  for (const c of gridDisk(latLngToCell(lat, lng, H3_RES), 1)) {
-    if (inLondon.has(c) && !cells.has(c)) {
+  for (const c of cellsAround(lat, lng, radiusM)) {
+    if (!cells.has(c)) {
       cells.add(c);
       added++;
     }
