@@ -159,7 +159,15 @@ function Timelapse({ data }: { data: WrappedData }) {
         {data.km2 < 1 ? `${Math.round(data.km2 * 100) / 100}` : data.km2.toFixed(1)} km²
       </p>
       <p className="text-[16px] text-ink/70">of fog cleared, in the order you cleared it.</p>
-      <canvas ref={ref} className="mt-5 aspect-square w-full border border-white/10" aria-label="Animated map of the fog you cleared" />
+      <div className="relative mt-5">
+        <canvas ref={ref} className="aspect-square w-full border border-white/10" aria-label="Animated map of the fog you cleared" />
+        {data.cellsInOrder.length === 0 && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-8 text-center">
+            <p className="text-[16px] font-semibold text-ink">Your timelapse starts with your first walk</p>
+            <p className="mt-1 text-[14px] text-ink/60">Every street you clear outside Mustang City lights up here, in order.</p>
+          </div>
+        )}
+      </div>
       {data.walks > 0 && (
         <p className="mt-3 text-[14px] text-ink/60">
           {data.walks} recorded walk{data.walks === 1 ? "" : "s"} · {data.walkedKm.toFixed(1)} km
@@ -342,11 +350,11 @@ function Share({ data, percentile, onClose }: { data: WrappedData; percentile: n
           type="button"
           disabled={!blob}
           onClick={share}
-          className="min-h-[52px] bg-ink text-[16px] font-bold tracking-[0.3em] text-night disabled:opacity-50 rounded-full"
+          className="min-h-[52px] bg-ink text-[16px] font-bold text-night disabled:opacity-50 rounded-full"
         >
           Share
         </button>
-        <button type="button" onClick={onClose} className="min-h-[48px] text-[14px] font-bold tracking-[0.14em] text-ink/70 rounded-full">
+        <button type="button" onClick={onClose} className="min-h-[48px] text-[14px] font-bold text-ink/70 rounded-full">
           Back to the map
         </button>
       </div>

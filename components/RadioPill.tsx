@@ -32,8 +32,8 @@ export default function RadioPill() {
       {r.on && r.script && (r.status === "playing" || r.status === "tuning") && (
         <div
           key={r.script}
-          className="glass absolute left-4 z-20 max-w-[calc(100%-96px)] animate-[fadein_300ms_ease-out] rounded-[18px] px-3.5 py-2.5"
-          style={{ bottom: "calc(var(--safe-bottom) + 168px)" }}
+          className="glass absolute left-4 z-20 max-w-[calc(100%-96px)] animate-[fadein_300ms_ease-out] overflow-hidden rounded-[18px] px-3.5 py-2.5"
+          style={{ bottom: "calc(var(--safe-bottom) + 196px)", maxHeight: "calc(100% - var(--safe-top) - var(--safe-bottom) - 196px - 96px)" }}
           aria-live="polite"
         >
           <p className="text-[12px] font-semibold text-gold">

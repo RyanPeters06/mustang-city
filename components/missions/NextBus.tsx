@@ -57,7 +57,10 @@ export default function NextBus({ at }: { at: LngLat }) {
         ) : (
           <>
             <span className="block font-bold text-ink">{stops[0].name}</span>
-            <span className="block text-ink/60">{res.status === "unavailable" ? "Live arrivals unavailable right now" : "No buses due soon"}</span>
+            {/* Feed down: still useful — where the nearest stop is — rather than an error message. */}
+            <span className="block text-ink/60">
+              Nearest stop · {Math.round(stops[0].d)} m away{res.status === "unavailable" ? "" : " · no buses due soon"}
+            </span>
           </>
         )}
       </span>

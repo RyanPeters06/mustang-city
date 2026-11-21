@@ -8,6 +8,8 @@ import fs from "node:fs";
 import earcut from "earcut";
 import { Document, NodeIO, VertexLayout } from "@gltf-transform/core";
 
+const slug = (t) => String(t).toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
+fs.mkdirSync("public/models/campus", { recursive: true });
 const SRC = JSON.parse(fs.readFileSync("scripts/models/footprints.json", "utf8"));
 const M_PER_DEG = 111320;
 
@@ -332,13 +334,12 @@ const manifest = [];
 
 // ================= Campus core (styled by architecture) =================
 {
+  // One model per building, anchored at its own centre: Mapbox only draws a model while its anchor's
+  // tile is in view, so a shared anchor made whole groups vanish when zoomed in on one building.
   const core = Object.entries(SRC.core);
-  const all = core.flatMap(([, b]) => b.rings[0].slice(0, -1));
-  const anchor = [all.reduce((s, p) => s + p[0], 0) / all.length, all.reduce((s, p) => s + p[1], 0) / all.length];
-  const builders = [];
-  const footprint = [];
-  const heights = [];
-  for (const [, b] of core) {
+  for (const [key, b] of core) {
+    const pts = b.rings[0].slice(0, -1);
+    const anchor = [pts.reduce((s, p) => s + p[0], 0) / pts.length, pts.reduce((s, p) => s + p[1], 0) / pts.length];
     const B = new Builder(anchor);
     const outer = ccw(b.rings[0]);
     const holes = b.rings.slice(1).map((r) => [...ccw(r)].reverse());
@@ -359,12 +360,10 @@ const manifest = [];
     }
     for (const hr of holeRings) B.walls(b.style === "glass" ? "frame" : b.style, hr, 0, H);
     B.cap("roof", [ring, ...holeRings], H);
-    builders.push(B);
-    footprint.push(outer);
-    heights.push(H);
+    const id = `core-${slug(key)}`;
+    await writeGlb(B, `campus/${id}`);
+    manifest.push({ id, name: key, url: `/models/campus/${id}.glb`, anchor, footprint: [outer], heights: [H] });
   }
-  await writeGlb(builders, "campus-core");
-  manifest.push({ id: "campus-core", name: "Campus core", url: "/models/campus-core.glb", anchor, footprint, heights });
 }
 
 // ================= Every other building inside Mustang City =================
@@ -383,19 +382,15 @@ const manifest = [];
     const c = centroid(b.rings[0]);
     return !taken.some((t) => inR(c, t) || t.some((v) => inR(v, b.rings[0])));
   });
-  const pts = rest.flatMap((b) => b.rings[0].slice(0, -1));
-  const anchor = [pts.reduce((s2, p) => s2 + p[0], 0) / pts.length, pts.reduce((s2, p) => s2 + p[1], 0) / pts.length];
-  const builders = [];
-  const footprint = [];
-  const heights = [];
-  let B = new Builder(anchor);
-  let tris = 0;
   const area = (r) => {
     let a = 0;
     for (let i = 0; i < r.length - 1; i++) a += r[i][0] * r[i + 1][1] - r[i + 1][0] * r[i][1];
     return Math.abs(a / 2);
   };
-  for (const b of rest) {
+  for (const [ri, b] of rest.entries()) {
+    const pts = b.rings[0].slice(0, -1);
+    const anchor = [pts.reduce((s2, p) => s2 + p[0], 0) / pts.length, pts.reduce((s2, p) => s2 + p[1], 0) / pts.length];
+    const B = new Builder(anchor);
     const outer = ccw(b.rings[0]);
     const ring = outer.map((p) => B.en(p));
     const A = area(ring);
@@ -422,18 +417,11 @@ const manifest = [];
         if (inR(pos, ring)) B.box("plant", pos, [4.5, 3], H, H + 1.8);
       }
     }
-    footprint.push(outer);
-    heights.push(H);
-    tris = [...B.parts.values()].reduce((s2, p) => s2 + p.I.length / 3, 0);
-    if (tris > 9000) {
-      builders.push(B);
-      B = new Builder(anchor);
-    }
+    const id = `b-${String(ri).padStart(3, "0")}${b.name ? `-${slug(b.name)}` : ""}`;
+    await writeGlb(B, `campus/${id}`);
+    manifest.push({ id, name: b.name ?? "Campus building", url: `/models/campus/${id}.glb`, anchor, footprint: [outer], heights: [H] });
   }
-  if (B.parts.size) builders.push(B);
-  await writeGlb(builders, "campus-rest");
-  manifest.push({ id: "campus-rest", name: "Mustang City", url: "/models/campus-rest.glb", anchor, footprint, heights });
-  console.log(`campus-rest: ${rest.length} buildings`);
+  console.log(`campus buildings: ${rest.length}`);
 }
 
 fs.writeFileSync("lib/data/campusModels.json", JSON.stringify(manifest));

@@ -104,6 +104,37 @@ const MODELS = campusModels as unknown as CampusModel[];
 const MODEL_RINGS = MODELS.flatMap((m) => m.footprint);
 const MODEL_PARTS = MODELS.flatMap((m) => m.footprint.map((ring, i) => ({ ring, height: m.heights[i] ?? 12 })));
 
+/**
+ * Which modelled building is visible under a tapped pixel (Mapbox can't hit-test model layers).
+ * Walk the ground points from the tap toward the camera (down the screen); a building at ground
+ * distance d in front of the tap's ground point blocks the line of sight if its height ≥ d / tan(pitch).
+ * The visible one is the blocking building closest to the camera.
+ */
+function modelPartUnderRay(map: MapboxMap, point: { x: number; y: number }) {
+  // Real sight line: from the tapped ground point back to the camera (position + altitude).
+  const g0 = map.unproject([point.x, point.y]);
+  const tap: LngLat = [g0.lng, g0.lat];
+  const cam = map.getFreeCameraOptions().position;
+  if (!cam) return null;
+  const camLL = cam.toLngLat();
+  const camGround: LngLat = [camLL.lng, camLL.lat];
+  const camAlt = cam.toAltitude();
+  const D = distanceM(tap, camGround);
+  if (!(D > 1) || !(camAlt > 1)) return null;
+  let blocker: (typeof MODEL_PARTS)[number] | null = null;
+  let crossed: (typeof MODEL_PARTS)[number] | null = null;
+  for (let s = 0; s < Math.min(D, 1500); s += 3) {
+    const t = s / D;
+    const here: LngLat = [tap[0] + (camGround[0] - tap[0]) * t, tap[1] + (camGround[1] - tap[1]) * t];
+    const part = MODEL_PARTS.find((p) => pointInRing(here, p.ring));
+    if (!part) continue;
+    const lineHeight = camAlt * t;
+    if (part.height + 1 >= lineHeight) blocker = part; // tall enough to block the line here
+    else if (part.height * 2.5 + 4 >= lineHeight) crossed = part; // line skims the roof: towers/spires
+  }
+  return blocker ?? crossed;
+}
+
 /** Which modelled building was tapped: footprint under the ground point, else the nearest one (tall models at pitch). */
 function modelPartAt(tap: LngLat, near: boolean) {
   const inside = MODEL_PARTS.find((p) => pointInRing(tap, p.ring));
@@ -135,13 +166,41 @@ function replacedByModel(g: Feature["geometry"]) {
 /** Night/dusk = glowing windows; dawn/day = reflective glass (separate `-day` glb, loaded on demand). */
 const isNightLook = (preset: string) => preset === "night" || preset === "dusk";
 const modelIdExpr = (preset: string) => (isNightLook(preset) ? ["get", "model"] : ["concat", ["get", "model"], "-day"]) as never;
-function applyModelVariant(map: MapboxMap, preset: string) {
-  const suffix = isNightLook(preset) ? "" : "-day";
-  for (const m of MODELS) {
-    const id = m.id + suffix;
-    if (!map.hasModel(id)) map.addModel(id, new URL(m.url.replace(/\.glb$/, `${suffix}.glb`), window.location.origin).href);
+// Models load in the background after the map is first drawn. Until a set is fully loaded the plain
+// extrusions stay up, so nobody ever sees a gap where a building should be (or a half-loaded set).
+const variantUrl = (m: CampusModel, suffix: string) => new URL(m.url.replace(/\.glb$/, `${suffix}.glb`), window.location.origin).href;
+const readyVariants = new Set<string>();
+const loadingVariants = new Map<string, Promise<void>>();
+function ensureVariant(map: MapboxMap, suffix: string) {
+  if (readyVariants.has(suffix)) return Promise.resolve();
+  let p = loadingVariants.get(suffix);
+  if (!p) {
+    p = (async () => {
+      // Warm the HTTP cache in parallel, then register with Mapbox and wait for it to settle.
+      await Promise.all(MODELS.map((m) => fetch(variantUrl(m, suffix)).then((r) => r.arrayBuffer()).catch(() => null)));
+      for (const m of MODELS) if (!map.hasModel(m.id + suffix)) map.addModel(m.id + suffix, variantUrl(m, suffix));
+      await new Promise<void>((resolve) => {
+        map.once("idle", () => resolve());
+        map.triggerRepaint();
+      });
+      readyVariants.add(suffix);
+    })();
+    loadingVariants.set(suffix, p);
   }
-  if (map.getLayer("campus-models")) map.setLayoutProperty("campus-models", "model-id", modelIdExpr(preset));
+  return p;
+}
+let wantedPreset = "";
+async function applyModelVariant(map: MapboxMap, preset: string) {
+  wantedPreset = preset;
+  const suffix = isNightLook(preset) ? "" : "-day";
+  await ensureVariant(map, suffix);
+  if (wantedPreset !== preset || !map.getLayer("campus-models")) return; // a newer switch won
+  map.setLayoutProperty("campus-models", "model-id", modelIdExpr(preset));
+  if (map.getLayoutProperty("campus-models", "visibility") === "none") {
+    // First set is in: show the models and drop the stand-in extrusions under them.
+    map.setLayoutProperty("campus-models", "visibility", "visible");
+    for (const id of ["campus-buildings", "mission-buildings"]) if (map.getLayer(id)) map.setFilter(id, ["!", ["get", "modelled"]]);
+  }
 }
 /** Windows glow at night, barely by day. */
 const modelGlow = (preset: string) => (preset === "night" ? 1 : preset === "dusk" || preset === "dawn" ? 0.7 : 0.12);
@@ -186,9 +245,10 @@ function collectCampusBuildings(map: MapboxMap) {
       | null
       | undefined;
     if (!first || !inCampus(first)) continue;
-    if (replacedByModel(g)) continue; // a hand-built 3D model stands here
+    // Buildings with a hand-built model are kept as stand-ins (filtered out once the models load).
+    const modelled = replacedByModel(g);
     const key = `${f.id ?? ""}:${first[0].toFixed(6)},${first[1].toFixed(6)}`;
-    const feature: Feature = { type: "Feature", properties: f.properties ?? {}, geometry: g };
+    const feature: Feature = { type: "Feature", properties: { ...(f.properties ?? {}), modelled }, geometry: g };
     campus.set(key, feature);
     const rings = (g.type === "Polygon" ? [g.coordinates[0]] : g.type === "MultiPolygon" ? g.coordinates.map((p) => p[0]) : []) as LngLat[][];
     if (MISSION_BUILDINGS.some((b) => rings.some((r) => pointInRing(b.point, r)))) mission.set(key, feature);
@@ -260,7 +320,6 @@ function addGameLayers(map: MapboxMap) {
   });
   // Hide the basemap's own buildings (and its trees) where our models stand.
   map.addLayer({ id: "model-clip", type: "clip", source: "model-footprints", layout: { "clip-layer-types": ["model"], "clip-layer-scope": ["basemap"] } });
-  applyModelVariant(map, currentLightPreset());
   map.addSource("campus-models", {
     type: "geojson",
     data: {
@@ -274,7 +333,7 @@ function addGameLayers(map: MapboxMap) {
     source: "campus-models",
     slot: "middle",
     minzoom: 15,
-    layout: { "model-id": modelIdExpr(currentLightPreset()) },
+    layout: { "model-id": modelIdExpr(currentLightPreset()), visibility: "none" }, // shown once loaded (applyModelVariant)
     paint: {
       "model-scale": [1, 1, 1],
       "model-emissive-strength": modelGlow(currentLightPreset()),
@@ -868,6 +927,9 @@ function addGameLayers(map: MapboxMap) {
     paint: { "icon-opacity": ["case", ["get", "weak"], 0.6, 1] },
   });
 
+  // Place the big island/campus names first so district labels make room instead of being overprinted.
+  if (map.getLayer("island-names")) map.moveLayer("island-names");
+
   const last = getLastFix();
   if (last) setPlayer(map, last);
 }
@@ -1351,7 +1413,11 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
         map.setFog(ATMOSPHERE);
         addGameLayers(map);
       });
-      map.once("idle", () => callbacks.current.onReady());
+      map.once("idle", () => {
+        callbacks.current.onReady();
+        // Heavy 3D models stream in after the first frame so the loading screen isn't held up by them.
+        void applyModelVariant(map, currentLightPreset());
+      });
 
       // Refresh campus footprints as new building tiles arrive (debounced).
       let campusTimer: ReturnType<typeof setTimeout> | undefined;
@@ -1453,8 +1519,8 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
           }
           return;
         }
-        const modelHit = map.queryRenderedFeatures(e.point, { layers: ["campus-models"] }).length > 0;
-        const part = modelPartAt([e.lngLat.lng, e.lngLat.lat], modelHit);
+        const modelsOn = map.getLayoutProperty("campus-models", "visibility") !== "none";
+        const part = modelsOn ? (modelPartUnderRay(map, e.point) ?? modelPartAt([e.lngLat.lng, e.lngLat.lat], false)) : null;
         if (part) {
           const geometry: Polygon = { type: "Polygon", coordinates: [part.ring] };
           (map.getSource("building-selected") as GeoJSONSource).setData({ type: "Feature", properties: { height: part.height + 2 }, geometry });
@@ -1502,7 +1568,7 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
         preset = next;
         map.setConfigProperty("basemap", "lightPreset", next);
         if (map.getLayer("campus-models")) map.setPaintProperty("campus-models", "model-emissive-strength", modelGlow(next));
-        applyModelVariant(map, next);
+        void applyModelVariant(map, next);
       };
       const lightTimer = setInterval(applyLight, 10 * 60_000);
       cleanups.push(() => clearInterval(lightTimer));

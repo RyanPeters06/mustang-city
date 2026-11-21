@@ -29,8 +29,13 @@ export function onBusFrame(l: (v: Vehicle[]) => void) {
   return () => frameListeners.delete(l);
 }
 
+let inflight = false;
+let lastPoll = 0;
 async function poll() {
-  if (document.visibilityState !== "visible") return;
+  // One request at a time, at most every 5 s (visibility flips + throttled timers can otherwise pile up).
+  if (document.visibilityState !== "visible" || inflight || performance.now() - lastPoll < 5000) return;
+  inflight = true;
+  lastPoll = performance.now();
   try {
     const res = await fetch("/api/buses", { cache: "no-store" });
     const j = (await res.json()) as { vehicles: Vehicle[]; status: BusStatus; ageSec: number | null };
@@ -43,6 +48,8 @@ async function poll() {
   } catch {
     state = { ...state, status: state.count ? "delayed" : "unavailable" };
     listeners.forEach((l) => l());
+  } finally {
+    inflight = false;
   }
 }
 

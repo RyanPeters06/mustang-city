@@ -111,7 +111,7 @@ export default function Intro({ map, mapState, reason, onDone, cover = null }: P
                 <div className="flex items-end gap-3">
                   <Emblem size={64} />
                   <div className="pb-1">
-                    <p className="text-[12px] font-semibold tracking-[0.3em] text-teal uppercase">Forest State</p>
+                    <p className="mb-1.5 text-[12px] font-semibold tracking-[0.3em] text-teal uppercase">Forest State</p>
                     <p
                       className="font-display text-[54px] leading-[0.86] uppercase"
                       style={{

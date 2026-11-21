@@ -67,8 +67,9 @@ export default function Legend({ map }: { map: React.RefObject<MapHandle | null>
       </button>
       {open && (
         <div
-          className="glass-solid absolute right-[76px] z-30 w-[236px] animate-[fadein_200ms_ease-out] rounded-[22px] p-4"
-          style={{ bottom: "calc(var(--safe-bottom) + 168px)" }}
+          className="glass-solid absolute right-[76px] z-30 w-[236px] animate-[fadein_200ms_ease-out] overflow-y-auto overscroll-contain rounded-[22px] p-4"
+          // Never taller than the gap between the HUD and the control stack.
+          style={{ bottom: "calc(var(--safe-bottom) + 196px)", maxHeight: "calc(100% - var(--safe-top) - var(--safe-bottom) - 196px - 96px)" }}
           role="dialog"
           aria-label="Map legend"
         >

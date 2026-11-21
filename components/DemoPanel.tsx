@@ -65,7 +65,7 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
   const btn = "w-full rounded-lg bg-white/10 px-3 py-2 text-left text-[14px] font-semibold text-white hover:bg-white/20";
 
   return createPortal(
-    <div className="fixed top-4 left-4 z-[100] w-56 space-y-1.5 rounded-xl border border-white/10 bg-black/85 p-3 font-sans shadow-2xl">
+    <div className="fixed top-4 left-4 z-[100] max-h-[calc(100dvh-2rem)] w-56 space-y-1.5 overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-black/85 p-3 font-sans shadow-2xl">
       <p className="pb-1 text-[12px] font-bold tracking-[0.14em] text-pink uppercase">Demo controls</p>
       <button className={btn} onClick={walk}>{walking ? "■ Stop walk" : "▶ Walk campus"}</button>
       <button
