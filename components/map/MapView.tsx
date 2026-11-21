@@ -15,6 +15,7 @@ import { onBusFrame, subscribeBuses } from "@/lib/buses";
 import { getTurf, subscribeTurf } from "@/lib/turf";
 import { COLLECTIBLES } from "@/lib/collectibles";
 import { getStaleCells, subscribeFogAge } from "@/lib/fogAge";
+import campusModels from "@/lib/data/campusModels.json";
 import { facultyColor } from "@/lib/faculty";
 import { LTC, routeById } from "@/lib/ltcData";
 import type { Vehicle } from "@/lib/ltc";
@@ -87,6 +88,42 @@ function pointInRing([x, y]: LngLat, ring: LngLat[]) {
 }
 
 /** Copy campus + mission building footprints out of the loaded streets tiles. */
+type CampusModel = { id: string; name: string; url: string; anchor: LngLat; footprint: LngLat[][]; heights: number[] };
+const MODELS = campusModels as unknown as CampusModel[];
+const MODEL_RINGS = MODELS.flatMap((m) => m.footprint);
+const MODEL_PARTS = MODELS.flatMap((m) => m.footprint.map((ring, i) => ({ ring, height: m.heights[i] ?? 12 })));
+
+/** Which modelled building was tapped: footprint under the ground point, else the nearest one (tall models at pitch). */
+function modelPartAt(tap: LngLat, near: boolean) {
+  const inside = MODEL_PARTS.find((p) => pointInRing(tap, p.ring));
+  if (inside) return inside;
+  let best: (typeof MODEL_PARTS)[number] | null = null;
+  let bestD = near ? 80 : 45;
+  for (const p of MODEL_PARTS) {
+    const c: LngLat = [p.ring.reduce((s2, v) => s2 + v[0], 0) / p.ring.length, p.ring.reduce((s2, v) => s2 + v[1], 0) / p.ring.length];
+    const d = distanceM(tap, c);
+    if (d < bestD) {
+      bestD = d;
+      best = p;
+    }
+  }
+  return best;
+}
+/** True when a tile building overlaps any model footprint (tiles split buildings, so test vertices both ways). */
+function replacedByModel(g: Feature["geometry"]) {
+  const rings = (g.type === "Polygon" ? [g.coordinates[0]] : g.type === "MultiPolygon" ? g.coordinates.map((p) => p[0]) : []) as LngLat[][];
+  return rings.some((ring) =>
+    MODEL_RINGS.some((m) => {
+      let hits = 0;
+      for (const v of ring) if (pointInRing(v, m)) hits++;
+      if (hits >= Math.max(1, Math.ceil(ring.length * 0.5))) return true; // mostly inside a model
+      return m.some((v) => pointInRing(v, ring));
+    }),
+  );
+}
+/** Windows glow at night, barely by day. */
+const modelGlow = (preset: string) => (preset === "night" ? 1 : preset === "dusk" || preset === "dawn" ? 0.7 : 0.12);
+
 function collectCampusBuildings(map: MapboxMap) {
   const campus = new Map<string, Feature>();
   const mission = new Map<string, Feature>();
@@ -97,6 +134,7 @@ function collectCampusBuildings(map: MapboxMap) {
       | null
       | undefined;
     if (!first || !inCampus(first)) continue;
+    if (replacedByModel(g)) continue; // a hand-built 3D model stands here
     const key = `${f.id ?? ""}:${first[0].toFixed(6)},${first[1].toFixed(6)}`;
     const feature: Feature = { type: "Feature", properties: f.properties ?? {}, geometry: g };
     campus.set(key, feature);
@@ -156,6 +194,39 @@ function addGameLayers(map: MapboxMap) {
       "fill-extrusion-base": ["coalesce", ["get", "min_height"], 0],
       "fill-extrusion-opacity": ["interpolate", ["linear"], ["zoom"], 14.5, 0, 15.5, 1],
       "fill-extrusion-emissive-strength": 1,
+    },
+  });
+
+  // --- Hand-built 3D landmarks (scripts/build-models.mjs): replace the plain extrusions ------
+  map.addSource("model-footprints", {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: MODEL_RINGS.map((r) => ({ type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [r] } })),
+    },
+  });
+  // Hide the basemap's own buildings (and its trees) where our models stand.
+  map.addLayer({ id: "model-clip", type: "clip", source: "model-footprints", layout: { "clip-layer-types": ["model"], "clip-layer-scope": ["basemap"] } });
+  for (const m of MODELS) map.addModel(m.id, new URL(m.url, window.location.origin).href);
+  map.addSource("campus-models", {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: MODELS.map((m) => ({ type: "Feature", properties: { model: m.id }, geometry: { type: "Point", coordinates: m.anchor } })),
+    },
+  });
+  map.addLayer({
+    id: "campus-models",
+    type: "model",
+    source: "campus-models",
+    slot: "middle",
+    minzoom: 15,
+    layout: { "model-id": ["get", "model"] },
+    paint: {
+      "model-scale": [1, 1, 1],
+      "model-emissive-strength": modelGlow(currentLightPreset()),
+      "model-cast-shadows": true,
+      "model-opacity": ["interpolate", ["linear"], ["zoom"], 15, 0, 15.6, 1],
     },
   });
 
@@ -1269,6 +1340,13 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
           }
           return;
         }
+        const modelHit = map.queryRenderedFeatures(e.point, { layers: ["campus-models"] }).length > 0;
+        const part = modelPartAt([e.lngLat.lng, e.lngLat.lat], modelHit);
+        if (part) {
+          const geometry: Polygon = { type: "Polygon", coordinates: [part.ring] };
+          (map.getSource("building-selected") as GeoJSONSource).setData({ type: "Feature", properties: { height: part.height + 2 }, geometry });
+          return callbacks.current.onBuildingTap(buildingInfo(geometry, [e.lngLat.lng, e.lngLat.lat]));
+        }
         const building = map.queryRenderedFeatures(e.point, { layers: ["building-selected", "mission-buildings", "campus-buildings"] })[0];
         if (building && (building.geometry.type === "Polygon" || building.geometry.type === "MultiPolygon")) {
           const geometry = building.geometry;
@@ -1306,6 +1384,7 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
         if (next === preset || !map.isStyleLoaded()) return;
         preset = next;
         map.setConfigProperty("basemap", "lightPreset", next);
+        if (map.getLayer("campus-models")) map.setPaintProperty("campus-models", "model-emissive-strength", modelGlow(next));
       };
       const lightTimer = setInterval(applyLight, 10 * 60_000);
       cleanups.push(() => clearInterval(lightTimer));

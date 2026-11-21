@@ -68,7 +68,7 @@ Options to get textured models (ranked):
 4. **Procedural textures on extrusions** (no models): pattern fills for stone, window bands via `fill-extrusion`
    patterns. Cheap but still boxy.
 
-I can build option 3 myself (Blender scripting, glTF export) **if you approve** — it's logged, not started.
+**Built (spec 019):** Ryan said to go ahead with whatever I can do, so option 3 is done by script (no Blender): Middlesex College, University College and 19 campus-core buildings from real footprints. Option 1 (phone photogrammetry) is still the upgrade path for photo-real facades.
 Backlog item "Hero 3D model: Middlesex College" already covers placing it.
 
 ## 4. Pause-screen music
@@ -125,7 +125,7 @@ Still to try (logged):
 | Auth0 tenant + `AUTH0_*`, `APP_BASE_URL` | Sign-in, friends, leaderboards, server tags | needed |
 | `DATABASE_URL` (Tiger Data) + `npm run db:schema && npm run db:seed` | Accounts, tags (`tag_votes`), new missions in DB | needed |
 | Decision: merge `claude/file-editing-offline-9q9lv2` → `main` (or let me push to `main`) | Vercel deploy of all this work | decision |
-| Approve 3D model route (§3) | Middlesex College hero model (backlog item marked blocked) | decision |
+| ~~Approve 3D model route (§3)~~ | Built stylised models (spec 019) | ✅ done |
 | Check live weather on the deployed site (Open-Meteo returned 429 to the cloud build machine) | HUD temperature + rain/snow | check |
 | Pick a music route (§4) | Pause-screen music | decision |
 | Photos of Middlesex College / UC (any angle) | Option 3 hand-built models, textures | optional |

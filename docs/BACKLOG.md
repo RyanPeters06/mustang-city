@@ -46,7 +46,7 @@ Full list with decisions: [docs/IDEAS.md §7](IDEAS.md#7-needs-from-ryan). Ideas
   within radius/time window. *Done when:* turf colours update from DB; a 3-account heist completes.
 - [x] **Polish pack** — poster-style mission cards (canvas + Web Share), hidden collectibles, radar HUD,
   fog decay (6 months), student-written missions with Gemini screening, live weather overlay.
-- [~] blocked: awaiting Ryan's choice of 3D model route (docs/IDEAS.md §3; he asked to log, not build, a self-made model) — **Hero 3D model: Middlesex College** — low-poly glTF via Mapbox `model` layer at z ≥ 16 (see
+- [x] **Hero 3D model: Middlesex College** (+ University College and 19 campus-core buildings, spec 019) — low-poly glTF via Mapbox `model` layer at z ≥ 16 (see
   `specs/003-friends-buildings/research.md`). *Done when:* model replaces the extrusion, stays at 60 fps.
 - [x] **Class Run** — schedule import + class waypoints + on-time Rep (design in `docs/roadmap.md`).
 
