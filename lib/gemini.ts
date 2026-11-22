@@ -3,11 +3,13 @@ import { GoogleGenAI } from "@google/genai";
 
 export type Verdict = { pass: boolean; confidence: number; reason: string };
 
-const MODEL = "gemini-4-hydrogen";
+// Flash-Lite answers in ~1 s; gemini-4-hydrogen was returning 503 "high demand" / 20 s replies, which blows the routes' 5 s timeouts.
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
 export const geminiConfigured = () => !!process.env.GEMINI_API_KEY;
 
 let client: GoogleGenAI | null = null;
-const ai = () => (client ??= new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }));
+// The Interactions input shapes used below ({ type: "text" | "image" }) are only accepted on v1beta; v1 rejects them with a 400.
+const ai = () => (client ??= new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY, apiVersion: "v1beta" }));
 
 const VERDICT_SCHEMA = {
   type: "object",
