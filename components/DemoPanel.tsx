@@ -3,6 +3,7 @@
 import { setDemoOn } from "@/lib/demo";
 import { addHeat } from "@/lib/wanted";
 import { toggleMusic } from "@/lib/music";
+import { radioBulletin, radioOn } from "@/lib/radio";
 import { todaysSurprises } from "@/lib/surprise";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -154,6 +155,7 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
       <button className={btn} onClick={() => setHeistSim(!getHeistSim())}>Demo heist crew on/off</button>
       <button className={btn} onClick={() => window.dispatchEvent(new CustomEvent("mc:goose-call", { detail: "East London" }))}>The Goose calls (demo)</button>
       <button className={btn} onClick={toggleMusic}>Music on/off</button>
+      <button className={btn} onClick={() => { radioOn(); setTimeout(() => radioBulletin("A Western student just claimed Masonville. That's 1 of 42 regions in Forest State."), 1500); }}>Radio news bulletin (demo)</button>
       <button className={btn} onClick={() => { const s = todaysSurprises()[0]; if (s) { acceptFix(s.at); setTimeout(() => acceptFix([s.at[0] + 0.00002, s.at[1]]), 900); } }}>Teleport to a surprise (demo)</button>
       <button className={btn} onClick={demoLoot}>Loot drop (demo)</button>
       <button className={btn} onClick={() => bankBag()}>Bank bag at Mustang City (demo)</button>

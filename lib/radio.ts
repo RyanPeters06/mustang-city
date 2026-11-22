@@ -7,6 +7,8 @@
 import { onFix, getLastFix } from "./location";
 import { districtAt } from "./districts";
 import { CAMPUS_CENTER, type LngLat } from "./geo";
+import { getSnapshot as getProgress, subscribe as subscribeProgress } from "./progress";
+import { DISTRICTS } from "./districts";
 
 export type RadioState = {
   on: boolean;
@@ -25,6 +27,7 @@ let audio: HTMLAudioElement | null = null;
 let lastDistrict: string | null = null;
 let lastCheck = 0;
 let queue: string | null = null;
+let unsubNews: (() => void) | null = null;
 
 const set = (p: Partial<RadioState>) => {
   state = { ...state, ...p };
@@ -116,11 +119,44 @@ async function playSegment(district: string) {
 
 const here = (): LngLat => getLastFix()?.lngLat ?? CAMPUS_CENTER;
 
+/**
+ * Radio news interruption (IDEAS §1): a short "breaking news" bulletin that cuts in over the current segment,
+ * e.g. when you claim a region. Phone speech voice + caption (fast, no network round trip).
+ */
+export function radioBulletin(text: string) {
+  if (!state.on) return;
+  stopVoice();
+  ident();
+  set({ status: "playing", script: `Breaking: ${text}`, scriptDistrict: null, source: "template" });
+  setTimeout(() => {
+    speakLocally(`Breaking news on Forest FM. ${text}`, () => {
+      if (!state.on) return;
+      setTimeout(() => state.on && set({ status: "idle" }), 3000);
+    });
+  }, 600);
+}
+
+function watchNews() {
+  let claimed = new Set(Object.keys(getProgress().districts));
+  const unsub = subscribeProgress(() => {
+    const now = Object.keys(getProgress().districts);
+    const fresh = now.find((r) => !claimed.has(r));
+    claimed = new Set(now);
+    if (!fresh) return;
+    const who = getProgress().profile.name || "A Western student";
+    radioBulletin(`${who} just claimed ${fresh}. That's ${now.length} of ${DISTRICTS.length} regions in Forest State.`);
+  });
+  return () => {
+    unsub();
+  };
+}
+
 /** Must be called from a tap (autoplay rules). */
 export function radioOn() {
   if (state.on) return;
   set({ on: true, status: "idle", script: null });
   ident();
+  unsubNews = watchNews();
   lastDistrict = districtAt(here());
   setTimeout(() => void playSegment(lastDistrict ?? "Central London"), 700);
   unsubFix = onFix((fix) => {
@@ -137,6 +173,8 @@ export function radioOn() {
 export function radioOff() {
   unsubFix?.();
   unsubFix = null;
+  unsubNews?.();
+  unsubNews = null;
   queue = null;
   stopVoice();
   state = OFF;

@@ -6,7 +6,10 @@ import { getAccount, getServerAccount, subscribeAccount, syncNow } from "@/lib/a
 import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/progress";
 import { pctFromCells } from "@/lib/fog";
 import { rankFor, fogRepFromCells } from "@/lib/rank";
-import { demoCells, demoFriends } from "@/lib/demoCrew";
+import { demoCells, demoCompetition, demoFriends } from "@/lib/demoCrew";
+import { getCells } from "@/lib/fog";
+
+const myCellSet = () => new Set(getCells());
 import type { FriendRow } from "@/app/api/friends/route";
 import type { EmblemId } from "@/lib/progress";
 import Emblem from "../profile/Emblem";
@@ -115,7 +118,7 @@ function CrewList({ prefill, shownFriend, onToggleMap }: Props) {
       </button>
     );
 
-  const mine = { rep: me.rep, pct: me.pct, missions: me.missionCount };
+  const mine = { rep: me.rep, pct: me.pct, missions: me.missionCount, regions: me.regionsClaimed };
   const h = "mb-2 text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase";
   const field = "min-w-0 flex-1 rounded-xl border border-white/12 bg-white/[0.06] px-3.5 py-3 text-[16px] text-ink outline-none focus:border-pink";
 
@@ -255,16 +258,20 @@ function FriendCard({
   demo = false,
 }: {
   f: FriendRow;
-  mine: { rep: number; pct: number; missions: number };
+  mine: { rep: number; pct: number; missions: number; regions: number };
   shown: boolean;
   onMap: () => void;
   onRemove?: () => void;
   demo?: boolean;
 }) {
+  const myCells = myCellSet();
   // Demo players have a fixed Rep story; real friends' Rep comes from the server.
   const theirRep = demo ? Math.max(f.rep, fogRepFromCells(f.cells)) : f.rep;
-  const theirs = { rep: theirRep, pct: pctFromCells(f.cells), missions: f.missions };
+  const theirs = { rep: theirRep, pct: pctFromCells(f.cells), missions: f.missions, regions: demo ? demoCompetition(f.handle).regions : (f.regions ?? 0) };
+  // Friend fog overlap (IDEAS §2): blocks you've both cleared (demo crew only; real friends' cells load on "Show their map").
+  const shared = demo ? Math.round(demoCells(f.handle).filter((c) => myCells.has(c)).length / 7) : null;
   const rows: { label: string; you: number; them: number; fmt: (n: number) => string }[] = [
+    { label: "Regions", you: mine.regions, them: theirs.regions, fmt: (n) => String(n) },
     { label: "Rep", you: mine.rep, them: theirs.rep, fmt: (n) => n.toLocaleString() },
     { label: "Explored", you: mine.pct, them: theirs.pct, fmt: fmtPct },
     { label: "Missions", you: mine.missions, them: theirs.missions, fmt: (n) => String(n) },
@@ -318,6 +325,11 @@ function FriendCard({
       >
         {shown ? "Hide their map" : "Show their map"}
       </button>
+      {shared !== null && (
+        <p className="mt-2 text-center text-[12px] text-ink/60">
+          {shared > 0 ? `You and ${f.name.split(" ")[0]} have both explored ${shared} block${shared === 1 ? "" : "s"}.` : `No overlap with ${f.name.split(" ")[0]} yet: go explore their side of town.`}
+        </p>
+      )}
     </li>
   );
 }

@@ -11,10 +11,11 @@ export type FriendRow = {
   rep: number;
   cells: number;
   missions: number;
+  regions?: number; // regions claimed (lib/regions.ts)
 };
 
 const COLS = `u.handle, u.display_name AS name, u.faculty, u.year, u.emblem, u.accent, u.rep,
-  u.explored_cells AS cells, u.mission_count AS missions`;
+  u.explored_cells AS cells, u.mission_count AS missions, u.regions_claimed AS regions`;
 
 /** Accepted friends + pending requests (incoming and outgoing). */
 export async function GET() {
