@@ -53,6 +53,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Photo mode: every layer except the map and the photo overlay fades out. */
+html[data-photo] main[data-game] > *:not(.map-root):not([data-photo-keep]) {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.3s ease;
+}
+
 /* UI chrome shouldn't feel like a web page */
 button,
 nav,

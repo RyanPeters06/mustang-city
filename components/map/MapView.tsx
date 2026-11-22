@@ -62,6 +62,8 @@ export type MapHandle = {
   clearDistrict: () => void;
   /** Legend toggles: show/hide a group of map layers. */
   setGroupVisible: (group: LayerGroup, on: boolean) => void;
+  /** Photo mode: grab the current map frame as a JPEG data URL (read inside a render, no preserveDrawingBuffer). */
+  snapshot: () => Promise<string | null>;
 };
 
 export type LayerGroup = "buses" | "tags" | "collectibles" | "landmarks";
@@ -1434,6 +1436,19 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
       );
     },
     clearBuilding: () => (mapRef.current?.getSource("building-selected") as GeoJSONSource | undefined)?.setData(EMPTY),
+    snapshot: () =>
+      new Promise((resolve) => {
+        const map = mapRef.current;
+        if (!map) return resolve(null);
+        map.once("render", () => {
+          try {
+            resolve(map.getCanvas().toDataURL("image/jpeg", 0.92));
+          } catch {
+            resolve(null);
+          }
+        });
+        map.triggerRepaint();
+      }),
     setGroupVisible: (group, on) => {
       const map = mapRef.current;
       if (!map) return;
@@ -1671,7 +1686,7 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
 
   // Mapbox sets `position: relative` on its container, so size it from an absolute wrapper.
   return (
-    <div className="absolute inset-0">
+    <div className="map-root absolute inset-0">
       <div ref={containerRef} className="h-full w-full" />
     </div>
   );

@@ -35,6 +35,7 @@ import Legend from "./Legend";
 import Onboarding from "./Onboarding";
 import NudgeChip from "./Nudge";
 import GooseCall from "./GooseCall";
+import PhotoMode from "./PhotoMode";
 import NextClassCard from "./classrun/NextClassCard";
 import ScheduleManager from "./classrun/ScheduleManager";
 import { CLASS_RUN_REP, onClassRun, startClassRunWatch } from "@/lib/schedule";
@@ -188,7 +189,7 @@ export default function GameScreen({ cover = null }: { cover?: CoverArt }) {
 
   return (
     <MotionConfig reducedMotion="user">
-    <main className="absolute inset-0">
+    <main className="absolute inset-0" data-game>
       <MapView
         ref={map}
         onReady={() => setMapState("ready")}
@@ -225,6 +226,7 @@ export default function GameScreen({ cover = null }: { cover?: CoverArt }) {
         <>
           <LocationPrompt />
           <LocateButton map={map} />
+          <PhotoMode map={map} />
           <TagButton onClick={() => setTagSheet("new")} />
           <Legend map={map} />
           <RadioPill />
