@@ -1,16 +1,40 @@
-# Handoff: project state as of Nov 21, 2026
+# Handoff: project state as of Nov 22, 2026
 
 Read this first in a new chat, then `CLAUDE.md`, `docs/BACKLOG.md` and `docs/IDEAS.md`. It records everything
-decided and built across the long build session, so no context is lost.
+decided and built across the build sessions, so no context is lost.
 
 ## Where things stand
-- **Branch:** `claude/file-editing-offline-9q9lv2` holds all work. PR #1 (everything up to the 3D campus) was merged
-  into `main`. Everything after it is on the branch only, and needs a **new PR** to reach `main` (Vercel deploys from
-  `main`). That covers the polish passes, the explored campus, day/night models, onboarding, the legend and these docs.
-- **Ryan's laptop changes are not on GitHub yet.** Suggested flow: push them to a `laptop-work` branch, then merge it
-  with this branch and resolve conflicts. Both branches touch the UI.
-- **Backlog:** every item is done. The remaining work is the **UI polish plan** in `docs/BACKLOG.md` (typography,
-  motion, accessibility, cover art) and the ideas awaiting approval in `docs/IDEAS.md` (§0 ranks them by hackathon win odds).
+- **Branch:** everything is on `main`; Vercel deploys `main` to **https://www.mustangcity.rodeo** (GoDaddy domain;
+  the bare domain redirects to www).
+- **Live keys on Vercel:** Mapbox, Gemini (working: briefings, radio, TTS) and Auth0 (redirect works, but the Auth0 app
+  still needs `https://www.mustangcity.rodeo/auth/callback` in Allowed Callback URLs). **No database yet.**
+- **Backlog:** the Nov 22 "approve everything" queue in `docs/BACKLOG.md` is built (see the list below).
+
+## The core loop (Nov 22)
+- **Regions** (`lib/regions.ts`): London = 42 planning districts. Each has 4 core quests built from real places
+  (`lib/data/places.json`, OpenStreetMap via `scripts/places-build.mjs`): set foot, explore N blocks, check in at a
+  local café/restaurant/shop, and a signature quest (Goose job, collectible, landmark or park). **3 of 4 claims the
+  region**: its whole fog lifts (claimed polygons are unioned into the fog holes, not stored as cells, so no Rep/%
+  inflation), +150 Rep. HUD headline is **Regions n/42**.
+- **Side quests** (`lib/sideQuests.ts`): 3 light quests per region (photo op, bus ride in at a real LTC stop, night
+  shift, trivia, food crawl, crew meet-up, tag), +40 Rep, pinned to real spots. Region quest blips on the map appear
+  only from z12.3 (no clutter at city zoom).
+- **Dailies + streaks** (`lib/daily.ts`): 3 quests a day (seeded by date), +20 each, +50 for all three; one a day keeps
+  the streak (flame on the HUD). **Surprise blips** (`lib/surprise.ts`): 3 gold stars a day, +75 Rep + loot.
+- **Competition:** regions leaderboard (week/all, Western/faculty/crew) + **faculty war** (each region held by the
+  faculty with the most claimers). Server: `region_claims` table, `/api/me` syncs claims + streak,
+  `/api/leaderboard?metric=regions` returns faculty standings. Labelled demo crew until the DB is connected.
+- **Stash & carry** (`lib/loot.ts`): quests drop loot into a 6-slot bag (+1 per rank); it only counts once banked by
+  walking onto campus (Mustang City).
+- **Feel:** wanted-level stars (`lib/wanted.ts`), golden-job variable rewards (18%, 1.5× Rep), The Goose calls you
+  (`/api/goose-call`, Gemini TTS) on first entering an unclaimed region, procedural synthwave soundtrack
+  (`lib/music.ts`), coach marks (onboarding v2) and near-miss nudges, photo mode, `/stage` big-screen mirror.
+- **Title screen:** layered cover (`lib/data/coverLayers.json` from `scripts/build-cover.mjs`), compositor-driven
+  camera (`components/intro/CoverCamera.tsx`), press any key / tap anywhere every load, panels burst, dive into the logo.
+
+## Demo panel (press D) cheat sheet
+Every region quest and side quest gets **Go there (demo)**; plus: The Goose calls, music on/off, loot drop, bank bag,
+teleport to a surprise, wanted level +1 star, play MISSION PASSED / GOLDEN pass, replay intro, walk campus, weather.
 
 ## What's built (one spec per feature in `specs/`)
 | Spec | Feature |
@@ -52,9 +76,9 @@ UI polish passes (commits after 019) changed the following:
 - Push only to the `claude/...` branch unless Ryan says otherwise. Force-push was blocked once, so merge instead.
 
 ## Needs from Ryan (also `docs/IDEAS.md` §7 and `docs/SETUP_KEYS.md`)
-- **Keys:** `GEMINI_API_KEY`, the Auth0 settings and `DATABASE_URL`, then run `npm run db:schema && npm run db:seed`.
-  The schema has new tables and columns since the last seed: `tag_votes`, `missions.created_at` and the heist index.
-- **Deploy:** a new PR from this branch into `main`.
+- **Supabase `DATABASE_URL`** (transaction pooler, port 6543, with the DB password), then `npm run db:schema && npm run db:seed`
+  and add it to Vercel. Unlocks accounts, real leaderboards, faculty war, tags, heists.
+- **Auth0:** add the www callback/logout/web-origin URLs above. The @uwo.ca-only Action is optional for the demo.
 - **Optional:** comic-panel art and icon (prompts in `docs/COVER_ART.md`).
 - **Checks on the deployed site:** live LTC buses (the realtime host reset connections from the cloud build machine)
   and Open-Meteo weather (it returned 429 to the cloud machine).

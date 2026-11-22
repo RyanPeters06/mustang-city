@@ -13,20 +13,21 @@ Full list with decisions: [docs/IDEAS.md §7](IDEAS.md#7-needs-from-ryan). Ideas
 
 ## Approved Nov 22 — "approve everything" (Ryan, away; build continuously, don't stop to ask)
 Built in this order; each item is browser-checked, committed and pushed (secrets scan on Entire checkpoints).
-- [>] **UI tweaks** — remove the radar, smaller HUD, remove the Mapbox wordmark + attribution button (credits move to Profile).
-- [ ] **Region side quests + map blips** — varied demo "husk" quests for every region (photo op, bus ride in, night visit,
+- [x] **UI tweaks** — remove the radar, smaller HUD, remove the Mapbox wordmark + attribution button (credits move to Profile).
+- [x] **Region side quests + map blips** — varied demo "husk" quests for every region (photo op, bus ride in, night visit,
   food crawl, tag, crew check-in…); quest blips on the map that only appear when zoomed in (no clutter at city zoom).
-- [ ] **First-run coach marks** (IDEAS §5) — 3 skippable pointers: tap a region, do its quests, check your dailies.
-- [ ] **Near-miss nudges** (IDEAS §2) — "1 quest from claiming Masonville" card on the map.
-- [ ] **Wanted level** (IDEAS §1) — 1–5 curiosity stars on the HUD.
-- [ ] **Variable rewards on pass** (IDEAS §2) — rare golden frame / bonus Rep roll on MISSION PASSED.
-- [ ] **Pause-screen music** (IDEAS §4) — procedural synth bed on the title + pause, mute toggle.
-- [ ] **The Goose calls you** (IDEAS §1) — incoming-call screen + Gemini TTS line when a quest unlocks nearby.
-- [ ] **Photo mode** (IDEAS §1) — hide UI, letterbox, grain, stamp, share.
-- [ ] **Live big-screen mirror `/stage`** (IDEAS §1).
-- [ ] **Stash & carry** (IDEAS §8) — loot from quests carried home to Mustang City.
-- [ ] **Extras** — surprise blips, collection sets, rank perks, O-Week mode, sustainability stats, seasonal palette.
-- [ ] **Docs + Devpost copy refresh** — HANDOFF, PITCH, Devpost story updated for regions/dailies/competition.
+- [x] **First-run coach marks** (IDEAS §5) — 3 skippable pointers: tap a region, do its quests, check your dailies.
+- [x] **Near-miss nudges** (IDEAS §2) — "1 quest from claiming Masonville" card on the map.
+- [x] **Wanted level** (IDEAS §1) — 1–5 curiosity stars on the HUD.
+- [x] **Variable rewards on pass** (IDEAS §2) — rare golden frame / bonus Rep roll on MISSION PASSED.
+- [x] **Pause-screen music** (IDEAS §4) — procedural synth bed on the title + pause, mute toggle.
+- [x] **The Goose calls you** (IDEAS §1) — incoming-call screen + Gemini TTS line when a quest unlocks nearby.
+- [x] **Photo mode** (IDEAS §1) — hide UI, letterbox, grain, stamp, share.
+- [x] **Live big-screen mirror `/stage`** (IDEAS §1).
+- [x] **Stash & carry** (IDEAS §8) — loot from quests carried home to Mustang City.
+- [x] **Extras (part 1)** — surprise blips, collection sets, CO₂ saved.
+- [ ] **Extras (part 2)** — rank perks, O-Week mode, seasonal palette, friend fog overlap, radio news interruptions.
+- [x] **Docs + Devpost copy refresh** — HANDOFF, PITCH, Devpost story updated for regions/dailies/competition.
 
 ## Queue
 

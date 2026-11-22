@@ -53,17 +53,23 @@ Use the **laptop phone frame** (judges see exactly the phone UI). Press **D** fo
 3. (25–40 s) Tap Middlesex College → history card. *"Every building has a story."*
 4. (40–60 s) Profile → **Forest State Wrapped** → share card. *"Graduate knowing your city."*
 
-### 3 minutes (main judging)
+### 3 minutes (main judging) — updated Nov 22 for the region loop
+Press **D** before you start (demo panel on = "Go there" teleports on every quest).
+
 | Time | Beat | Do | Say |
 |---|---|---|---|
-| 0:00–0:20 | Hook | Title card on screen | Story points 1–2 |
-| 0:20–0:40 | Intro | Tap to enter → flight | "London becomes Forest State. Western is Mustang City — home base." |
-| 0:40–1:05 | Fog | Demo panel → Replay your real walk (16×), then zoom out to city view | "Black fog everywhere you haven't been. % explored, neighbourhoods unlock at 30%." |
-| 1:05–1:25 | 3D campus | Fly to Mustang City, tilt, tap Middlesex | "Hand-built 3D campus. Tap any building for its real history." |
-| 1:25–2:05 | Mission | Missions → Banting House (or Meet The Family) → Goose briefing → Teleport (demo) → photo → **MISSION PASSED** | "The Goose sends you to real places. Gemini checks your photo. You earn Rep." |
-| 2:05–2:25 | Live city | Zoom to downtown: live buses; open a mission card: "Route 2 in 4 min" | "That's live London Transit — missions tell you which bus gets you there." |
-| 2:25–2:45 | Social | Crew → compare with a friend, show their fog; mention turf + heists | "Faculties fight over neighbourhoods. Heists need three people at once — strangers meet." |
-| 2:45–3:00 | Close | Profile → Wrapped → share card | Story points 5–6: "Graduate knowing your city." |
+| 0:00–0:20 | Hook | Title screen (cover breathing, "Press any key") | Story points 1–2 |
+| 0:20–0:35 | Intro | Press a key: panels burst, dive into the logo, flight into Forest State | "London becomes Forest State. Western is Mustang City, home base." |
+| 0:35–0:55 | The problem | Zoom out: fog everywhere, HUD **Regions 1/42** | "Nobody walks a whole neighbourhood. So you *claim* them." |
+| 0:55–1:35 | Claim a region | Missions → Regions near you → Masonville → Go there (set foot) → café → Check in → landmark → Check in → **REGION CLAIMED**, fog lifts | "Four real local quests, do three, the whole region is yours." |
+| 1:35–1:50 | The Goose calls | Demo panel → The Goose calls → Answer | "Walk into a new region and The Goose phones you. That's Gemini's voice." |
+| 1:50–2:10 | Mission + reward | A Goose job → photo → **MISSION PASSED** (or Play GOLDEN pass) | "Gemini checks the photo. Sometimes it rolls golden." |
+| 2:10–2:30 | Come back daily | Missions → Daily card: streak flame, 3 dailies, surprise stars | "Three dailies and a streak, plus surprises that vanish at midnight." |
+| 2:30–2:45 | Competition | Crew → Leaderboard → Regions + Faculty war | "Every region counts for you and your faculty." |
+| 2:45–3:00 | Close | Profile → stash shelf → Wrapped | Story points 5–6: "Graduate knowing your city." |
+
+Extra beats if asked: photo mode (camera button), `/stage` on a second screen, stash & carry ("bring the loot home to campus"),
+wanted stars, live buses.
 
 ### 5 minutes (if you get it)
 Add after 2:45: Forest FM radio segment (15 s) · leave a tag (20 s) · "Entering East London" banner via demo walk (Old East Village is inside it) (20 s) ·
