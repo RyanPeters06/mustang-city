@@ -68,7 +68,7 @@ Use the **laptop phone frame** (judges see exactly the phone UI). Press **D** fo
 ### 5 minutes (if you get it)
 Add after 2:45: Forest FM radio segment (15 s) · leave a tag (20 s) · "Entering East London" banner via demo walk (Old East Village is inside it) (20 s) ·
 tech slide: Next.js PWA, Mapbox Standard + hand-built glTF, H3 fog, Gemini (vision + TTS + guarded rewrites),
-Auth0 @uwo.ca Action, Tiger Data hypertable + continuous aggregate, live GTFS-RT (45 s).
+Auth0 @uwo.ca Action, Supabase Postgres, live GTFS-RT, and the health tracking (WHO 150-minute goal) (45 s).
 
 ## Before you walk up (checklist)
 - [ ] Laptop: app open, intro **not yet seen this session** (so the flight plays), demo panel tested, light preset = Dusk

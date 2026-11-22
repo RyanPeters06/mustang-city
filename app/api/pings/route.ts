@@ -7,8 +7,8 @@ type Ping = { ts: number; lat: number; lng: number; acc: number };
 const MAX_BATCH = 500;
 
 /**
- * Batch-insert live GPS fixes into the `location_pings` hypertable (brief → Data model).
- * Feeds replay/Wrapped across devices and the `user_daily_cells` continuous aggregate.
+ * Batch-insert live GPS fixes into `location_pings` (brief → Data model).
+ * Feeds replay/Wrapped across devices and the `user_daily_cells` view.
  */
 export async function POST(req: Request) {
   const acc = await requireAccount();

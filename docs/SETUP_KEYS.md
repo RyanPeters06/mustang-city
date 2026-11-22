@@ -9,31 +9,17 @@ Variables) and, for Claude's cloud sessions, add them through the secure credent
 |---|---|---|---|---|---|
 | 1 | **Gemini API** | Google AI Studio → Get API key | `GEMINI_API_KEY` (optional `RADIO_VOICE`) | Photo mission checks, Goose briefings, Forest FM script + voice, tag and student-job screening, timetable screenshots; can also generate the cover art | Free tier |
 | 2 | **Auth0** | auth0.com → free tenant → Regular Web App; follow the README "Auth0" steps (callback URLs + the @uwo.ca Action) | `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_SECRET` (`openssl rand -hex 32`), `APP_BASE_URL` | Sign-in, friends, leaderboards, server tags, heists, turf, student jobs | Free |
-| 3 | **Tiger Data** (Postgres + TimescaleDB) | tigerdata.com → free trial service → connection string | `DATABASE_URL`, then `npm run db:schema && npm run db:seed` | All account data; GPS pings hypertable; continuous aggregate for weekly stats | Free trial |
+| 3 | **Supabase** (Postgres) | supabase.com → new project → **Connect** → Transaction pooler (port 6543) URI, with your DB password filled in | `DATABASE_URL`, then `npm run db:schema && npm run db:seed` | All account data: profiles, friends, missions, GPS pings, leaderboards, tags, heists, turf | Free |
 | 4 | **Mapbox** | done | `NEXT_PUBLIC_MAPBOX_TOKEN` | Map | Free tier |
 
-**Why Tiger Data stays the main database (not Supabase):** the schema uses a TimescaleDB hypertable and a continuous
-aggregate, it's an MLH prize track the brief prioritises, and Supabase has removed TimescaleDB from its Postgres 17 builds.
-Switching fully to Supabase is possible (the app talks plain Postgres via `DATABASE_URL`) but means rewriting those two
-features and giving up the Tiger Data prize.
+**Database decision (Nov 22):** Supabase replaces Tiger Data. The app talks plain Postgres through `DATABASE_URL`
+(`lib/db.ts`), so the only schema changes were dropping the TimescaleDB hypertable (now a plain indexed table) and turning
+the continuous aggregate into a plain view. `lib/db.ts` turns off prepared statements automatically on the pooler URL.
+Use the **transaction pooler** string (port 6543) on Vercel; the direct connection is IPv6-only on the free tier.
 
-## Recommended add-on: Supabase (Realtime + Storage)
-
-Use Supabase *alongside* Tiger Data for the two things it's best at:
-- **Realtime channels:** heist crews update instantly (instead of 5-second polling), the live big-screen `/stage` mirror,
-  and future loot challenges.
-- **Storage:** real photo files for tags, mission photos and posters (today they're small data URLs).
-
-Get it: supabase.com → new project → Project Settings → API.
-
-Env vars:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: public by design and safe with row-level security, but it's a second public key, so
-  the constitution's "only the Mapbox token is public" rule needs a one-line amendment. The alternative is relaying
-  Realtime through our server.
-- `SUPABASE_SERVICE_ROLE_KEY`: server only.
-
-Free tier.
+Later, Supabase can also add **Realtime** (live heist crews instead of 5-second polling) and **Storage** (real photo files
+instead of small data URLs). Those need `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (a second public key,
+so the "only the Mapbox token is public" rule needs a one-line amendment) and a server-only `SUPABASE_SERVICE_ROLE_KEY`.
 
 ## Prize-track extras
 

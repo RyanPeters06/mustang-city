@@ -20,13 +20,16 @@ export const MAX_BOUNDS: [LngLat, LngLat] = [
   [-80.7, 43.5],
 ];
 
-/** A box of open sea around the island; London is cut out of it. */
+/**
+ * A box of open sea around the island; London is cut out of it. Deliberately huge (~8° each way) so that even
+ * fully tilted at minimum zoom the horizon is all sea and no plain basemap shows through in the distance.
+ */
 export const SEA_RING: LngLat[] = [
-  [-82.5, 42.2],
-  [-79.9, 42.2],
-  [-79.9, 43.7],
-  [-82.5, 43.7],
-  [-82.5, 42.2],
+  [-89, 35],
+  [-73, 35],
+  [-73, 51],
+  [-89, 51],
+  [-89, 35],
 ];
 
 /** Signed area > 0 means counter-clockwise (used to push surf rings outward). */

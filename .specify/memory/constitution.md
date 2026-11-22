@@ -83,8 +83,8 @@ Rationale: the Devpost page, demo video and social posts are public.
 ## Technology & Platform Constraints
 
 - Next.js (App Router) + TypeScript + Tailwind v4 + Motion; Mapbox GL JS v3 on Mapbox Standard;
-  h3-js (res 10, fallback 9); Auth0 Next.js SDK; Tiger Data (Postgres + TimescaleDB, with
-  `location_pings` as the only hypertable); Gemini API; Vercel hosting; HTTPS always.
+  h3-js (res 10, fallback 9); Auth0 Next.js SDK; Supabase (Postgres; amended Nov 22,
+  replacing Tiger Data); Gemini API; Vercel hosting; HTTPS always.
 - Palette tokens: night #140A2E, fog #000000, pink #FF4F8B, orange #FF8A3D, gold #FFC857,
   purple #7B2FF7, teal #2EE6D6.
 - iOS specifics from the brief's "iPhone experience" section are requirements, not suggestions.

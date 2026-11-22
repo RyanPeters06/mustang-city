@@ -18,9 +18,37 @@ function traceKm(t: Trace) {
   return m / 1000;
 }
 
-export type WalkStats = { kmTotal: number; kmWeek: number; newPlacesWeek: number; walksWeek: number };
+/** WHO guideline: adults should get at least 150 minutes of moderate activity (e.g. brisk walking) a week. */
+export const WEEKLY_ACTIVE_GOAL_MIN = 150;
+/** Rough average stride: ~1,300 steps per km. Shown with "≈" since we measure distance, not steps. */
+const STEPS_PER_KM = 1300;
+const DAY_MS = 24 * 3600 * 1000;
 
-/** km walked (all time + this week) and explored cells first reached on this week's walks. */
+export type WalkStats = {
+  kmTotal: number;
+  kmWeek: number;
+  newPlacesWeek: number;
+  walksWeek: number;
+  activeMinWeek: number;
+  stepsWeek: number;
+  streakDays: number;
+};
+
+const dayKey = (ms: number) => new Date(ms).toDateString();
+
+/** Consecutive days (ending today, or yesterday if today has no walk yet) with at least one recorded walk. */
+function streak(traces: Trace[], now: number) {
+  const days = new Set(traces.map((t) => dayKey(t.startedAt)));
+  let d = days.has(dayKey(now)) ? now : now - DAY_MS;
+  let n = 0;
+  while (days.has(dayKey(d))) {
+    n++;
+    d -= DAY_MS;
+  }
+  return n;
+}
+
+/** km walked (all time + this week), active minutes, streak, and explored cells first reached on this week's walks. */
 export function walkStats(now = Date.now()): WalkStats {
   const traces = getRecordedTraces();
   const all = new Set(getCells());
@@ -29,6 +57,7 @@ export function walkStats(now = Date.now()): WalkStats {
   let kmTotal = 0;
   let kmWeek = 0;
   let walksWeek = 0;
+  let activeMsWeek = 0;
   for (const t of traces) {
     const km = traceKm(t);
     kmTotal += km;
@@ -36,6 +65,7 @@ export function walkStats(now = Date.now()): WalkStats {
     if (recent) {
       kmWeek += km;
       walksWeek++;
+      activeMsWeek += t.points.at(-1)?.[3] ?? 0; // point[3] = ms since the walk started
     }
     for (const [lng, lat] of t.points) {
       for (const c of cellsAround(lat, lng, 100)) {
@@ -47,5 +77,13 @@ export function walkStats(now = Date.now()): WalkStats {
     }
   }
   // ~7 res-11 cells ≈ one city block-sized "place"
-  return { kmTotal, kmWeek, newPlacesWeek: Math.round(thisWeek.size / 7), walksWeek };
+  return {
+    kmTotal,
+    kmWeek,
+    newPlacesWeek: Math.round(thisWeek.size / 7),
+    walksWeek,
+    activeMinWeek: Math.round(activeMsWeek / 60000),
+    stepsWeek: Math.round((kmWeek * STEPS_PER_KM) / 100) * 100,
+    streakDays: streak(traces, now),
+  };
 }

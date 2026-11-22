@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Anton, Bricolage_Grotesque } from "next/font/google";
+import { Anton, Bowlby_One, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 
 const anton = Anton({ weight: "400", subsets: ["latin"], variable: "--font-anton" });
 const bricolage = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage" });
+// Chunky game-cover lettering for the "start" prompt (an original free font, not the GTA typeface).
+const bowlby = Bowlby_One({ weight: "400", subsets: ["latin"], variable: "--font-bowlby" });
 
 export const metadata: Metadata = {
   title: "Mustang City",
@@ -28,7 +30,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${anton.variable} ${bricolage.variable}`}>
+    <html lang="en" className={`${anton.variable} ${bricolage.variable} ${bowlby.variable}`}>
       <body>
         <div className="shell">
           <div className="app-root">{children}</div>

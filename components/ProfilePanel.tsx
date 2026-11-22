@@ -9,7 +9,7 @@ import Emblem from "./profile/Emblem";
 import ProfileEditor from "./profile/ProfileEditor";
 import LoreCard from "./missions/LoreCard";
 import Replays from "./profile/Replays";
-import { walkStats } from "@/lib/walkStats";
+import { walkStats, WEEKLY_ACTIVE_GOAL_MIN } from "@/lib/walkStats";
 import BadgeGrid from "./profile/BadgeGrid";
 import Neighbourhoods from "./profile/Neighbourhoods";
 import { badgeByCode } from "@/lib/badges";
@@ -137,13 +137,40 @@ export default function ProfilePanel({
         <Stat value={`${missionCount}/${MISSIONS.length}`} label="Missions" color="text-pink" />
       </section>
 
-      {/* Walking (brief → Sun Life health track): from real recorded walks only */}
-      <section className="rounded-2xl bg-white/[0.04] px-4 py-3">
+      {/* Health (Sun Life health track): from real recorded walks only, measured against the WHO weekly activity goal */}
+      <section className="rounded-2xl bg-white/[0.04] px-4 py-3" aria-labelledby="health-title">
         <div className="flex items-baseline justify-between">
-          <h3 className="text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">Walking</h3>
-          <span className="text-[12px] text-ink/60">{walk.walksWeek ? `${walk.walksWeek} walk${walk.walksWeek === 1 ? "" : "s"} this week` : "Real walks only"}</span>
+          <h3 id="health-title" className="text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">Health</h3>
+          <span className="text-[12px] text-ink/60">
+            {walk.streakDays > 1 ? `${walk.streakDays}-day walking streak` : walk.walksWeek ? `${walk.walksWeek} walk${walk.walksWeek === 1 ? "" : "s"} this week` : "Real walks only"}
+          </span>
         </div>
-        <div className="mt-2 grid grid-cols-3 gap-2 text-center">
+        <div className="mt-2">
+          <div className="flex items-baseline justify-between">
+            <p className="text-[20px] font-bold text-teal tabular-nums">
+              {walk.activeMinWeek}
+              <span className="ml-1 text-[12px] font-semibold text-ink/60">/ {WEEKLY_ACTIVE_GOAL_MIN} active min</span>
+            </p>
+            <p className="text-[12px] text-ink/60">
+              {walk.activeMinWeek >= WEEKLY_ACTIVE_GOAL_MIN ? "Weekly goal hit" : `${WEEKLY_ACTIVE_GOAL_MIN - walk.activeMinWeek} min to go`}
+            </p>
+          </div>
+          <div
+            className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/10"
+            role="progressbar"
+            aria-label="Active minutes this week"
+            aria-valuemin={0}
+            aria-valuemax={WEEKLY_ACTIVE_GOAL_MIN}
+            aria-valuenow={Math.min(walk.activeMinWeek, WEEKLY_ACTIVE_GOAL_MIN)}
+          >
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-teal to-gold transition-[width] duration-700 motion-reduce:transition-none"
+              style={{ width: `${Math.min(100, (walk.activeMinWeek / WEEKLY_ACTIVE_GOAL_MIN) * 100)}%` }}
+            />
+          </div>
+          <p className="mt-1 text-[11px] text-ink/50">WHO recommends 150+ minutes of moderate activity a week.</p>
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2 text-center">
           <div>
             <p className="text-[20px] font-bold text-teal tabular-nums">
               {walk.kmWeek.toFixed(1)}
@@ -152,17 +179,15 @@ export default function ProfilePanel({
             <p className="text-[12px] text-ink/60">this week</p>
           </div>
           <div>
+            <p className="text-[20px] font-bold text-pink tabular-nums">≈{walk.stepsWeek.toLocaleString()}</p>
+            <p className="text-[12px] text-ink/60">steps</p>
+          </div>
+          <div>
             <p className="text-[20px] font-bold text-gold tabular-nums">{walk.newPlacesWeek}</p>
             <p className="text-[12px] text-ink/60">new places</p>
           </div>
-          <div>
-            <p className="text-[20px] font-bold text-ink tabular-nums">
-              {walk.kmTotal.toFixed(1)}
-              <span className="ml-0.5 text-[12px] font-semibold">km</span>
-            </p>
-            <p className="text-[12px] text-ink/60">all time</p>
-          </div>
         </div>
+        <p className="mt-2 text-center text-[12px] text-ink/50">{walk.kmTotal.toFixed(1)} km walked all time</p>
       </section>
 
       {showcase.length > 0 && (

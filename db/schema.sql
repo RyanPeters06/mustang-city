@@ -1,5 +1,4 @@
--- Mustang City schema (Tiger Data: Postgres + TimescaleDB). Idempotent: safe to re-run.
-CREATE EXTENSION IF NOT EXISTS timescaledb;
+-- Mustang City schema (Supabase / plain Postgres). Idempotent: safe to re-run.
 
 DO $$ BEGIN
   CREATE TYPE mission_type AS ENUM ('photo', 'checkin', 'bus', 'heist');
@@ -35,7 +34,7 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS mission_count integer NOT NULL DEFAUL
 ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
 CREATE UNIQUE INDEX IF NOT EXISTS users_handle_key ON users (handle);
 
--- Only hypertable: raw GPS fixes. Feeds reveal, replay and Wrapped.
+-- Raw GPS fixes. Feeds reveal, replay and Wrapped.
 CREATE TABLE IF NOT EXISTS location_pings (
   user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   ts          timestamptz NOT NULL,
@@ -44,7 +43,6 @@ CREATE TABLE IF NOT EXISTS location_pings (
   accuracy_m  real,
   h3_cell     text NOT NULL
 );
-SELECT create_hypertable('location_pings', by_range('ts', INTERVAL '1 day'), if_not_exists => TRUE);
 CREATE INDEX IF NOT EXISTS location_pings_user_ts ON location_pings (user_id, ts DESC);
 
 CREATE TABLE IF NOT EXISTS revealed_cells (
@@ -200,20 +198,12 @@ CREATE TABLE IF NOT EXISTS district_control (
   updated_at        timestamptz NOT NULL DEFAULT now()
 );
 
--- Continuous aggregate: which cells each user pinged per day.
+-- Which cells each user pinged per day (a plain view; the (user_id, ts) index keeps it quick at our scale).
 -- Explored count = SELECT count(DISTINCT h3_cell) FROM user_daily_cells WHERE user_id = $1;
-CREATE MATERIALIZED VIEW IF NOT EXISTS user_daily_cells
-WITH (timescaledb.continuous) AS
-SELECT time_bucket(INTERVAL '1 day', ts) AS bucket,
+CREATE OR REPLACE VIEW user_daily_cells AS
+SELECT date_trunc('day', ts) AS bucket,
        user_id,
        h3_cell,
        count(*) AS pings
 FROM location_pings
-GROUP BY bucket, user_id, h3_cell
-WITH NO DATA;
-
-SELECT add_continuous_aggregate_policy('user_daily_cells',
-  start_offset => INTERVAL '30 days',
-  end_offset => INTERVAL '1 minute',
-  schedule_interval => INTERVAL '15 minutes',
-  if_not_exists => TRUE);
+GROUP BY bucket, user_id, h3_cell;

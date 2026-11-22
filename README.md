@@ -14,12 +14,12 @@ npm run dev
 
 Press **D** on a laptop for hidden demo controls (scripted campus walk, fly to campus, reset fog).
 
-## Database (Tiger Data)
+## Database (Supabase)
 
-Put `DATABASE_URL` in `.env.local`, then:
+Put your Supabase **transaction pooler** connection string (port 6543) in `.env.local` as `DATABASE_URL`, then:
 
 ```bash
-npm run db:schema   # tables, location_pings hypertable, continuous aggregate
+npm run db:schema   # tables, location_pings, user_daily_cells view
 npm run db:seed     # landmark + starter missions, badges (safe to re-run)
 ```
 

@@ -249,14 +249,14 @@ Rep is the single currency: every action earns it, ranks come from it, and facul
 
 ## Prize tracks
 
-Enter the overall prizes, Most Adventurous and six MLH tracks; Sun Life and TinyFish are stretch entries that depend on framing and time. If the rules cap sponsor entries, prioritise Most Adventurous, Gemini and Tiger Data.
+**Updated Nov 22:** enter Overall, Most Adventurous, Sun Life (Health card + walking framing), Gemini, Auth0, Entire and GoDaddy. Tiger Data is dropped (Supabase is the database now). If the rules cap sponsor entries, prioritise Most Adventurous, Sun Life and Gemini.
 
 | Track | Prize | Fit | How Mustang City qualifies |
 |---|---|---|---|
 | First / Second / Third Overall | iPad / AirPods Pro 3 / Fitbit Air per member | Strong | Polished, complete app scoring on all four criteria |
 | Organizers' Choice: Most Adventurous | Arc'teryx toque per member | Strong | Its brief, "a hack that enables others to discover the unknown," is the pitch |
 | [MLH] Best Use of Gemini API | MLH swag kits | Strong | Photo verification, mission and collectible text, radio host scripts, goose boss dialogue |
-| [MLH] Best Use of Tiger Data | Stream Deck Mini | Strong | Main Postgres database; GPS pings as a hypertable; continuous aggregates for % explored and leaderboards |
+| ~~[MLH] Best Use of Tiger Data~~ | Stream Deck Mini | Dropped | Replaced by Supabase on Nov 22 |
 | [MLH] Best Use of Auth0 | Wireless headphones | Strong | Login restricted to @uwo.ca via an Auth0 Action |
 | [MLH] Best Domain Name from GoDaddy Registry | Digital gift card | Strong | Register a domain through MLH's GoDaddy Registry offer and point it at Vercel |
 | [MLH] Best Use of Entire | Mini portable projector | Strong if used | Build with AI agents through Entire (Sessions, Graph, Brain); report token savings in the write-up |
@@ -354,7 +354,7 @@ The app is a Next.js PWA deployed on Vercel and added to the phone's home screen
 | Map | Mapbox GL JS + Mapbox Standard (custom config) | 3D buildings on campus |
 | Fog | h3-js, resolution 10 (fallback 9) | Revealed cell IDs stored per user |
 | Auth | Auth0 Next.js SDK | Auth0 Action rejects non-@uwo.ca emails |
-| Database | Tiger Data (Postgres + TimescaleDB) | GPS pings as a hypertable; continuous aggregates for stats |
+| Database | Supabase (Postgres) | GPS pings table; a view for daily explored cells |
 | Photo storage | Vercel Blob, or Vultr Object Storage to qualify for Vultr | Upload directly from the browser; send Gemini the URL |
 | AI | Gemini API | Vision for photo checks; text for missions, lore, radio scripts, goose boss; TTS for the radio voice |
 | Transit | LTC GTFS static zip + GTFS-RT feeds | Parse protobuf in an API route with gtfs-realtime-bindings |

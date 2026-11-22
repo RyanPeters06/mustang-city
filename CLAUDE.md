@@ -13,7 +13,7 @@ The full product brief is in [docs/product-brief.md](docs/product-brief.md) — 
 - Build order and cut list are in the brief's "Build plan" section.
 
 ## Stack
-Next.js (App Router) + TypeScript + Tailwind v4, Motion, Mapbox GL JS (Standard style), h3-js, Auth0, Tiger Data (Postgres/TimescaleDB), Gemini API, Vercel.
+Next.js (App Router) + TypeScript + Tailwind v4, Motion, Mapbox GL JS (Standard style), h3-js, Auth0, Supabase (Postgres), Gemini API, Vercel.
 
 ## Code map
 - `components/GameScreen.tsx` — the one screen: map + HUD + tab bar + sheet + overlays + demo panel (press D).

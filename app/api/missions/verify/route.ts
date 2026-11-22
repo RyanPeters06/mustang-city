@@ -68,7 +68,7 @@ export async function POST(req: Request) {
   return NextResponse.json({ pass, confidence: verdict.confidence, reason: verdict.reason, rep: pass ? mission.rep : 0 });
 }
 
-/** Persist to Tiger Data when both the DB and a signed-in @uwo.ca session exist; otherwise the device keeps it. */
+/** Persist to the database when both the DB and a signed-in @uwo.ca session exist; otherwise the device keeps it. */
 async function saveCompletion(slug: string, rep: number, lat: number, lng: number, reason: string) {
   const sql = db();
   if (!sql || !auth0) return;

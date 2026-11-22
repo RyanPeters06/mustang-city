@@ -85,6 +85,10 @@ const reducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const dur = (ms: number) => (reducedMotion() ? 0 : ms);
 const NO_PAD = { top: 0, bottom: 0, left: 0, right: 0 };
+/** Furthest zoom-out (MAX_BOUNDS also clamps to ~9.8): Forest State fills the screen instead of shrinking to a sliver. */
+const MIN_ZOOM = 9.6;
+/** Max tilt by zoom: 45° at the city overview, rising to the full 70° once you're down at street level. */
+const pitchLimit = (z: number) => Math.round(45 + Math.min(1, Math.max(0, (z - 11) / 2.5)) * 25);
 
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
 
@@ -1401,13 +1405,21 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
         pitch: CITY_PITCH,
         bearing: -20,
         maxPitch: 70,
-        minZoom: 9.4,
+        minZoom: MIN_ZOOM,
         maxBounds: MAX_BOUNDS,
         attributionControl: false,
       });
       mapRef.current = map;
       if (process.env.NODE_ENV !== "production") (window as unknown as { __mcMap: MapboxMap }).__mcMap = map;
       map.addControl(new mapboxgl.AttributionControl({ compact: true }), "bottom-right");
+
+      // Tilt limit eases in with zoom: zoomed out, a full 70° tilt is mostly empty sky.
+      const fitPitch = () => {
+        const max = pitchLimit(map.getZoom());
+        if (map.getMaxPitch() !== max) map.setMaxPitch(max);
+      };
+      map.on("zoom", fitPitch);
+      fitPitch();
 
       map.on("style.load", () => {
         map.setFog(ATMOSPHERE);

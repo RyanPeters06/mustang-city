@@ -44,8 +44,8 @@ UI polish passes (commits after 019) changed the following:
 - **Fog decay** is a haze only: explored ground never un-explores.
 - **Privacy:** no live location sharing; the Class Run schedule stays on the device; loot challenges (an idea, not built)
   must be opt-in with coarse areas only.
-- **Database:** keep Tiger Data (TimescaleDB hypertable + continuous aggregate, MLH prize). Supabase is recommended as
-  an add-on for Realtime and Storage only, because Supabase dropped TimescaleDB on Postgres 17 (`docs/SETUP_KEYS.md`).
+- **Database (changed Nov 22):** Supabase (plain Postgres) replaced Tiger Data, which didn't really fit. The hypertable is now
+  a plain indexed table and the continuous aggregate a plain view. Not entering the Tiger Data prize (`docs/SETUP_KEYS.md`).
 - **Turf** uses cleared cells per faculty, not Rep, because cells are what's geographic.
 - **Design direction:** a clean, soft, premium mobile app. GTA 6 flavour comes from the art direction (postcards, sunset
   palette, full-bleed loading art, establishing-shot captions), not from hard or polygonal shapes.
