@@ -29,7 +29,7 @@ Built in this order; each item is browser-checked, committed and pushed (secrets
 - [x] **Extras (part 2)** — rank perks, O-Week mode, seasonal events (Frost City now), friend fog overlap, radio news bulletins, accessibility mode, 11 side-quest kinds.
 - [~] **Push notifications** — needs VAPID keys added to Vercel + a service worker; not started (Ryan's keys).
 - [~] **Loot challenges (multiplayer)** — needs realtime (Supabase Realtime) + accounts; not started.
-- [ ] **Heist trailer generator** — canvas + MediaRecorder share video.
+- [x] **Heist trailer generator → reel** — photo mode "Record reel": 9 s vertical video (cover → live map orbit + stats → end card), MediaRecorder, share/save.
 - [x] **Docs + Devpost copy refresh** — HANDOFF, PITCH, Devpost story updated for regions/dailies/competition.
 
 ## Queue

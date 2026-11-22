@@ -1,7 +1,10 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState, type RefObject } from "react";
+import { useEffect, useState, useSyncExternalStore, type RefObject } from "react";
+import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/progress";
+import { DISTRICTS } from "@/lib/districts";
+import { recordReel } from "@/lib/reel";
 import type { MapHandle } from "./map/MapView";
 import { districtAt } from "@/lib/districts";
 
@@ -13,6 +16,9 @@ export default function PhotoMode({ map }: { map: RefObject<MapHandle | null> })
   const [on, setOn] = useState(false);
   const [busy, setBusy] = useState(false);
   const [shot, setShot] = useState<string | null>(null);
+  const [reel, setReel] = useState<{ url: string; blob: Blob; ext: string } | null>(null);
+  const [recording, setRecording] = useState<number | null>(null);
+  const snap = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   useEffect(() => {
     if (on) document.documentElement.setAttribute("data-photo", "1");
@@ -70,6 +76,32 @@ export default function PhotoMode({ map }: { map: RefObject<MapHandle | null> })
     setBusy(false);
   }
 
+  async function makeReel() {
+    const m = map.current;
+    if (!m) return;
+    setRecording(0);
+    const out = await recordReel(
+      m,
+      { name: snap.profile.name || "Player one", regions: snap.regionsClaimed, totalRegions: DISTRICTS.length, rep: snap.rep, streak: snap.streak, rank: snap.rank },
+      (p) => setRecording(p),
+    );
+    setRecording(null);
+    if (out) setReel({ url: URL.createObjectURL(out.blob), blob: out.blob, ext: out.ext });
+  }
+
+  async function shareReel() {
+    if (!reel) return;
+    const file = new File([reel.blob], `mustang-city-reel.${reel.ext}`, { type: reel.blob.type });
+    const nav = navigator as Navigator & { canShare?: (d: { files: File[] }) => boolean };
+    if (nav.canShare?.({ files: [file] })) await navigator.share({ files: [file], title: "My Forest State reel" }).catch(() => {});
+    else {
+      const a = document.createElement("a");
+      a.href = reel.url;
+      a.download = file.name;
+      a.click();
+    }
+  }
+
   async function share() {
     if (!shot) return;
     const blob = await (await fetch(shot)).blob();
@@ -87,6 +119,8 @@ export default function PhotoMode({ map }: { map: RefObject<MapHandle | null> })
 
   const exit = () => {
     setShot(null);
+    if (reel) URL.revokeObjectURL(reel.url);
+    setReel(null);
     setOn(false);
   };
 
@@ -120,10 +154,26 @@ export default function PhotoMode({ map }: { map: RefObject<MapHandle | null> })
               <button type="button" onClick={exit} className="glass min-h-[44px] rounded-full px-5 text-[14px] font-bold text-ink">
                 Done
               </button>
-              <button type="button" onClick={capture} disabled={busy} className="btn-sunset min-h-[44px] rounded-full px-6 text-[14px] font-bold disabled:opacity-60">
+              <button type="button" onClick={capture} disabled={busy || recording !== null} className="btn-sunset min-h-[44px] rounded-full px-6 text-[14px] font-bold disabled:opacity-60">
                 {busy ? "Developing…" : "Capture"}
               </button>
+              <button type="button" onClick={makeReel} disabled={busy || recording !== null} className="glass min-h-[44px] rounded-full px-5 text-[14px] font-bold text-pink disabled:opacity-70">
+                {recording !== null ? `Recording ${Math.round(recording * 100)}%` : "Record reel"}
+              </button>
             </div>
+            {reel && (
+              <motion.div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/85 p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <video src={reel.url} autoPlay loop muted playsInline className="max-h-[70%] rounded-2xl shadow-2xl ring-4 ring-white/90" />
+                <div className="flex gap-3">
+                  <button type="button" onClick={() => setReel(null)} className="glass min-h-[44px] rounded-full px-5 text-[14px] font-bold text-ink">
+                    Back
+                  </button>
+                  <button type="button" onClick={shareReel} className="btn-sunset min-h-[44px] rounded-full px-6 text-[14px] font-bold">
+                    Share reel
+                  </button>
+                </div>
+              </motion.div>
+            )}
             {shot && (
               <motion.div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/80 p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- local data URL preview */}

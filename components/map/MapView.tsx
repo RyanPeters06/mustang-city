@@ -67,6 +67,8 @@ export type MapHandle = {
   setGroupVisible: (group: LayerGroup, on: boolean) => void;
   /** Photo mode: grab the current map frame as a JPEG data URL (read inside a render, no preserveDrawingBuffer). */
   snapshot: () => Promise<string | null>;
+  /** Reel recorder: call `draw(canvas)` inside every map render (the WebGL buffer is valid there). Returns stop. */
+  onFrame: (draw: (canvas: HTMLCanvasElement) => void) => () => void;
 };
 
 export type LayerGroup = "buses" | "tags" | "collectibles" | "landmarks";
@@ -1509,6 +1511,17 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
         orbitRef.current = requestAnimationFrame(spin);
       };
       orbitRef.current = requestAnimationFrame(spin);
+    },
+    onFrame: (draw) => {
+      const map = mapRef.current;
+      if (!map) return () => {};
+      const fn = () => draw(map.getCanvas());
+      map.on("render", fn);
+      const keepAlive = setInterval(() => map.triggerRepaint(), 1000 / 24); // keep frames coming while recording
+      return () => {
+        map.off("render", fn);
+        clearInterval(keepAlive);
+      };
     },
     snapshot: () =>
       new Promise((resolve) => {
