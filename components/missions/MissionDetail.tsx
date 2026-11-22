@@ -16,7 +16,7 @@ import { rememberPhoto } from "@/lib/poster";
 import { getRides, getServerRides, subscribeRides } from "@/lib/rides";
 import { useBriefing } from "@/lib/useBriefing";
 
-export type PassedInfo = { slug: string; rep: number; thumb?: string; reason: string; title?: string };
+export type PassedInfo = { slug: string; rep: number; thumb?: string; reason: string; title?: string; golden?: boolean };
 
 type Props = {
   slug: string;
@@ -57,10 +57,10 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
       if (!res.ok) return setPhase({ kind: "error", message: json.message ?? "Something went wrong. Try again." });
       if (!json.pass) return setPhase({ kind: "error", message: `Not quite: ${json.reason ?? "try another angle."}` });
       if (image) rememberPhoto(slug, image);
-      completeMission({ slug, rep: m.rep, thumb, reason: json.reason });
+      const award = completeMission({ slug, rep: m.rep, thumb, reason: json.reason });
       setPhase({ kind: "idle" });
       if (routed) onWaypoint(null);
-      onPassed({ slug, rep: m.rep, thumb, reason: json.reason ?? "" });
+      onPassed({ slug, rep: award.rep || m.rep, golden: award.golden, thumb, reason: json.reason ?? "" });
     } catch {
       setPhase({ kind: "error", message: "No connection. Your photo is still here — try again." });
     }
@@ -152,8 +152,8 @@ export default function MissionDetail({ slug, waypoint, onWaypoint, onPassed }: 
                 fix={fix && accurate ? { lngLat: fix.lngLat, accuracy: fix.accuracy } : null}
                 inRange={inRange}
                 onComplete={() => {
-                  completeMission({ slug, rep: m.rep, reason: "Heist crew complete." });
-                  onPassed({ slug, rep: m.rep, reason: "Heist crew complete." });
+                  const award = completeMission({ slug, rep: m.rep, reason: "Heist crew complete." });
+                  onPassed({ slug, rep: award.rep || m.rep, golden: award.golden, reason: "Heist crew complete." });
                 }}
               />
             ) : !fix ? (

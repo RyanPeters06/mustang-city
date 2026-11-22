@@ -22,7 +22,10 @@ import { MISSIONS } from "./missions";
 
 const STORAGE_KEY = "mc.progress.v1";
 
-export type Completion = { slug: string; at: number; rep: number; thumb?: string; reason?: string };
+export type Completion = { slug: string; at: number; rep: number; thumb?: string; reason?: string; golden?: boolean };
+
+/** Variable reward: a mission pass has this chance to roll GOLDEN for 1.5× Rep (a slot-machine beat on the pass screen). */
+export const GOLDEN_CHANCE = 0.18;
 
 export const FACULTIES = [
   "Arts & Humanities",
@@ -338,12 +341,15 @@ export const getServerSnapshot = () => SERVER;
 export const isComplete = (slug: string) => (ensureLoaded(), !!data.completions[slug]);
 
 /** Record a completion once. Returns the Rep awarded (0 if already done). */
-export function completeMission(c: Omit<Completion, "at">) {
+/** Record a mission pass. Returns the Rep actually awarded and whether it rolled golden (0/false if already done). */
+export function completeMission(c: Omit<Completion, "at" | "golden">): { rep: number; golden: boolean } {
   ensureLoaded();
-  if (data.completions[c.slug]) return 0;
-  data = { ...data, completions: { ...data.completions, [c.slug]: { ...c, at: Date.now() } } };
+  if (data.completions[c.slug]) return { rep: 0, golden: false };
+  const golden = Math.random() < GOLDEN_CHANCE;
+  const rep = golden ? Math.round(c.rep * 1.5) : c.rep;
+  data = { ...data, completions: { ...data.completions, [c.slug]: { ...c, rep, golden, at: Date.now() } } };
   save();
-  return c.rep;
+  return { rep, golden };
 }
 
 export function updateProfile(patch: Partial<Profile>) {

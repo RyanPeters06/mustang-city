@@ -5,10 +5,13 @@ import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/progress";
 import { getServerWeather, getWeather, subscribeWeather } from "@/lib/weather";
 import { DISTRICTS } from "@/lib/districts";
 import { FLAME_PATH } from "./missions/DailyCard";
+import { getServerWanted, getWanted, subscribeWanted } from "@/lib/wanted";
+import { AnimatePresence, motion } from "motion/react";
 
 export default function Hud({ visible = true }: { visible?: boolean }) {
   const { rep, rank, regionsClaimed, streak } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const w = useSyncExternalStore(subscribeWeather, getWeather, getServerWeather);
+  const wanted = useSyncExternalStore(subscribeWanted, getWanted, getServerWanted);
 
   return (
     <header
@@ -25,13 +28,14 @@ export default function Hud({ visible = true }: { visible?: boolean }) {
                 {streak}
               </span>
             )}
-            {w.status === "live" && w.tempC !== null && (
+            <WantedStars />
+            {!wanted && w.status === "live" && w.tempC !== null && (
               <span className="text-ink/60">
                 {" "}· {Math.round(w.tempC)}°C {w.label}
               </span>
             )}
           </p>
-          <p className="font-display text-[16px] leading-none tracking-[0.02em] text-ink uppercase">Forest State</p>
+          <p className="font-display text-[16px] leading-none tracking-[0.02em] whitespace-nowrap text-ink uppercase">Forest State</p>
         </div>
         <Stat label="Rep" value={rep.toLocaleString()} color="text-gold" />
         <div className="h-6 w-px bg-white/10" />
@@ -48,5 +52,39 @@ function Stat({ label, value, color }: { label: string; value: string; color: st
       <p className={`text-[16px] leading-tight font-bold tabular-nums ${color}`}>{value}</p>
       <p className="text-[10px] font-medium tracking-[0.14em] text-ink/60 uppercase">{label}</p>
     </div>
+  );
+}
+
+const STAR = "M12 3l2.6 5.4 5.9.9-4.3 4.1 1 5.9L12 16.6 6.8 19.3l1-5.9L3.5 9.3l5.9-.9z";
+
+/** Wanted level for curiosity (lib/wanted.ts): five stars that light up while you're on an exploring streak. */
+function WantedStars() {
+  const stars = useSyncExternalStore(subscribeWanted, getWanted, getServerWanted);
+  return (
+    <AnimatePresence>
+      {stars > 0 && (
+        <motion.span
+          className="ml-1.5 inline-flex translate-y-[1px] gap-[2px]"
+          aria-label={`Wanted level ${stars} of 5`}
+          initial={{ opacity: 0, x: -4 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, transition: { duration: 0.4 } }}
+        >
+          {[0, 1, 2, 3, 4].map((i) => (
+            <motion.svg
+              key={i}
+              viewBox="0 0 24 24"
+              className={`h-2.5 w-2.5 ${i < stars ? "text-gold drop-shadow-[0_0_4px_rgba(255,200,87,0.9)]" : "text-white/20"}`}
+              fill="currentColor"
+              aria-hidden
+              animate={i < stars ? { scale: [1.5, 1] } : { scale: 1 }}
+              transition={{ duration: 0.35 }}
+            >
+              <path d={STAR} />
+            </motion.svg>
+          ))}
+        </motion.span>
+      )}
+    </AnimatePresence>
   );
 }

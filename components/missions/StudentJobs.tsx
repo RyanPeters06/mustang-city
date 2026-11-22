@@ -17,7 +17,7 @@ const SAMPLES: CommunityMission[] = [
 type Mode = "loading" | "server" | "local";
 
 /** Missions tab → Student jobs: player-written check-in missions, voted up or buried by everyone. */
-export default function StudentJobs({ onPassed }: { onPassed: (info: { slug: string; rep: number; reason: string; title?: string }) => void }) {
+export default function StudentJobs({ onPassed }: { onPassed: (info: { slug: string; rep: number; reason: string; title?: string; golden?: boolean }) => void }) {
   const [mode, setMode] = useState<Mode>("loading");
   const [list, setList] = useState<CommunityMission[]>([]);
   const [open, setOpen] = useState<string | null>(null);
@@ -69,8 +69,8 @@ export default function StudentJobs({ onPassed }: { onPassed: (info: { slug: str
       // Samples demo the moment but never count toward real progress.
       return onPassed({ slug: m.slug, rep: m.rep, reason: "Sample job — not saved", title: m.title });
     }
-    completeMission({ slug: m.slug, rep: m.rep, reason: `Student job by @${m.author}` });
-    onPassed({ slug: m.slug, rep: m.rep, reason: `Student job by @${m.author}`, title: m.title });
+    const award = completeMission({ slug: m.slug, rep: m.rep, reason: `Student job by @${m.author}` });
+    onPassed({ slug: m.slug, rep: award.rep || m.rep, golden: award.golden, reason: `Student job by @${m.author}`, title: m.title });
   }
 
   return (

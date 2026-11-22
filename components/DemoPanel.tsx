@@ -1,6 +1,7 @@
 "use client";
 
 import { setDemoOn } from "@/lib/demo";
+import { addHeat } from "@/lib/wanted";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { DEMO_WALK, densify } from "@/lib/geo";
@@ -113,6 +114,9 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
       >
         Play MISSION PASSED
       </button>
+      <button className={btn} onClick={() => onPassed({ slug: selected ?? "goose-sighting", rep: 150, golden: true, reason: "Demo: a golden job roll." })}>
+        Play GOLDEN pass (demo)
+      </button>
       <button className={btn} onClick={() => { stopWalk(); resetFog(); }}>Reset fog</button>
       <button
         className={btn}
@@ -146,6 +150,7 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
       <button className={btn} onClick={() => ageAllCells(0)}>Refresh fog (no decay)</button>
       <button className={btn} onClick={() => setSampleTurf(!isSampleTurf())}>Sample faculty turf on/off</button>
       <button className={btn} onClick={() => setHeistSim(!getHeistSim())}>Demo heist crew on/off</button>
+      <button className={btn} onClick={() => addHeat(70)}>Wanted level +1 star (demo)</button>
       <button className={btn} onClick={() => addDemoRep(500)}>+500 Rep (demo)</button>
       <button className={btn} onClick={resetProgress}>Reset missions + demo Rep</button>
       <p className="pt-1 text-[12px] text-white/50">Press D to hide</p>

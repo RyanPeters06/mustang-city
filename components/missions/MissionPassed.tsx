@@ -69,7 +69,7 @@ export default function MissionPassed({ info, onDone }: { info: PassedInfo | nul
             <motion.img
               src={info.thumb}
               alt=""
-              className="mb-6 h-36 w-36 rounded-2xl object-cover shadow-2xl ring-4 ring-gold"
+              className={`mb-6 h-36 w-36 rounded-2xl object-cover shadow-2xl ring-4 ${info.golden ? "ring-gold shadow-[0_0_40px_rgba(255,200,87,0.7)]" : "ring-gold"}`}
               initial={{ scale: 0.6, rotate: -8, opacity: 0 }}
               animate={{ scale: 1, rotate: -4, opacity: 1 }}
               transition={{ ...SPRING_POP, delay: 0.1 }}
@@ -100,8 +100,18 @@ export default function MissionPassed({ info, onDone }: { info: PassedInfo | nul
           >
             {m?.title ?? info.title}
           </motion.p>
+          {info.golden && (
+            <motion.p
+              className="mt-3 rounded-full bg-gold/20 px-3 py-1 text-[12px] font-bold tracking-[0.2em] text-gold uppercase ring-1 ring-gold/60"
+              initial={{ scale: 0, rotate: -12 }}
+              animate={{ scale: [0, 1.25, 1], rotate: [-12, 4, 0] }}
+              transition={{ delay: 0.75, duration: 0.5 }}
+            >
+              Golden job · 1.5× Rep
+            </motion.p>
+          )}
           <motion.p
-            className="mt-2 text-[34px] font-bold text-orange tabular-nums"
+            className={`mt-2 text-[34px] font-bold tabular-nums ${info.golden ? "text-gold drop-shadow-[0_0_18px_rgba(255,200,87,0.8)]" : "text-orange"}`}
             initial={{ y: 16, opacity: 0, scale: 0.8 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             transition={{ delay: 0.5, ...SPRING_POP }}
