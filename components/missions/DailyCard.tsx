@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { ProgressSnapshot } from "@/lib/progress";
 import { DAILY_REP, DAILY_SWEEP_REP, dailyQuests, dayKey, msToMidnight } from "@/lib/daily";
 import { SURPRISE_REP, todaysSurprises } from "@/lib/surprise";
+import { currentEvent } from "@/lib/season";
 
 export const FLAME_PATH = "M12 3c1 3.5 4.5 5 4.5 9.5a4.5 4.5 0 0 1-9 0c0-2 1-3.2 2-4.2.2 1.6 1 2.6 2 2.7C11 8.6 11.3 5.6 12 3Z";
 
@@ -21,6 +22,7 @@ export default function DailyCard({ snap }: { snap: ProgressSnapshot }) {
     return () => clearInterval(t);
   }, []);
   const day = dayKey(now);
+  const event = currentEvent(new Date(now));
   const quests = dailyQuests(day);
   const done = quests.map((q) => !!snap.dailyDone[`${day}|${q.id}`]);
   const count = done.filter(Boolean).length;
@@ -87,7 +89,13 @@ export default function DailyCard({ snap }: { snap: ProgressSnapshot }) {
         {count === 3 ? `All three done: +${DAILY_SWEEP_REP} bonus Rep earned.` : `Finish all three for +${DAILY_SWEEP_REP} bonus Rep.`}
       </p>
       <div className="mt-3 border-t border-white/10 pt-3">
-        <p className="text-[12px] font-bold tracking-[0.14em] text-gold uppercase">Surprises today · +{SURPRISE_REP} Rep each</p>
+        {event && (
+          <div className="mb-2 flex items-center gap-2 rounded-xl bg-teal/10 px-3 py-2 text-[12px] text-teal">
+            <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden><path d={event.glyph} /></svg>
+            <span><span className="font-bold">{event.name} event:</span> {event.perk}.</span>
+          </div>
+        )}
+        <p className="text-[12px] font-bold tracking-[0.14em] text-gold uppercase">Surprises today · +{SURPRISE_REP * (event?.surpriseMultiplier ?? 1)} Rep each</p>
         <ul className="mt-1.5 space-y-1">
           {todaysSurprises(day).map((s) => (
             <li key={s.id} className={`flex items-baseline justify-between gap-3 text-[13px] ${snap.surprises[s.id] ? "text-ink/45 line-through" : "text-ink/80"}`}>

@@ -6,12 +6,16 @@ import { getServerWeather, getWeather, subscribeWeather } from "@/lib/weather";
 import { DISTRICTS } from "@/lib/districts";
 import { FLAME_PATH } from "./missions/DailyCard";
 import { getServerWanted, getWanted, subscribeWanted } from "@/lib/wanted";
+import { currentEvent } from "@/lib/season";
+
+const noopSub = () => () => {};
 import { AnimatePresence, motion } from "motion/react";
 
 export default function Hud({ visible = true }: { visible?: boolean }) {
   const { rep, rank, regionsClaimed, streak, bag, bagSize } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const w = useSyncExternalStore(subscribeWeather, getWeather, getServerWeather);
   const wanted = useSyncExternalStore(subscribeWanted, getWanted, getServerWanted);
+  const event = useSyncExternalStore(noopSub, currentEvent, () => null);
 
   return (
     <header
@@ -36,7 +40,14 @@ export default function Hud({ visible = true }: { visible?: boolean }) {
               </span>
             )}
           </p>
-          <p className="font-display text-[16px] leading-none tracking-[0.02em] whitespace-nowrap text-ink uppercase">Forest State</p>
+          <p className="flex items-center gap-1.5 font-display text-[16px] leading-none tracking-[0.02em] whitespace-nowrap text-ink uppercase">
+            Forest State
+            {event && (
+              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-teal" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-label={`${event.name} event`}>
+                <path d={event.glyph} />
+              </svg>
+            )}
+          </p>
         </div>
         {bag.length > 0 && (
           <>

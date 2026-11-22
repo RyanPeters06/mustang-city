@@ -19,6 +19,7 @@ import { SIDE_REP, regionSideQuests, sideQuestCheck } from "./sideQuests";
 import { LOOT_REP, bagSize, rollLoot, stashValue, type LootItem } from "./loot";
 import { inCampusArea } from "./fog";
 import { SURPRISE_REP, surpriseAt } from "./surprise";
+import { currentEvent } from "./season";
 
 export { rankFor };
 import { MISSIONS } from "./missions";
@@ -89,6 +90,7 @@ type Stored = {
   bag?: LootItem[]; // carried loot (not yet banked)
   stash?: LootItem[]; // banked at Mustang City: counts toward Rep
   surprises?: Record<string, number>; // surprise blip id (`${day}:${i}`) → reached at
+  surpriseRep?: Record<string, number>; // surprise id → Rep earned (seasonal events can pay double)
   finds?: Record<string, number>; // collectible id → found at
   classRuns?: Record<string, number>; // `${meetingId}|${date}` → arrived on time at
 };
@@ -148,6 +150,7 @@ function ensureLoaded() {
         bag: parsed.bag ?? [],
         stash: parsed.stash ?? [],
         surprises: parsed.surprises ?? {},
+        surpriseRep: parsed.surpriseRep ?? {},
         finds: parsed.finds ?? {},
         classRuns: parsed.classRuns ?? {},
       };
@@ -180,8 +183,11 @@ function ensureLoaded() {
     // Surprise blips: reaching one today pays out once.
     const surprise = surpriseAt(fix.lngLat);
     if (surprise && !data.surprises?.[surprise.id]) {
+      const ev = currentEvent();
+      const earned = SURPRISE_REP * (ev?.surpriseMultiplier ?? 1);
       data.surprises = { ...(data.surprises ?? {}), [surprise.id]: Date.now() };
-      celebrate({ id: `surprise-${surprise.id}`, kind: "surprise", title: `Surprise: ${surprise.name}`, subtitle: `Found before midnight · +${SURPRISE_REP} Rep`, color: "#FFC857", glyph: "M12 3l2.6 5.4 5.9.9-4.3 4.1 1 5.9L12 16.6 6.8 19.3l1-5.9L3.5 9.3l5.9-.9z" });
+      data.surpriseRep = { ...(data.surpriseRep ?? {}), [surprise.id]: earned };
+      celebrate({ id: `surprise-${surprise.id}`, kind: "surprise", title: `Surprise: ${surprise.name}`, subtitle: `Found before midnight · +${earned} Rep${ev ? ` (${ev.name})` : ""}`, color: "#FFC857", glyph: "M12 3l2.6 5.4 5.9.9-4.3 4.1 1 5.9L12 16.6 6.8 19.3l1-5.9L3.5 9.3l5.9-.9z" });
       dropLoot(`surprise:${surprise.id}`, 0.15, true);
       save();
     }
@@ -370,7 +376,7 @@ export function getSnapshot(): ProgressSnapshot {
     const dailyRep = dailyKeys.length * DAILY_REP + sweptDays * DAILY_SWEEP_REP;
     const sideRep = Object.keys(data.sideDone ?? {}).length * SIDE_REP;
     const lootRep = stashValue(data.stash ?? []);
-    const surpriseRep = Object.keys(data.surprises ?? {}).length * SURPRISE_REP;
+    const surpriseRep = Object.keys(data.surprises ?? {}).reduce((s, id) => s + (data.surpriseRep?.[id] ?? SURPRISE_REP), 0);
     const rep = fog.rep + missionRep + data.demoRep + districtRep + findRep + classRep + dailyRep + sideRep + lootRep + surpriseRep;
     snapshot = {
       completions: data.completions,
@@ -468,7 +474,7 @@ export const unlockLabel = (id: EmblemId) => {
 /** Dev/demo only: forget completions. */
 export function resetProgress() {
   ensureLoaded();
-  data = { ...data, completions: {}, demoRep: 0, finds: {}, districts: {}, visits: {}, checkins: {}, dailyDone: {}, activeDays: [], dayStart: undefined, sideDone: {}, bag: [], stash: [], surprises: {} };
+  data = { ...data, completions: {}, demoRep: 0, finds: {}, districts: {}, visits: {}, checkins: {}, dailyDone: {}, activeDays: [], dayStart: undefined, sideDone: {}, bag: [], stash: [], surprises: {}, surpriseRep: {} };
   syncClaimedFog();
   save();
 }
