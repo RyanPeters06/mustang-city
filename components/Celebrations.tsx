@@ -103,7 +103,7 @@ export default function Celebrations({ paused = false }: { paused?: boolean }) {
             </span>
             <span className="min-w-0">
               <span className="block text-[12px] font-bold tracking-[0.14em] text-gold uppercase">
-                {c.kind === "district" ? "Neighbourhood unlocked" : c.kind === "ride" ? "Ride logged" : c.kind === "collectible" ? "Collectible found" : c.kind === "class" ? "Class Run · on time" : "Badge unlocked"}
+                {c.kind === "district" ? "Region claimed" : c.kind === "ride" ? "Ride logged" : c.kind === "collectible" ? "Collectible found" : c.kind === "class" ? "Class Run · on time" : "Badge unlocked"}
               </span>
               <span className="block truncate text-[16px] font-bold text-ink">{c.title}</span>
               <span className="block truncate text-[12px] text-ink/60">{c.subtitle}</span>

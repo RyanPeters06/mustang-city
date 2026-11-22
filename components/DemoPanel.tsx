@@ -1,5 +1,6 @@
 "use client";
 
+import { setDemoOn } from "@/lib/demo";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { DEMO_WALK, densify } from "@/lib/geo";
@@ -32,8 +33,8 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement;
-      if (t.closest("input, textarea, [contenteditable]")) return;
+      const t = e.target as HTMLElement | null;
+      if (t?.closest?.("input, textarea, [contenteditable]")) return;
       if (e.key === "d" || e.key === "D") setOpen((o) => !o);
     };
     window.addEventListener("keydown", onKey);
@@ -42,6 +43,9 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
       clearInterval(timer.current);
     };
   }, []);
+
+  // Region quests show "Go there" teleports while the demo panel is open.
+  useEffect(() => setDemoOn(open), [open]);
 
   const stopWalk = () => {
     clearInterval(timer.current);

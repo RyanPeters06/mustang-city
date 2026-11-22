@@ -9,7 +9,11 @@ import { getRides, subscribeRides } from "./rides";
 import { COLLECTIBLES, COLLECTIBLE_REP } from "./collectibles";
 import { CLASS_RUN_REP } from "./schedule";
 import { celebrate } from "./celebrate";
-import { DISTRICT_REP, getDistrictStats } from "./districts";
+import { DISTRICTS, districtAt, getDistrictStats } from "./districts";
+import { REGION_REP, checkInTarget, regionProgress, regionQuests } from "./regions";
+import { setClaimedAreas } from "./fog";
+import { onFix } from "./location";
+import type { LngLat } from "./geo";
 
 export { rankFor };
 import { MISSIONS } from "./missions";
@@ -67,7 +71,9 @@ type Stored = {
   badges: Record<string, number>; // code → earned at
   lastRank: string | null; // last rank celebrated (null = not yet initialised)
   demoRep: number; // demo-controls only
-  districts: Record<string, number>; // unlocked district name → at
+  districts: Record<string, number>; // claimed region (neighbourhood) name → at
+  visits?: Record<string, number>; // region name → first set foot in it
+  checkins?: Record<string, { place: string; at: number }>; // region quest id → place checked in at
   finds?: Record<string, number>; // collectible id → found at
   classRuns?: Record<string, number>; // `${meetingId}|${date}` → arrived on time at
 };
@@ -80,6 +86,9 @@ export type ProgressSnapshot = {
   badges: Record<string, number>;
   demoRep: number;
   districts: Record<string, number>;
+  visits: Record<string, number>;
+  checkins: Record<string, { place: string; at: number }>;
+  regionsClaimed: number;
   finds: Record<string, number>;
   classRuns: Record<string, number>;
   rep: number;
@@ -107,6 +116,8 @@ function ensureLoaded() {
         lastRank: parsed.lastRank ?? null,
         demoRep: parsed.demoRep ?? 0,
         districts: parsed.districts ?? {},
+        visits: parsed.visits ?? {},
+        checkins: parsed.checkins ?? {},
         finds: parsed.finds ?? {},
         classRuns: parsed.classRuns ?? {},
       };
@@ -120,7 +131,20 @@ function ensureLoaded() {
     checkMilestones();
   });
   subscribeRides(() => checkMilestones()); // bus rides feed Route 6 Regular / Every Route (also starts detection)
+  // Region quest "Set foot in …": the first fix inside each region.
+  onFix((fix) => {
+    const region = districtAt(fix.lngLat);
+    if (!region || data.visits?.[region]) return;
+    data.visits = { ...(data.visits ?? {}), [region]: Date.now() };
+    save();
+  });
+  syncClaimedFog();
   checkMilestones(true);
+}
+
+/** Claimed regions are fully revealed on the map (their fog lifts with a crisp border, like Mustang City). */
+function syncClaimedFog() {
+  setClaimedAreas(DISTRICTS.filter((d) => data.districts[d.name]).flatMap((d) => d.polygons));
 }
 
 /** Celebrate rank-ups and newly earned badges (once each). `silent` on first load. */
@@ -146,20 +170,26 @@ function checkMilestones(silent = false) {
     changed = true;
     if (!silent) celebrate({ id: `badge-${b.code}`, kind: "badge", title: b.name, subtitle: b.description, color: b.color, glyph: b.glyph });
   }
-  for (const d of getDistrictStats()) {
-    if (!d.eligible || data.districts[d.name]) continue;
+  // Region claims: finish CLAIM_NEEDED of a neighbourhood's four quests (lib/regions.ts) and its fog lifts.
+  const stats = getDistrictStats();
+  const regionInput = { visits: data.visits ?? {}, checkins: data.checkins ?? {}, completions: data.completions, finds: data.finds ?? {} };
+  let claimedNow = false;
+  for (const d of DISTRICTS) {
+    if (data.districts[d.name] || !regionProgress(d.name, regionInput, stats).claimable) continue;
     data.districts = { ...data.districts, [d.name]: Date.now() };
     changed = true;
+    claimedNow = true;
     if (!silent)
       celebrate({
         id: `district-${d.name}`,
         kind: "district",
         title: d.name,
-        subtitle: `Neighbourhood unlocked · +${DISTRICT_REP} Rep`,
+        subtitle: `Region claimed · +${REGION_REP} Rep · ${Object.keys(data.districts).length}/${DISTRICTS.length}`,
         color: "#FFC857",
         glyph: "M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Zm0-8.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
       });
   }
+  if (claimedNow) syncClaimedFog();
   if (changed) save(false);
 }
 
@@ -193,7 +223,7 @@ export function getSnapshot(): ProgressSnapshot {
     const fog = getFogSnapshot();
     const list = Object.values(data.completions);
     const missionRep = list.reduce((s, c) => s + c.rep, 0);
-    const districtRep = Object.keys(data.districts).length * DISTRICT_REP;
+    const districtRep = Object.keys(data.districts).length * REGION_REP;
     const findRep = Object.keys(data.finds ?? {}).length * COLLECTIBLE_REP;
     const classRep = Object.keys(data.classRuns ?? {}).length * CLASS_RUN_REP;
     const rep = fog.rep + missionRep + data.demoRep + districtRep + findRep + classRep;
@@ -205,6 +235,9 @@ export function getSnapshot(): ProgressSnapshot {
       badges: data.badges,
       demoRep: data.demoRep,
       districts: data.districts,
+      visits: data.visits ?? {},
+      checkins: data.checkins ?? {},
+      regionsClaimed: Object.keys(data.districts).length,
       finds: data.finds ?? {},
       classRuns: data.classRuns ?? {},
       rep,
@@ -223,6 +256,9 @@ const SERVER: ProgressSnapshot = {
   badges: {},
   demoRep: 0,
   districts: {},
+  visits: {},
+  checkins: {},
+  regionsClaimed: 0,
   finds: {},
   classRuns: {},
   rep: 0,
@@ -267,8 +303,24 @@ export const unlockLabel = (id: EmblemId) => {
 /** Dev/demo only: forget completions. */
 export function resetProgress() {
   ensureLoaded();
-  data = { ...data, completions: {}, demoRep: 0, finds: {} };
+  data = { ...data, completions: {}, demoRep: 0, finds: {}, districts: {}, visits: {}, checkins: {} };
+  syncClaimedFog();
   save();
+}
+
+/**
+ * Region quest check-in: GPS-verified, you have to be standing at an accepted place.
+ * Returns the place's name, or null if you're not close enough to one.
+ */
+export function checkInQuest(region: string, questId: string, at: LngLat): string | null {
+  ensureLoaded();
+  const q = regionQuests(region).find((x) => x.id === questId);
+  if (!q || q.kind !== "checkin" || data.checkins?.[questId]) return null;
+  const place = checkInTarget(q, region, at);
+  if (!place) return null;
+  data.checkins = { ...(data.checkins ?? {}), [questId]: { place: place.n, at: Date.now() } };
+  save();
+  return place.n;
 }
 
 /** Demo controls only: add Rep that is tracked separately and cleared by "Reset missions". */

@@ -11,7 +11,7 @@ import LoreCard from "./missions/LoreCard";
 import Replays from "./profile/Replays";
 import { walkStats, WEEKLY_ACTIVE_GOAL_MIN } from "@/lib/walkStats";
 import BadgeGrid from "./profile/BadgeGrid";
-import Neighbourhoods from "./profile/Neighbourhoods";
+import RegionsBoard from "./districts/RegionsBoard";
 import { badgeByCode } from "@/lib/badges";
 
 type User = { name?: string; email?: string; picture?: string };
@@ -257,7 +257,7 @@ export default function ProfilePanel({
 
       <BadgeGrid snap={snap} />
 
-      <Neighbourhoods snap={snap} />
+      <RegionsBoard snap={snap} mode="all" />
 
       <CollectiblesSection snap={snap} onOpen={onOpenCollectible} />
 

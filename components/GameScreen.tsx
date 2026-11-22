@@ -283,7 +283,7 @@ export default function GameScreen({ cover = null }: { cover?: CoverArt }) {
             }}
           />
         ) : tab === "missions" ? (
-          <MissionList onOpen={openMission} onPassed={setPassed} />
+          <MissionList onOpen={openMission} onPassed={setPassed} onOpenRegion={(name) => setDistrict(name)} />
         ) : tab === "profile" ? (
           <ProfilePanel denied={params.denied} onOpenMission={openMission} onOpenTag={setTagSheet} onOpenWrapped={() => setWrapped(true)} onOpenCollectible={setCollectible} onOpenSchedule={() => setScheduleOpen(true)} onPlayReplay={() => setTab("map")} />
         ) : (

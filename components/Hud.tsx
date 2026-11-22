@@ -3,9 +3,10 @@
 import { useSyncExternalStore } from "react";
 import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/progress";
 import { getServerWeather, getWeather, subscribeWeather } from "@/lib/weather";
+import { DISTRICTS } from "@/lib/districts";
 
 export default function Hud({ visible = true }: { visible?: boolean }) {
-  const { rep, rank, pct } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const { rep, rank, regionsClaimed } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const w = useSyncExternalStore(subscribeWeather, getWeather, getServerWeather);
 
   return (
@@ -27,7 +28,8 @@ export default function Hud({ visible = true }: { visible?: boolean }) {
         </div>
         <Stat label="Rep" value={rep.toLocaleString()} color="text-gold" />
         <div className="h-8 w-px bg-white/10" />
-        <Stat label="Explored" value={`${pct < 10 ? pct.toFixed(2) : pct.toFixed(1)}%`} color="text-teal" />
+        {/* Headline progress: regions claimed through their quests (lib/regions.ts) */}
+        <Stat label="Regions" value={`${regionsClaimed}/${DISTRICTS.length}`} color="text-teal" />
       </div>
     </header>
   );

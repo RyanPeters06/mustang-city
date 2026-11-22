@@ -222,6 +222,13 @@ function offCampusRuns(rings: LngLat[][]): LngLat[][] {
   return runs;
 }
 
+/** Claimed regions (lib/regions.ts): revealed in full with a crisp border. Polygons are [outer, ...holes]. */
+let claimed: LngLat[][][] = [];
+export function setClaimedAreas(polys: LngLat[][][]) {
+  claimed = polys;
+  listeners.forEach((l) => l()); // redraw only; claimed land isn't stored as cells (no Rep/% inflation)
+}
+
 export function buildFog(): { fog: FeatureCollection<Polygon>; edges: Feature<MultiLineString> } {
   ensureLoaded();
   // Player-walked area: hexagons smoothed into soft blobs.
@@ -229,7 +236,7 @@ export function buildFog(): { fog: FeatureCollection<Polygon>; edges: Feature<Mu
     (region as LngLat[][]).map((r) => smoothRing(r)),
   );
   // Revealed = player blobs ∪ Mustang City (exact, sharp campus boundary).
-  const campus: LngLat[][][] = [[CAMPUS_RING]];
+  const campus = (claimed.length ? polygonClipping.union([[CAMPUS_RING]] as never, ...(claimed.map((p) => [p]) as never[])) : [[CAMPUS_RING]]) as LngLat[][][];
   const revealed = (player.length ? polygonClipping.union(campus as never, player as never) : campus) as LngLat[][][];
   // Soft fog edge only where the player walked outside campus; the campus border stays crisp.
   const softEdges = (player.length ? polygonClipping.difference(player as never, campus as never) : []) as LngLat[][][];
