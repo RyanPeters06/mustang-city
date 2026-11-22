@@ -22,13 +22,29 @@ function shouldShow() {
   return iOS && safari && !standalone && window.innerWidth < 768;
 }
 
-export default function InstallHint({ ready }: { ready: boolean }) {
+export default function InstallHint({ ready, hidden = false }: { ready: boolean; hidden?: boolean }) {
   const [show, setShow] = useState(false);
 
+  // Only after the first-run cards are finished (never stacked with them).
   useEffect(() => {
     if (!ready) return;
-    const t = setTimeout(() => setShow(shouldShow()), 2500); // after onboarding settles
-    return () => clearTimeout(t);
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const arm = () => {
+      clearTimeout(t);
+      t = setTimeout(() => setShow(shouldShow()), 1500);
+    };
+    let onboarded = false;
+    try {
+      onboarded = localStorage.getItem("mc.onboarded.v1") === "1";
+    } catch {
+      onboarded = true;
+    }
+    if (onboarded) arm();
+    window.addEventListener("mc:onboarded", arm);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("mc:onboarded", arm);
+    };
   }, [ready]);
 
   const dismiss = () => {
@@ -42,10 +58,10 @@ export default function InstallHint({ ready }: { ready: boolean }) {
 
   return (
     <AnimatePresence>
-      {show && (
+      {show && !hidden && (
         <motion.div
           className="glass-solid absolute inset-x-4 z-40 flex items-center gap-3 rounded-[20px] p-3.5"
-          style={{ top: "calc(var(--safe-top) + 84px)" }}
+          style={{ bottom: "calc(var(--safe-bottom) + 96px)" }}
           initial={{ y: -16, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -16, opacity: 0 }}

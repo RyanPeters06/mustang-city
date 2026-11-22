@@ -12,7 +12,7 @@ const STEPS = [
 ];
 
 /** First-run pointers: three short cards after the first landing. Skippable, shown once per phone. */
-export default function Onboarding({ ready }: { ready: boolean }) {
+export default function Onboarding({ ready, hidden = false }: { ready: boolean; hidden?: boolean }) {
   const [step, setStep] = useState<number | null>(null);
 
   useEffect(() => {
@@ -33,11 +33,12 @@ export default function Onboarding({ ready }: { ready: boolean }) {
     } catch {
       /* ignore */
     }
+    window.dispatchEvent(new Event("mc:onboarded"));
   };
 
   return (
     <AnimatePresence>
-      {step !== null && (
+      {step !== null && !hidden && (
         <motion.div
           key="onboarding"
           className="glass-solid absolute inset-x-4 z-40 rounded-[24px] p-5"

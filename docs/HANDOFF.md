@@ -83,6 +83,31 @@ UI polish passes (commits after 019) changed the following:
 - **Headless browser screenshots:** use `--use-gl=angle --use-angle=swiftshader`. Run the scripts from the scratchpad,
   not the repo root, or the screenshots land in git.
 
+## Open items: discussed but NOT done (Nov 22 review)
+**Blocked on Ryan:**
+1. Keys: `GEMINI_API_KEY` (photo checks, Goose voice, radio TTS, screening, timetable OCR), Auth0, `DATABASE_URL` + `db:schema`/`db:seed`.
+2. A new PR from `claude/file-editing-offline-9q9lv2` into `main` for any commits after `2bb9229`.
+3. Comic-panel cover art + icon: drop-in slots ready in `public/cover/` and `public/brand/icon.png`.
+4. Record a real walk for the Replay/Wrapped demo (PITCH.md #2).
+5. Verify on the deployed site: Open-Meteo weather (429 from cloud machines).
+6. Verify the 85% retention stat before using it on stage (PITCH.md).
+
+**Decided to build, not yet built (Ryan's ideas, IDEAS §8 / §0):**
+7. Stash & carry inventory (Mustang City is the stash; limited bag; bank by returning to campus).
+8. Loot challenges (opt-in London trivia duel, coarse areas only) — needs Auth0 + DB + realtime.
+9. Supabase add-on for Realtime (heists, live /stage mirror) + Storage (real photo files).
+
+**High-value ideas awaiting a yes (IDEAS §0, ranked):**
+10. Devpost trailer · 11. Live big-screen `/stage` mirror · 12. "Wanted level" curiosity stars · 13. The Goose calls you
+(Gemini TTS) · 14. Pause-screen music (procedural Web Audio, no licence) · 15. Near-miss nudges · 16. Photo mode ·
+17. Daily Job + forgiving streaks · 18. Web push notifications · 19. Collection sets · 20. O-Week preset missions.
+
+**Known gaps / tech debt:**
+21. Collectible finds, class runs and rides are device-only (not synced to the account; tables exist for collectibles).
+22. Student jobs aren't on the map (list only); "Found It" Class Run badge needs term dates.
+23. 3D models are stylised (no real facades); photogrammetry is the upgrade path (IDEAS §3).
+24. No automated tests; verification is build + lint + browser checks.
+
 ## Ideas logged but not built (see `docs/IDEAS.md`)
 - **Ranked list (§0):** Devpost trailer, comic-panel cover intro, live big-screen mirror, "wanted level" stars, The Goose
   calls you, the stash and carry inventory (Mustang City as the stash), loot challenges as a London trivia duel, pause

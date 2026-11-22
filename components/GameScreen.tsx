@@ -304,8 +304,8 @@ export default function GameScreen({ cover = null }: { cover?: CoverArt }) {
       <Intro map={map} mapState={mapState} reason={reason} onDone={onEntered} cover={cover} />
       <AreaBanner />
       <ReplayBar />
-      <Onboarding ready={mapState === "ready" && entered} />
-      <InstallHint ready={mapState === "ready" && entered} />
+      <Onboarding ready={mapState === "ready" && entered} hidden={sheetOpen} />
+      <InstallHint ready={mapState === "ready" && entered} hidden={sheetOpen} />
       <Celebrations paused={passed !== null} />
       <MissionPassed info={passed} onDone={clearPassed} />
       <AnimatePresence>{wrapped && <Wrapped key="wrapped" onClose={() => setWrapped(false)} />}</AnimatePresence>
