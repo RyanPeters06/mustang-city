@@ -1,7 +1,9 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { DiveFlash, LoadingPrompt, PosterTexture, StartPrompt, playStartSound } from "./intro/TitleFx";
+import CoverCamera, { DIVE_MS } from "./intro/CoverCamera";
 import { Emblem } from "./brand/Logo";
 import type { MapHandle, IntroStep } from "./map/MapView";
 import type { CoverArt } from "@/lib/brandAssets";
@@ -34,32 +36,26 @@ const CAPTIONS: Record<Exclude<IntroStep, "done">, { kicker: string; title: stri
   mustang: { kicker: "Western campus", title: "Mustang City" },
 };
 
-const SEEN_KEY = "mc.intro.seen";
 const noopSubscribe = () => () => {};
 /** Phones say "Tap", laptops say "Click". */
 const isCoarsePointer = () => window.matchMedia("(pointer: coarse)").matches;
-const seenThisSession = () => {
-  try {
-    return sessionStorage.getItem(SEEN_KEY) === "1";
-  } catch {
-    return false;
-  }
-};
 
 /**
- * Entrance: branded loader → "tap to enter" title card → letterboxed camera flight from the whole
- * of Forest State down into Mustang City, with establishing-shot captions. Once per session;
- * later loads just fade the loader. The tap also gives us the user gesture audio needs later.
+ * Entrance: branded loader → "press start" title screen → letterboxed camera flight from the whole
+ * of Forest State down into Mustang City, with establishing-shot captions. Every load waits for the
+ * press, like a console game; it also gives us the user gesture audio needs later.
  */
 export default function Intro({ map, mapState, reason, onDone, cover = null }: Props) {
-  const seen = useSyncExternalStore(noopSubscribe, seenThisSession, () => false);
   const [chosen, setPhase] = useState<"title" | "diving" | "flying" | "done" | null>(null);
   const collage = cover?.kind === "collage";
   const coarse = useSyncExternalStore(noopSubscribe, isCoarsePointer, () => true);
-  const reduceMotion = useReducedMotion();
-  const phase = mapState !== "ready" ? "loader" : (chosen ?? (seen ? "done" : "title"));
+  const phase = mapState !== "ready" ? "loader" : (chosen ?? "title");
   const [caption, setCaption] = useState<IntroStep | null>(null);
   const [tip, setTip] = useState(0);
+  const [pressed, setPressed] = useState(false);
+  const [coverRun, setCoverRun] = useState(0);
+  const started = useRef(false);
+  const startLabel = coarse ? "Tap anywhere to start" : "Press any key to start";
 
   useEffect(() => {
     if (phase !== "loader" && phase !== "title") return;
@@ -72,24 +68,42 @@ export default function Intro({ map, mapState, reason, onDone, cover = null }: P
     if (phase === "done") onDone();
   }, [phase, map, onDone]);
 
+  // Any key starts on a laptop, like a console title screen (D is left alone: it opens the demo panel).
+  useEffect(() => {
+    if (phase !== "title") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+      if (["Shift", "Control", "Alt", "Meta", "Tab", "CapsLock", "d", "D"].includes(e.key)) return;
+      e.preventDefault();
+      void enter();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
   // Replay from the demo panel.
   useEffect(() => {
-    const replay = () => setPhase("title");
+    const replay = () => {
+      started.current = false;
+      setPressed(false);
+      setCoverRun((n) => n + 1); // restart the cover's camera move from the opening close-up
+      setPhase("title");
+    };
     window.addEventListener("mc:replay-intro", replay);
     return () => window.removeEventListener("mc:replay-intro", replay);
   }, [map]);
 
   async function enter() {
-    try {
-      sessionStorage.setItem(SEEN_KEY, "1");
-    } catch {
-      /* private mode: the intro just plays again next time */
-    }
+    if (started.current) return; // a click and a key press can both land
+    started.current = true;
     const reduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (collage && !reduced) {
-      // Dive into the cover's Mustang City logo, then hand over to the map flight.
+      // Arcade confirm blink + sound, then dive into the cover's Mustang City logo and hand over to the map flight.
+      playStartSound(DIVE_MS);
+      setPressed(true);
+      await new Promise((r) => setTimeout(r, 340));
       setPhase("diving");
-      await new Promise((r) => setTimeout(r, COVER_DIVE_MS));
+      await new Promise((r) => setTimeout(r, DIVE_MS));
     }
     setPhase("flying");
     await map.current?.playIntro(setCaption);
@@ -112,7 +126,7 @@ export default function Intro({ map, mapState, reason, onDone, cover = null }: P
             exit={collage ? { opacity: 0 } : { opacity: 0, scale: 1.04 }}
             transition={{ duration: collage ? 0.3 : 0.8, ease: EASE_OUT }}
           >
-            {cover ? <CoverArtLayer cover={cover} dive={phase === "diving"} /> : <Postcards />}
+            {cover ? <CoverArtLayer key={coverRun} cover={cover} dive={phase === "diving"} /> : <Postcards />}
             {/* legibility: the collage carries its own logo, so it only needs a light bottom fade behind the button */}
             {collage ? (
               <div aria-hidden className="absolute inset-x-0 bottom-0 h-[24%] bg-gradient-to-t from-black/85 to-transparent" />
@@ -161,21 +175,13 @@ export default function Intro({ map, mapState, reason, onDone, cover = null }: P
                 </div>
               ) : phase === "title" ? (
                 // Label only: the whole screen is the start button (below), arcade-style.
-                <motion.p
-                  aria-hidden
-                  className="mt-7 flex min-h-[56px] items-center justify-center text-center text-[18px] tracking-[0.03em] whitespace-nowrap text-white uppercase"
-                  style={{
-                    fontFamily: "var(--font-bowlby), var(--font-anton), sans-serif",
-                    WebkitTextStroke: "7px #000",
-                    paintOrder: "stroke fill",
-                    textShadow: "0 4px 0 #000",
-                  }}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={reduceMotion ? { opacity: 1, y: 0 } : { opacity: [0, 1, 1, 0.35, 1], y: 0 }}
-                  transition={reduceMotion ? { duration: 0.4 } : { opacity: { duration: 2.2, times: [0, 0.15, 0.55, 0.78, 1], repeat: Infinity, repeatDelay: 0.2 }, y: { duration: 0.5, ease: EASE_OUT } }}
-                >
-                  {coarse ? "Tap" : "Click"} anywhere to start
-                </motion.p>
+                <div className="mt-7">
+                  <StartPrompt label={startLabel} pressed={pressed} />
+                </div>
+              ) : collage ? (
+                <div className="mt-7 flex min-h-[56px] items-center justify-center">
+                  <LoadingPrompt />
+                </div>
               ) : (
                 <div className="mt-7 flex min-h-[56px] items-center justify-between gap-4">
                   <p key={tip} className="max-w-[78%] animate-[fadein_400ms_ease-out] text-[14px] leading-snug text-ink/75">
@@ -184,18 +190,25 @@ export default function Intro({ map, mapState, reason, onDone, cover = null }: P
                   <span className="h-6 w-6 shrink-0 animate-spin rounded-full border-2 border-white/15 border-t-gold" aria-label="Loading" />
                 </div>
               )}
-              {phase === "title" && (
+              {(phase === "title" || (collage && phase === "loader")) && (
                 <p key={tip} className="mt-3 h-9 animate-[fadein_400ms_ease-out] text-center text-[12px] leading-snug text-ink/60">
                   {TIPS[tip]}
                 </p>
               )}
+              {collage && <p className="mt-1 text-center text-[10px] font-semibold tracking-[0.18em] whitespace-nowrap text-ink/35 uppercase">Hack Western 13 · London, ON</p>}
             </motion.div>
+            {collage && (
+              <>
+                <PosterTexture />
+                <DiveFlash active={phase === "diving"} durationMs={DIVE_MS} />
+              </>
+            )}
             {phase === "title" && mapState !== "unavailable" && (
               <button
                 type="button"
                 onClick={enter}
                 autoFocus
-                aria-label={`${coarse ? "Tap" : "Click"} anywhere to start`}
+                aria-label={startLabel}
                 className="absolute inset-0 z-10 cursor-pointer focus-visible:outline-none"
               />
             )}
@@ -280,60 +293,20 @@ function Postcards() {
   );
 }
 
-/** Where the Mustang City logo sits in the portrait collage (scripts/build-cover.mjs: logo centre 540,900 of 1080×1920). */
-const LOGO_ORIGIN = "50% 46.9%";
-/** Opening close-up: the Goose boss panel (top-left of the collage). */
-const OPEN_ORIGIN = "22% 6%";
-export const COVER_DIVE_MS = 1150;
-
 /**
- * Ryan's cover art. A collage opens on a close-up of one panel, pulls back to reveal the whole fragmented cover,
- * and on enter dives into the Mustang City logo. Separate panels cycle like the postcards.
+ * Ryan's cover art. A collage plays as a camera move (components/intro/CoverCamera.tsx); separate panels
+ * cycle like the postcards.
  */
 function CoverArtLayer({ cover, dive }: { cover: NonNullable<CoverArt>; dive: boolean }) {
   const srcs = cover.kind === "collage" ? [cover.src] : cover.srcs;
   const [i, setI] = useState(0);
-  const [revealed, setRevealed] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-  // Hold the pull-back until the collage has downloaded, or it plays out behind a black screen.
-  useEffect(() => {
-    if (cover.kind !== "collage") return;
-    const img = new Image();
-    img.onload = img.onerror = () => setLoaded(true);
-    img.src = cover.src; // onload also fires for a cached image
-  }, [cover]);
   useEffect(() => {
     if (srcs.length < 2) return;
     const t = setInterval(() => setI((n) => (n + 1) % srcs.length), 4200);
     return () => clearInterval(t);
   }, [srcs.length]);
 
-  if (cover.kind === "collage") {
-    // Scale 1 is the hand-off point: changing transform-origin there causes no jump.
-    const target = dive
-      ? { scale: 7, opacity: 0, transformOrigin: LOGO_ORIGIN }
-      : !loaded
-        ? { scale: 2.1, opacity: 0, transformOrigin: OPEN_ORIGIN }
-        : revealed
-        ? { scale: 1, opacity: 1, transformOrigin: LOGO_ORIGIN }
-        : { scale: 1, opacity: 1, transformOrigin: OPEN_ORIGIN };
-    return (
-      <div className="absolute inset-0 bg-black" aria-hidden>
-        <motion.div
-          className="absolute inset-0 bg-cover bg-center motion-reduce:!transform-none"
-          style={{ backgroundImage: `url(${cover.src})` }}
-          initial={{ scale: 2.1, opacity: 0, transformOrigin: OPEN_ORIGIN }}
-          animate={target}
-          onAnimationComplete={() => loaded && !dive && setRevealed(true)}
-          transition={
-            dive
-              ? { scale: { duration: COVER_DIVE_MS / 1000, ease: [0.7, 0, 0.84, 0] }, opacity: { duration: 0.35, delay: (COVER_DIVE_MS - 350) / 1000 } }
-              : { scale: { duration: 3.4, ease: [0.16, 1, 0.3, 1], delay: 0.5 }, opacity: { duration: 0.6 } }
-          }
-        />
-      </div>
-    );
-  }
+  if (cover.kind === "collage") return <CoverCamera dive={dive} />;
 
   return (
     <div className="absolute inset-0" aria-hidden>

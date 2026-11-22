@@ -14,10 +14,14 @@ export const LONDON_BOUNDARY = londonBoundary as LngLat[];
 /** Named Western buildings (OpenStreetMap), used for campus labels. */
 export const CAMPUS_BUILDINGS = campusBuildings as { name: string; lng: number; lat: number; residence: boolean }[];
 
-/** Camera can't leave Forest State: London's extent plus a strip of sea. */
+/**
+ * Camera can't leave Forest State, like a game's pause-menu map. Mapbox clamps the camera *centre* to these bounds,
+ * so they're London's own extent (lon -81.391..-81.107, lat 42.825..43.073) pulled in slightly: at the furthest
+ * you can push, the island's edge sits just past the middle of the screen with sea beyond, and no further.
+ */
 export const MAX_BOUNDS: [LngLat, LngLat] = [
-  [-81.8, 42.4],
-  [-80.7, 43.5],
+  [-81.37, 42.845],
+  [-81.13, 43.055],
 ];
 
 /**
