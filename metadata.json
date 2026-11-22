@@ -1,0 +1,48 @@
+{
+  "cli_version": "0.13.4",
+  "checkpoint_id": "01M80KHQ16DDTR8Q5NKE0Q1PGE",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 5,
+  "files_touched": [
+    "public/cover/cover.webp",
+    "public/cover/devpost.png",
+    "scripts/build-cover.mjs",
+    "scripts/cover/bus.webp",
+    "scripts/cover/delilahs.webp",
+    "scripts/cover/gas-station.webp",
+    "scripts/cover/goose-attack.webp",
+    "scripts/cover/goose-boss.webp",
+    "scripts/cover/logo.webp"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": "/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 70,
+    "cache_creation_tokens": 59946,
+    "cache_read_tokens": 3504978,
+    "output_tokens": 22215,
+    "api_call_count": 30
+  },
+  "redaction": {
+    "replacements": 15,
+    "layers": {
+      "betterleaks": 0,
+      "connection_string": 0,
+      "credential_key": 0,
+      "credential_value": 0,
+      "credentialed_uri": 0,
+      "entropy": 9,
+      "key_context": 6,
+      "provider_token": 0,
+      "shell_stdin": 0
+    }
+  }
+}
