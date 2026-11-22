@@ -1,0 +1,12 @@
+do both: 
+
+<pasted_content id="3fba">
+as for next
+
+* Competition: region leaderboards against friends and faculties. That needs the Supabase connection string to sync between players.
+* Streaks: daily quests or streaks so people come back each day.
+</pasted_content id="3fba">
+
+---
+
+Commit and push

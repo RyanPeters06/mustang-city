@@ -1,0 +1,104 @@
+{
+  "cli_version": "0.13.4",
+  "checkpoint_id": "01M811604FHR116HHCX51H0BW3",
+  "session_id": "4c0cd45b-3a48-440e-bac1-94a459175e5b",
+  "strategy": "manual-commit",
+  "created_at": "2026-11-22T07:05:32.7870566Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "save_step_count": 1,
+  "files_touched": [
+    "app/api/leaderboard/route.ts",
+    "app/api/me/route.ts",
+    "components/Celebrations.tsx",
+    "components/Hud.tsx",
+    "components/crew/Leaderboard.tsx",
+    "components/missions/DailyCard.tsx",
+    "components/missions/MissionList.tsx",
+    "db/schema.sql",
+    "lib/account.ts",
+    "lib/celebrate.ts",
+    "lib/daily.ts",
+    "lib/demoCrew.ts",
+    "lib/progress.ts"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-5-5",
+  "turn_id": "ae1509813123",
+  "checkpoint_transcript_start": 3419,
+  "transcript_lines_at_start": 3419,
+  "compact_transcript_start": 412,
+  "token_usage": {
+    "input_tokens": 58,
+    "cache_creation_tokens": 43743,
+    "cache_read_tokens": 15367770,
+    "output_tokens": 27900,
+    "api_call_count": 27
+  },
+  "session_token_usage": {
+    "input_tokens": 780,
+    "cache_creation_tokens": 645325,
+    "cache_read_tokens": 115017331,
+    "output_tokens": 269004,
+    "api_call_count": 350,
+    "subagent_tokens": {
+      "input_tokens": 8,
+      "cache_creation_tokens": 75937,
+      "cache_read_tokens": 73456,
+      "output_tokens": 6078,
+      "api_call_count": 4
+    },
+    "subagent_tokens_complete": true
+  },
+  "redaction": {
+    "replacements": 329,
+    "layers": {
+      "betterleaks": 18,
+      "connection_string": 0,
+      "credential_key": 0,
+      "credential_value": 36,
+      "credentialed_uri": 0,
+      "entropy": 282,
+      "key_context": 25,
+      "provider_token": 4,
+      "shell_stdin": 0
+    }
+  },
+  "skill_events_version": 1,
+  "skill_events": [
+    {
+      "id": "claude-skill-toolu_018z1bAXMbftnd3qf7Fi2Huv",
+      "event_type": "tool_invocation",
+      "skill": {
+        "name": "gemini-api-dev"
+      },
+      "source": {
+        "agent": "claude-code",
+        "signal": "skill_tool_use",
+        "confidence": "explicit"
+      },
+      "turn_id": "98ce5c8cb074",
+      "transcript_anchor": {
+        "unit": "line",
+        "start": 652,
+        "end": 653,
+        "entry_ids": [
+          "f35c91ca-6368-4654-8eee-eafd36fa565c"
+        ],
+        "tool_use_id": "toolu_018z1bAXMbftnd3qf7Fi2Huv"
+      },
+      "native": {
+        "tool_name": "Skill",
+        "tool_use_id": "toolu_018z1bAXMbftnd3qf7Fi2Huv"
+      },
+      "collapse": {
+        "target": "tool_pair",
+        "label": "Skill: gemini-api-dev",
+        "default_collapsed": true
+      }
+    }
+  ],
+  "session_metrics": {
+    "turn_count": 24
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "cli_version": "0.13.4",
+  "checkpoint_id": "01M811604FHR116HHCX51H0BW3",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "app/api/leaderboard/route.ts",
+    "app/api/me/route.ts",
+    "components/Celebrations.tsx",
+    "components/Hud.tsx",
+    "components/crew/Leaderboard.tsx",
+    "components/missions/DailyCard.tsx",
+    "components/missions/MissionList.tsx",
+    "db/schema.sql",
+    "lib/account.ts",
+    "lib/celebrate.ts",
+    "lib/daily.ts",
+    "lib/demoCrew.ts",
+    "lib/progress.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": "/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 58,
+    "cache_creation_tokens": 43743,
+    "cache_read_tokens": 15367770,
+    "output_tokens": 27900,
+    "api_call_count": 27
+  },
+  "redaction": {
+    "replacements": 329,
+    "layers": {
+      "betterleaks": 18,
+      "connection_string": 0,
+      "credential_key": 0,
+      "credential_value": 36,
+      "credentialed_uri": 0,
+      "entropy": 282,
+      "key_context": 25,
+      "provider_token": 4,
+      "shell_stdin": 0
+    }
+  }
+}
