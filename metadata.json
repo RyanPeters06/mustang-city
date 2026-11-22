@@ -1,0 +1,46 @@
+{
+  "cli_version": "0.13.4",
+  "checkpoint_id": "01M812SMS5ET1AAX8WSM7FVNHT",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "components/DemoPanel.tsx",
+    "components/Hud.tsx",
+    "components/missions/MissionDetail.tsx",
+    "components/missions/MissionPassed.tsx",
+    "components/missions/StudentJobs.tsx",
+    "lib/progress.ts",
+    "lib/wanted.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 36,
+    "cache_creation_tokens": 18678,
+    "cache_read_tokens": 11955375,
+    "output_tokens": 12082,
+    "api_call_count": 18
+  },
+  "redaction": {
+    "replacements": 364,
+    "layers": {
+      "betterleaks": 18,
+      "connection_string": 0,
+      "credential_key": 0,
+      "credential_value": 36,
+      "credentialed_uri": 0,
+      "entropy": 315,
+      "key_context": 27,
+      "provider_token": 4,
+      "shell_stdin": 0
+    }
+  }
+}
