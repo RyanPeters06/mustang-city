@@ -40,8 +40,8 @@ export default function Hud({ visible = true }: { visible?: boolean }) {
               </span>
             )}
           </p>
-          <p className="flex items-center gap-1.5 font-display text-[16px] leading-none tracking-[0.02em] whitespace-nowrap text-ink uppercase">
-            Forest State
+          <p className="flex min-w-0 items-center gap-1.5 font-display text-[16px] leading-none tracking-[0.02em] whitespace-nowrap text-ink uppercase">
+            <span className="min-w-0 truncate">Forest State</span>
             {event && (
               <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-teal" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-label={`${event.name} event`}>
                 <path d={event.glyph} />

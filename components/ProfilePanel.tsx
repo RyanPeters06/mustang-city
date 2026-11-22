@@ -11,6 +11,7 @@ import ProfileEditor from "./profile/ProfileEditor";
 import LoreCard from "./missions/LoreCard";
 import Replays from "./profile/Replays";
 import MusicToggle from "./profile/MusicToggle";
+import AccessibilitySettings from "./profile/AccessibilitySettings";
 import StashShelf from "./profile/StashShelf";
 import CollectionSets from "./profile/CollectionSets";
 import { walkStats, WEEKLY_ACTIVE_GOAL_MIN } from "@/lib/walkStats";
@@ -276,6 +277,7 @@ export default function ProfilePanel({
       <CollectionSets snap={snap} />
       <StashShelf snap={snap} />
       <MusicToggle />
+      <AccessibilitySettings />
 
       <TagsSection onOpen={onOpenTag} />
 

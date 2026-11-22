@@ -7,6 +7,7 @@ import ltc from "./data/ltc.json";
 import { DISTRICTS, districtAt } from "./districts";
 import { PLACES, type Place } from "./regions";
 import { distanceM, type LngLat } from "./geo";
+import { radiusScale } from "./a11y";
 
 export const SIDE_REP = 40;
 
@@ -104,7 +105,7 @@ export function sideQuestCheck(q: SideQuest, at: LngLat | null, visited: boolean
     return answer === q.trivia?.answer ? { ok: true } : { ok: false, reason: "Not quite. Try again." };
   }
   if (!at) return { ok: false, reason: "Turn on location first." };
-  if (distanceM(at, q.at) > q.radius) return { ok: false, reason: `Get closer to ${q.place ?? "the spot"}.` };
+  if (distanceM(at, q.at) > q.radius * radiusScale()) return { ok: false, reason: `Get closer to ${q.place ?? "the spot"}.` };
   const h = new Date().getHours();
   if (q.kind === "night" && !demo && h < 20 && h >= 5) return { ok: false, reason: "Come back after 8 pm." };
   return { ok: true };

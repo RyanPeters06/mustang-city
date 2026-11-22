@@ -64,6 +64,12 @@ html[data-stage] .app-root {
   box-shadow: none !important;
 }
 
+/* Accessibility mode → larger text: scale the whole app (lib/a11y.ts). */
+/* UI layers only: zooming the map container would break Mapbox's pointer coordinates. */
+html[data-large] main[data-game] > *:not(.map-root) {
+  zoom: 1.12;
+}
+
 /* Photo mode: every layer except the map and the photo overlay fades out. */
 html[data-photo] main[data-game] > *:not(.map-root):not([data-photo-keep]) {
   opacity: 0 !important;

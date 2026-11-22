@@ -36,6 +36,7 @@ import Onboarding from "./Onboarding";
 import NudgeChip from "./Nudge";
 import GooseCall from "./GooseCall";
 import PhotoMode from "./PhotoMode";
+import { getA11y } from "@/lib/a11y";
 import NextClassCard from "./classrun/NextClassCard";
 import ScheduleManager from "./classrun/ScheduleManager";
 import { CLASS_RUN_REP, onClassRun, startClassRunWatch } from "@/lib/schedule";
@@ -76,6 +77,8 @@ export default function GameScreen({ cover = null }: { cover?: CoverArt }) {
   const [mapState, setMapState] = useState<"loading" | "ready" | "unavailable">("loading");
   const [entered, setEntered] = useState(false);
   const onEntered = useCallback(() => setEntered(true), []);
+  // Apply saved accessibility settings (larger text) from the first frame, not only once Profile opens.
+  useEffect(() => void getA11y(), []);
   const [reason, setReason] = useState<string>();
   const params = useSyncExternalStore(noopSubscribe, readParams, () => SERVER_PARAMS);
   const [chosenTab, setTab] = useState<Tab | null>(null);

@@ -15,6 +15,7 @@ import { DISTRICTS, districtAt, getDistrictStats, type DistrictStat } from "./di
 import { MISSIONS } from "./missions";
 import { COLLECTIBLES } from "./collectibles";
 import { distanceM, type LngLat } from "./geo";
+import { radiusScale } from "./a11y";
 
 export const CLAIM_NEEDED = 3;
 export const REGION_REP = 150;
@@ -24,7 +25,7 @@ export type Place = { n: string; c: PlaceCat; p: LngLat; d: number };
 export const PLACES = placesRaw as Place[];
 
 /** How close a check-in has to be. Parks are big, so their (centroid) radius is generous. */
-export const checkInRadius = (c: PlaceCat) => (c === "park" ? 160 : c === "culture" ? 80 : 45);
+export const checkInRadius = (c: PlaceCat) => (c === "park" ? 160 : c === "culture" ? 80 : 45) * radiusScale();
 
 export type Quest =
   | { id: string; kind: "visit"; title: string; detail: string }

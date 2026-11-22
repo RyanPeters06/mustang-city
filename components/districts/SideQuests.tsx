@@ -5,6 +5,7 @@ import type { ProgressSnapshot } from "@/lib/progress";
 import { completeSideQuest } from "@/lib/progress";
 import { SIDE_REP, regionSideQuests, type SideKind, type SideQuest } from "@/lib/sideQuests";
 import { distanceM, type LngLat } from "@/lib/geo";
+import { radiusScale } from "@/lib/a11y";
 
 const GLYPH: Record<SideKind, string> = {
   photo: "M4 8h3l2-3h6l2 3h3v11H4z M12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z",
@@ -50,7 +51,7 @@ export default function SideQuests({
         {quests.map((q) => {
           const done = !!snap.sideDone[q.id];
           const dist = from && q.kind !== "trivia" ? distanceM(from, q.at) : null;
-          const near = dist != null && dist <= q.radius;
+          const near = dist != null && dist <= q.radius * radiusScale();
           return (
             <li key={q.id} className={`hud-panel px-3.5 py-3 ${done ? "opacity-75" : ""}`}>
               <div className="flex items-start gap-3">
