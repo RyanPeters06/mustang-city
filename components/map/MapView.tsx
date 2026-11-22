@@ -14,7 +14,7 @@ import { getTags, subscribeTags } from "@/lib/tags";
 import { onBusFrame, subscribeBuses } from "@/lib/buses";
 import { getTurf, subscribeTurf } from "@/lib/turf";
 import { COLLECTIBLES } from "@/lib/collectibles";
-import { questPlaces, regionQuests } from "@/lib/regions";
+import { questPlaces, regionProgress, regionQuests } from "@/lib/regions";
 import { allSideQuests } from "@/lib/sideQuests";
 import { todaysSurprises } from "@/lib/surprise";
 import { getStaleCells, subscribeFogAge } from "@/lib/fogAge";
@@ -686,7 +686,13 @@ function addGameLayers(map: MapboxMap) {
     minzoom: 9.6,
     maxzoom: 14,
     layout: {
-      "text-field": ["upcase", ["get", "name"]],
+      "text-field": [
+        "format",
+        ["upcase", ["get", "name"]],
+        {},
+        ["case", ["!=", ["get", "progress"], ""], ["concat", "\n", ["get", "progress"]], ""],
+        { "font-scale": 0.78, "text-color": "#ff8a3d" },
+      ],
       "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
       "text-size": ["interpolate", ["linear"], ["zoom"], 9.6, 8, 11, 10, 13, 15],
       "text-letter-spacing": 0.22,
@@ -1258,12 +1264,15 @@ function districtShapes(): FeatureCollection {
 }
 
 function districtLabels(): FeatureCollection {
-  const unlocked = getProgress().districts;
+  const p = getProgress();
+  const unlocked = p.districts;
+  const input = { visits: p.visits, checkins: p.checkins, completions: p.completions, finds: p.finds };
   return {
     type: "FeatureCollection",
     features: DISTRICTS.map((d) => ({
       type: "Feature",
-      properties: { name: d.name, unlocked: !!unlocked[d.name] },
+      // progress: "2/4" under the name for regions you've started but not claimed yet
+      properties: { name: d.name, unlocked: !!unlocked[d.name], progress: unlocked[d.name] ? "" : ((c) => (c > 0 ? `${c}/4 QUESTS` : ""))(regionProgress(d.name, input).count) },
       geometry: { type: "Point", coordinates: d.label },
     })),
   };
@@ -1648,7 +1657,9 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
           (map.getSource("collectibles") as GeoJSONSource | undefined)?.setData(collectibleData());
           (map.getSource("region-quests") as GeoJSONSource | undefined)?.setData(questBlipData());
           (map.getSource("surprises") as GeoJSONSource | undefined)?.setData(surpriseData());
-          const key = Object.keys(getProgress().districts).join("|");
+          const pr = getProgress();
+          // redraw district shapes/labels when claims or any region-quest progress changes
+          const key = [Object.keys(pr.districts).join("|"), Object.keys(pr.visits).length, Object.keys(pr.checkins).length, pr.missionCount, Object.keys(pr.finds).length].join("#");
           if (key !== districtKey) {
             districtKey = key;
             refreshDistricts(map);
