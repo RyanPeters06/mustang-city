@@ -1,0 +1,48 @@
+write these out for me, no em dashes: 
+
+<pasted_content id="3fba">
+Project details
+For public project page
+Information entered below will appear on your public project page.
+The following fields are required to submit your project:
+[About the project](https://devpost.com/submit-to/31536-hack-western-13/manage/submissions/1313991-mustang-city/project_details/edit#)
+[Built with](https://devpost.com/submit-to/31536-hack-western-13/manage/submissions/1313991-mustang-city/project_details/edit#)
+Project Story
+* About the project
+Be sure to write what inspired you, what you learned, how you built your project, and the challenges you faced. Format your story in [Markdown, with LaTeX support for math](https://help.devpost.com/article/193-markdown-tips).
+is required to submit
+Markdown tips ([learn more](https://help.devpost.com/article/193-markdown-tips#Adding-Markdown-to-your-project-description-jpj7m))
+Text formatting
+
+* ## Headline
+* **bold**
+* _ italics _
+* [link](http://foo.bar)
+* ![Alt text](/path/to/img.jpg)
+
+Code block example
+
+````
+```ruby
+puts "Hello World!"
+```
+````
+
+LaTeX math tips ([learn more](https://help.devpost.com/article/193-markdown-tips#Adding-LaTeX-math-to-your-project-description-W0VQC))
+
+* `\\( ... \\)` for in-line math
+* `$$ ... $$` for displayed equations
+
+* Built with
+You can add up to 25 tags.
+
+* * Built with
+
+is required to submit
+"Try it out" links
+Add links where people can try your project or see your code.
+[add another link](https://devpost.com/submit-to/31536-hack-western-13/manage/submissions/1313991-mustang-city/project_details/edit#)
+Project Media
+Image gallery
+JPG, PNG or GIF format,
+</pasted_content id="3fba">
