@@ -10,6 +10,7 @@ import ProfileEditor from "./profile/ProfileEditor";
 import LoreCard from "./missions/LoreCard";
 import Replays from "./profile/Replays";
 import MusicToggle from "./profile/MusicToggle";
+import StashShelf from "./profile/StashShelf";
 import { walkStats, WEEKLY_ACTIVE_GOAL_MIN } from "@/lib/walkStats";
 import BadgeGrid from "./profile/BadgeGrid";
 import RegionsBoard from "./districts/RegionsBoard";
@@ -263,6 +264,7 @@ export default function ProfilePanel({
       <CollectiblesSection snap={snap} onOpen={onOpenCollectible} />
 
       <Replays onPlay={onPlayReplay} />
+      <StashShelf snap={snap} />
       <MusicToggle />
 
       <TagsSection onOpen={onOpenTag} />

@@ -16,6 +16,8 @@ import { onFix } from "./location";
 import type { LngLat } from "./geo";
 import { DAILY_REP, DAILY_SWEEP_REP, dailyDone, dailyQuests, dayKey, startOfDay, streakFrom } from "./daily";
 import { SIDE_REP, regionSideQuests, sideQuestCheck } from "./sideQuests";
+import { LOOT_REP, bagSize, rollLoot, stashValue, type LootItem } from "./loot";
+import { inCampusArea } from "./fog";
 
 export { rankFor };
 import { MISSIONS } from "./missions";
@@ -83,6 +85,8 @@ type Stored = {
   dailyDone?: Record<string, number>; // `${day}|${questId}` → done at
   activeDays?: string[]; // days with at least one daily quest done (streak)
   sideDone?: Record<string, number>; // region side quest id → done at
+  bag?: LootItem[]; // carried loot (not yet banked)
+  stash?: LootItem[]; // banked at Mustang City: counts toward Rep
   finds?: Record<string, number>; // collectible id → found at
   classRuns?: Record<string, number>; // `${meetingId}|${date}` → arrived on time at
 };
@@ -100,6 +104,9 @@ export type ProgressSnapshot = {
   regionsClaimed: number;
   dailyDone: Record<string, number>;
   sideDone: Record<string, number>;
+  bag: LootItem[];
+  stash: LootItem[];
+  bagSize: number;
   cellsToday: number;
   streak: number;
   finds: Record<string, number>;
@@ -135,6 +142,8 @@ function ensureLoaded() {
         dailyDone: parsed.dailyDone ?? {},
         activeDays: parsed.activeDays ?? [],
         sideDone: parsed.sideDone ?? {},
+        bag: parsed.bag ?? [],
+        stash: parsed.stash ?? [],
         finds: parsed.finds ?? {},
         classRuns: parsed.classRuns ?? {},
       };
@@ -162,6 +171,8 @@ function ensureLoaded() {
   });
   // Region quest "Set foot in …": the first fix inside each region.
   onFix((fix) => {
+    // Stash: walking onto campus (Mustang City) banks everything in the bag.
+    if ((data.bag ?? []).length && inCampusArea(fix.lngLat[1], fix.lngLat[0])) bankBag();
     const region = districtAt(fix.lngLat);
     if (!region || data.visits?.[region]) return;
     data.visits = { ...(data.visits ?? {}), [region]: Date.now() };
@@ -172,6 +183,51 @@ function ensureLoaded() {
 }
 
 const FLAME = "M12 3c1 3.5 4.5 5 4.5 9.5a4.5 4.5 0 0 1-9 0c0-2 1-3.2 2-4.2.2 1.6 1 2.6 2 2.7C11 8.6 11.3 5.6 12 3Z";
+
+/**
+ * Stash & carry (lib/loot.ts): put a drop in the bag. A full bag means the loot is lost: go bank it at Mustang City.
+ * `quiet` skips saving (callers save right after).
+ */
+function dropLoot(from: string, boost = 0, quiet = false) {
+  const bag = data.bag ?? [];
+  if (bag.some((i) => i.from === from) || (data.stash ?? []).some((i) => i.from === from)) return;
+  const item = rollLoot(from, boost);
+  const rankIdx = RANKS.findIndex((r) => r.name === getSnapshot().rank);
+  if (bag.length >= bagSize(rankIdx)) {
+    celebrate({ id: `lost-${from}`, kind: "loot", title: `Bag full: ${item.name} left behind`, subtitle: "Bank your bag at Mustang City to make room.", color: "#FF4F8B", glyph: BAG });
+    return;
+  }
+  data.bag = [...bag, item];
+  celebrate({
+    id: `loot-${from}`,
+    kind: "loot",
+    title: item.name,
+    subtitle: `${item.rarity === "legendary" ? "LEGENDARY" : item.rarity === "rare" ? "Rare" : "Loot"} · bank it at Mustang City for +${LOOT_REP[item.rarity]} Rep`,
+    color: item.rarity === "legendary" ? "#FFC857" : item.rarity === "rare" ? "#7B2FF7" : "#2EE6D6",
+    glyph: BAG,
+  });
+  if (!quiet) save();
+}
+
+/** Bank everything carried (on campus, or the demo button). Returns how many items were stashed. */
+export function bankBag() {
+  ensureLoaded();
+  const bag = data.bag ?? [];
+  if (!bag.length) return 0;
+  data.stash = [...(data.stash ?? []), ...bag];
+  data.bag = [];
+  celebrate({ id: `stash-${Date.now()}`, kind: "stash", title: "Stashed", subtitle: `${bag.length} item${bag.length === 1 ? "" : "s"} banked at Mustang City · +${stashValue(bag)} Rep`, color: "#FFC857", glyph: BAG });
+  save();
+  return bag.length;
+}
+
+/** Demo panel: drop a random piece of loot into the bag. */
+export function demoLoot() {
+  ensureLoaded();
+  dropLoot(`demo:${Date.now()}`, Math.random() * 0.2);
+}
+
+const BAG = "M6 8h12l-1 12H7z M9 8V6a3 3 0 0 1 6 0v2";
 
 /** Claimed regions are fully revealed on the map (their fog lifts with a crisp border, like Mustang City). */
 function syncClaimedFog() {
@@ -208,6 +264,7 @@ function checkMilestones(silent = false) {
   for (const d of DISTRICTS) {
     if (data.districts[d.name] || !regionProgress(d.name, regionInput, stats).claimable) continue;
     data.districts = { ...data.districts, [d.name]: Date.now() };
+    if (!silent) dropLoot(`claim:${d.name}`, 0.25, true);
     changed = true;
     claimedNow = true;
     if (!silent)
@@ -300,7 +357,8 @@ export function getSnapshot(): ProgressSnapshot {
     const sweptDays = Object.values(dailyKeys.reduce<Record<string, number>>((m, k) => ((m[k.split("|")[0]] = (m[k.split("|")[0]] ?? 0) + 1), m), {})).filter((n) => n >= 3).length;
     const dailyRep = dailyKeys.length * DAILY_REP + sweptDays * DAILY_SWEEP_REP;
     const sideRep = Object.keys(data.sideDone ?? {}).length * SIDE_REP;
-    const rep = fog.rep + missionRep + data.demoRep + districtRep + findRep + classRep + dailyRep + sideRep;
+    const lootRep = stashValue(data.stash ?? []);
+    const rep = fog.rep + missionRep + data.demoRep + districtRep + findRep + classRep + dailyRep + sideRep + lootRep;
     snapshot = {
       completions: data.completions,
       profile: data.profile,
@@ -314,6 +372,9 @@ export function getSnapshot(): ProgressSnapshot {
       regionsClaimed: Object.keys(data.districts).length,
       dailyDone: data.dailyDone ?? {},
       sideDone: data.sideDone ?? {},
+      bag: data.bag ?? [],
+      stash: data.stash ?? [],
+      bagSize: bagSize(RANKS.findIndex((r) => r.name === rankFor(rep).rank)),
       cellsToday: Math.max(0, fog.count - (data.dayStart?.day === dayKey() ? data.dayStart.cells : fog.count)),
       streak: streakFrom(data.activeDays ?? []),
       finds: data.finds ?? {},
@@ -339,6 +400,9 @@ const SERVER: ProgressSnapshot = {
   regionsClaimed: 0,
   dailyDone: {},
   sideDone: {},
+  bag: [],
+  stash: [],
+  bagSize: 6,
   cellsToday: 0,
   streak: 0,
   finds: {},
@@ -360,6 +424,7 @@ export function completeMission(c: Omit<Completion, "at" | "golden">): { rep: nu
   const golden = Math.random() < GOLDEN_CHANCE;
   const rep = golden ? Math.round(c.rep * 1.5) : c.rep;
   data = { ...data, completions: { ...data.completions, [c.slug]: { ...c, rep, golden, at: Date.now() } } };
+  dropLoot(`mission:${c.slug}`, golden ? 0.2 : 0, true);
   save();
   return { rep, golden };
 }
@@ -388,7 +453,7 @@ export const unlockLabel = (id: EmblemId) => {
 /** Dev/demo only: forget completions. */
 export function resetProgress() {
   ensureLoaded();
-  data = { ...data, completions: {}, demoRep: 0, finds: {}, districts: {}, visits: {}, checkins: {}, dailyDone: {}, activeDays: [], dayStart: undefined, sideDone: {} };
+  data = { ...data, completions: {}, demoRep: 0, finds: {}, districts: {}, visits: {}, checkins: {}, dailyDone: {}, activeDays: [], dayStart: undefined, sideDone: {}, bag: [], stash: [] };
   syncClaimedFog();
   save();
 }
@@ -402,6 +467,7 @@ export function completeSideQuest(region: string, id: string, at: LngLat | null,
   const check = sideQuestCheck(q, at, !!data.visits?.[region], opts.demo, opts.answer);
   if (!check.ok) return check.reason;
   data.sideDone = { ...(data.sideDone ?? {}), [id]: Date.now() };
+  dropLoot(id, 0, true);
   save();
   celebrate({ id: `side-${id}`, kind: "daily", title: q.title, subtitle: `${region} side quest · +${SIDE_REP} Rep`, color: "#FF4F8B", glyph: "M12 3l2.6 5.4 5.9.9-4.3 4.1 1 5.9L12 16.6 6.8 19.3l1-5.9L3.5 9.3l5.9-.9z" });
   return null;
@@ -418,6 +484,7 @@ export function checkInQuest(region: string, questId: string, at: LngLat): strin
   const place = checkInTarget(q, region, at);
   if (!place) return null;
   data.checkins = { ...(data.checkins ?? {}), [questId]: { place: place.n, at: Date.now() } };
+  dropLoot(questId, 0, true);
   save();
   return place.n;
 }

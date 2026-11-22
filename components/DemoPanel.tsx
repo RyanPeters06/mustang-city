@@ -11,7 +11,7 @@ import { districtAt, districtSamplePoints } from "@/lib/districts";
 import { acceptFix } from "@/lib/location";
 import { SAMPLE_TRACE_ID, playTrace } from "@/lib/replay";
 import { missionBySlug } from "@/lib/missions";
-import { addDemoRep, resetProgress } from "@/lib/progress";
+import { addDemoRep, bankBag, demoLoot, resetProgress } from "@/lib/progress";
 import { getLightOverride, setLightOverride, type LightPreset } from "@/lib/mapStyle";
 import { isSampleTurf, setSampleTurf } from "@/lib/turf";
 import { getHeistSim, setHeistSim } from "@/lib/heistDemo";
@@ -153,6 +153,8 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
       <button className={btn} onClick={() => setHeistSim(!getHeistSim())}>Demo heist crew on/off</button>
       <button className={btn} onClick={() => window.dispatchEvent(new CustomEvent("mc:goose-call", { detail: "East London" }))}>The Goose calls (demo)</button>
       <button className={btn} onClick={toggleMusic}>Music on/off</button>
+      <button className={btn} onClick={demoLoot}>Loot drop (demo)</button>
+      <button className={btn} onClick={() => bankBag()}>Bank bag at Mustang City (demo)</button>
       <button className={btn} onClick={() => addHeat(70)}>Wanted level +1 star (demo)</button>
       <button className={btn} onClick={() => addDemoRep(500)}>+500 Rep (demo)</button>
       <button className={btn} onClick={resetProgress}>Reset missions + demo Rep</button>

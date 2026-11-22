@@ -9,7 +9,7 @@ import { getServerWanted, getWanted, subscribeWanted } from "@/lib/wanted";
 import { AnimatePresence, motion } from "motion/react";
 
 export default function Hud({ visible = true }: { visible?: boolean }) {
-  const { rep, rank, regionsClaimed, streak } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const { rep, rank, regionsClaimed, streak, bag, bagSize } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const w = useSyncExternalStore(subscribeWeather, getWeather, getServerWeather);
   const wanted = useSyncExternalStore(subscribeWanted, getWanted, getServerWanted);
 
@@ -37,6 +37,12 @@ export default function Hud({ visible = true }: { visible?: boolean }) {
           </p>
           <p className="font-display text-[16px] leading-none tracking-[0.02em] whitespace-nowrap text-ink uppercase">Forest State</p>
         </div>
+        {bag.length > 0 && (
+          <>
+            <Stat label="Bag" value={`${bag.length}/${bagSize}`} color={bag.length >= bagSize ? "text-pink" : "text-ink"} />
+            <div className="h-6 w-px bg-white/10" />
+          </>
+        )}
         <Stat label="Rep" value={rep.toLocaleString()} color="text-gold" />
         <div className="h-6 w-px bg-white/10" />
         {/* Headline progress: regions claimed through their quests (lib/regions.ts) */}
