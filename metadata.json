@@ -1,0 +1,43 @@
+{
+  "cli_version": "0.13.4",
+  "checkpoint_id": "01M814FEAAFYKMXPCPDDWFGK2M",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "app/api/friends/route.ts",
+    "components/DemoPanel.tsx",
+    "components/crew/CrewPanel.tsx",
+    "lib/radio.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 38,
+    "cache_creation_tokens": 19666,
+    "cache_read_tokens": 14724131,
+    "output_tokens": 10536,
+    "api_call_count": 19
+  },
+  "redaction": {
+    "replacements": 401,
+    "layers": {
+      "betterleaks": 18,
+      "connection_string": 0,
+      "credential_key": 0,
+      "credential_value": 36,
+      "credentialed_uri": 0,
+      "entropy": 352,
+      "key_context": 27,
+      "provider_token": 4,
+      "shell_stdin": 0
+    }
+  }
+}
