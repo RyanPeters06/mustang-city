@@ -1,0 +1,23 @@
+whats wrong here: 
+
+<pasted_content id="3fba">
+Forest State
+
+Mustang City
+
+Map unavailable
+
+Map token isn't configured for this deployment.
+</pasted_content id="3fba">
+
+---
+
+Good work so far, but we need to flesh out features. I want to have more engagement. This kind of feels like a one-trick pony. I haven't really looked into some of the stuff, but I don't really see any like collectibles or any like heists or any like special features or kind of like a user story where someone's actually out there having fun using this app, right? And another consideration is the fog. I love the idea, and we still need to keep this, of the fog uncovering when a player walks through. But realistically, a person isn't going to walk step by step on the entire city. So I'm thinking more of a user will have to claim a region, and they can also do the fog thing, but to claim the entire region, they do certain quests. So maybe explore, try out a new cafe in that area, go shopping or whatever. And that way it will unlock the entire area, and then it'll show you more so like, oh, 1 out of 50 regions explored, for example, and yeah, that kind of stuff. So I was asking to do a pass through and try to understand how to make this more usable, that someone, a Western student, can actually have a blast and be addicted using this, trying to get ahead of their friends, trying to be a competition, whatever. So I trust you with that, and let me know how it goes.
+
+---
+
+Try again
+
+---
+
+Commit and push
