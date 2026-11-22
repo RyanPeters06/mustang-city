@@ -33,6 +33,7 @@ import CollectibleDetail from "./CollectibleDetail";
 import WeatherOverlay from "./WeatherOverlay";
 import Legend from "./Legend";
 import Onboarding from "./Onboarding";
+import NudgeChip from "./Nudge";
 import NextClassCard from "./classrun/NextClassCard";
 import ScheduleManager from "./classrun/ScheduleManager";
 import { CLASS_RUN_REP, onClassRun, startClassRunWatch } from "@/lib/schedule";
@@ -218,6 +219,7 @@ export default function GameScreen({ cover = null }: { cover?: CoverArt }) {
       />
       <WeatherOverlay />
       <Hud visible={entered} />
+      {mapState === "ready" && entered && <NudgeChip hidden={sheetOpen} onOpenRegion={(name) => setDistrict(name)} />}
       {mapState === "ready" && entered && !sheetOpen && (
         <>
           <LocationPrompt />
