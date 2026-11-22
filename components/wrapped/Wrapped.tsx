@@ -193,10 +193,12 @@ function Numbers({ data, percentile }: { data: WrappedData; percentile: number |
       <p className="font-display mt-1 text-[40px] leading-none text-ink uppercase">{data.rank}</p>
       <p className="text-[16px] text-ink/70">{data.rep.toLocaleString()} Rep earned</p>
       <div className="mt-6 grid grid-cols-2 gap-2.5">
+        <Stat value={`${data.districtsUnlocked}/${data.totalRegions}`} label="regions claimed" color="text-gold" />
         <Stat value={`${fmtPct(data.pct)}%`} label="of London explored" color="text-teal" />
         <Stat value={String(data.missions)} label="missions passed" color="text-orange" />
-        <Stat value={String(data.districtsUnlocked)} label="districts claimed" color="text-gold" />
-        <Stat value={String(data.badges)} label="badges" color="text-pink" />
+        <Stat value={String(data.sideQuests)} label="side quests" color="text-pink" />
+        <Stat value={String(data.lootStashed)} label="loot banked" color="text-purple" />
+        <Stat value={String(data.streak)} label="day streak" color="text-orange" />
       </div>
       <p className="mt-5 text-[16px] text-ink/80">
         {percentile !== null ? (
@@ -270,7 +272,7 @@ async function renderCard(data: WrappedData, percentile: number | null): Promise
   ctx.fillText(data.name.toUpperCase().slice(0, 16), 80, 270);
 
   const rows: [string, string][] = [
-    [`${fmtPct(data.pct)}%`, "OF LONDON EXPLORED"],
+    [`${data.districtsUnlocked}/${data.totalRegions}`, "REGIONS CLAIMED"],
     [String(data.missions), "MISSIONS PASSED"],
     [data.rank.toUpperCase(), `${data.rep.toLocaleString()} REP`],
   ];
@@ -293,7 +295,7 @@ async function renderCard(data: WrappedData, percentile: number | null): Promise
   } else {
     ctx.fillStyle = "rgba(246,239,255,0.85)";
     ctx.font = `600 34px ${sans}`;
-    ctx.fillText("mustangcity · clear the fog over Forest State", 80, 1830);
+    ctx.fillText("mustangcity.rodeo · graduate knowing your city", 80, 1830);
   }
   return new Promise((res) => c.toBlob((b) => res(b!), "image/png"));
 }

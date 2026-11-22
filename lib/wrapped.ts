@@ -4,7 +4,7 @@ import { cellToBoundary, cellToLatLng, getHexagonAreaAvg } from "h3-js";
 import { cellsAround, getCells } from "./fog";
 import { getRecordedTraces } from "./replay";
 import { getSnapshot } from "./progress";
-import { getDistrictStats } from "./districts";
+import { DISTRICTS, getDistrictStats } from "./districts";
 import { MISSIONS, CATEGORY_LABEL } from "./missions";
 import { BADGES } from "./badges";
 
@@ -18,6 +18,10 @@ export type WrappedData = {
   photoMissions: number;
   landmarks: number;
   districtsUnlocked: number;
+  totalRegions: number;
+  sideQuests: number;
+  lootStashed: number;
+  streak: number;
   topDistrict: { name: string; pct: number } | null;
   topCategory: string | null;
   badges: number;
@@ -66,6 +70,10 @@ export function buildWrapped(): WrappedData {
     photoMissions: doneMissions.filter((m) => m.type === "photo").length,
     landmarks: doneMissions.filter((m) => m.category).length,
     districtsUnlocked: Object.keys(snap.districts).length,
+    totalRegions: DISTRICTS.length,
+    sideQuests: Object.keys(snap.sideDone).length,
+    lootStashed: snap.stash.length,
+    streak: snap.streak,
     topDistrict: top && top.have > 0 ? { name: top.name, pct: top.pct } : null,
     topCategory: topCat ? CATEGORY_LABEL[topCat] : null,
     badges: BADGES.filter((b) => snap.badges[b.code]).length,
