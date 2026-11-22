@@ -207,3 +207,16 @@ SELECT date_trunc('day', ts) AS bucket,
        count(*) AS pings
 FROM location_pings
 GROUP BY bucket, user_id, h3_cell;
+
+-- Region claims (lib/regions.ts): a neighbourhood is claimed by finishing 3 of its 4 quests. Feeds the
+-- regions leaderboard and the faculty war (each region is held by the faculty with the most claimers).
+CREATE TABLE IF NOT EXISTS region_claims (
+  user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  region      text NOT NULL,
+  claimed_at  timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id, region)
+);
+CREATE INDEX IF NOT EXISTS region_claims_region ON region_claims (region);
+CREATE INDEX IF NOT EXISTS region_claims_claimed_at ON region_claims (claimed_at);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS regions_claimed integer NOT NULL DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS streak_days integer NOT NULL DEFAULT 0;

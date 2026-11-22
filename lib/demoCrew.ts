@@ -69,3 +69,18 @@ export function demoFriends(): FriendRow[] {
     return { ...f, cells: demoCells(f.handle).length };
   });
 }
+
+/** Sample competition stats for the demo crew (regions claimed, daily streak). Labelled "(demo)" in the UI. */
+const DEMO_COMP: Record<string, { regions: number; streak: number }> = {
+  "demo.maya": { regions: 6, streak: 4 },
+  "demo.dev": { regions: 2, streak: 1 },
+  "demo.jules": { regions: 11, streak: 9 },
+};
+export const demoCompetition = (handle: string) => DEMO_COMP[handle] ?? { regions: 0, streak: 0 };
+
+/** Sample faculty war standings, shown only while accounts are off (clearly labelled as a sample). */
+export const DEMO_FACULTIES = [
+  { faculty: "Social Science", regions: 11, claimers: 1 },
+  { faculty: "Science", regions: 6, claimers: 1 },
+  { faculty: "Engineering", regions: 2, claimers: 1 },
+];

@@ -4,9 +4,10 @@ import { useSyncExternalStore } from "react";
 import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/progress";
 import { getServerWeather, getWeather, subscribeWeather } from "@/lib/weather";
 import { DISTRICTS } from "@/lib/districts";
+import { FLAME_PATH } from "./missions/DailyCard";
 
 export default function Hud({ visible = true }: { visible?: boolean }) {
-  const { rep, rank, regionsClaimed } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const { rep, rank, regionsClaimed, streak } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const w = useSyncExternalStore(subscribeWeather, getWeather, getServerWeather);
 
   return (
@@ -18,6 +19,12 @@ export default function Hud({ visible = true }: { visible?: boolean }) {
         <div className="min-w-0 flex-1">
           <p className="truncate text-[12px] font-bold tracking-[0.14em] whitespace-nowrap text-gold uppercase">
             {rank}
+            {streak > 0 && (
+              <span className="ml-1.5 inline-flex items-center gap-0.5 text-orange" aria-label={`${streak}-day streak`}>
+                <svg viewBox="0 0 24 24" className="-mt-0.5 h-3.5 w-3.5" fill="currentColor" aria-hidden><path d={FLAME_PATH} /></svg>
+                {streak}
+              </span>
+            )}
             {w.status === "live" && w.tempC !== null && (
               <span className="text-ink/60">
                 {" "}· {Math.round(w.tempC)}°C {w.label}

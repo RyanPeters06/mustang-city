@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import RegionsBoard from "../districts/RegionsBoard";
+import DailyCard from "./DailyCard";
 import { CATEGORY_LABEL, MISSIONS, TYPE_LABEL, formatDistance, missionDistance, type Mission } from "@/lib/missions";
 import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/progress";
 import { useLastFix } from "@/lib/useLastFix";
@@ -36,7 +37,8 @@ export default function MissionList({
 
   return (
     <div className="space-y-5 pb-4">
-      {/* Regions first: claiming them is the main loop (lib/regions.ts) */}
+      {/* Daily quests + streak first (a reason to open the app today), then regions: the main loop */}
+      <DailyCard snap={snap} />
       <RegionsBoard snap={snap} from={from} mode="nearest" onOpen={onOpenRegion} />
       <div>
       <h3 className="mb-1 text-[12px] font-bold tracking-[0.14em] text-ink/60 uppercase">Goose jobs</h3>

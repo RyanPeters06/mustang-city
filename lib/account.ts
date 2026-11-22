@@ -58,7 +58,7 @@ function start() {
 export async function syncNow() {
   if (state.auth !== "signed-in" || state.sync === "db-unavailable") return;
   set({ sync: "syncing" });
-  const { profile, completions } = getProgress();
+  const { profile, completions, districts, streak } = getProgress();
   try {
     const res = await fetch("/api/me", {
       method: "POST",
@@ -67,6 +67,8 @@ export async function syncNow() {
         profile: { name: profile.name, faculty: profile.faculty, year: profile.year, emblem: profile.emblem, accent: profile.accent },
         cells: getCells(),
         completions: Object.keys(completions),
+        regions: Object.entries(districts).map(([name, at]) => ({ name, at })),
+        streak,
       }),
     });
     if (res.status === 503) return set({ sync: "db-unavailable" });

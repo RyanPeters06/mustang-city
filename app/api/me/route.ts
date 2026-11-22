@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { requireAccount, toHandle } from "@/lib/session";
 import { fogRepFromCells } from "@/lib/rank";
 import { TAG_VOTE_REP } from "@/lib/tagRules";
+import { DISTRICTS } from "@/lib/districts";
+
+const REGION_NAMES = new Set(DISTRICTS.map((d) => d.name));
 
 const CELL = /^[0-9a-f]{15}$/;
 const MAX_CELLS = 50_000;
@@ -10,6 +13,8 @@ type Body = {
   profile?: { name?: string; faculty?: string; year?: string; emblem?: string; accent?: string };
   cells?: string[];
   completions?: string[]; // mission slugs
+  regions?: { name: string; at: number }[]; // claimed regions (lib/regions.ts)
+  streak?: number; // daily-quest streak, in days
 };
 
 /** Sync device progress to the account (idempotent). Returns the player's handle and server totals. */
@@ -58,6 +63,20 @@ export async function POST(req: Request) {
       ON CONFLICT (mission_id, user_id) DO NOTHING`;
   }
 
+  // Region claims: only real region names; keep the device's claim time (clamped to now) for weekly boards.
+  const regions = (body.regions ?? [])
+    .filter((r) => r && typeof r.name === "string" && REGION_NAMES.has(r.name))
+    .slice(0, DISTRICTS.length)
+    .map((r) => ({ name: r.name, at: new Date(Math.min(Number(r.at) || Date.now(), Date.now())).toISOString() }));
+  if (regions.length) {
+    await sql`
+      INSERT INTO region_claims (user_id, region, claimed_at)
+      SELECT ${me.id}, r.name, r.at::timestamptz
+      FROM unnest(${regions.map((r) => r.name)}::text[], ${regions.map((r) => r.at)}::text[]) AS r(name, at)
+      ON CONFLICT (user_id, region) DO NOTHING`;
+  }
+  const streak = Math.max(0, Math.min(3650, Math.floor(Number(body.streak) || 0)));
+
   const [stats] = await sql<{ cells: number; missions: number; mission_rep: number; tag_votes: number }[]>`
     SELECT
       (SELECT count(*)::int FROM revealed_cells WHERE user_id = ${me.id}) AS cells,
@@ -71,7 +90,8 @@ export async function POST(req: Request) {
   await sql`
     UPDATE users SET handle = ${handle}, display_name = ${displayName}, faculty = ${p.faculty?.slice(0, 60) || null},
       year = ${p.year?.slice(0, 20) || null}, emblem = ${emblem}, accent = ${accent},
-      explored_cells = ${stats.cells}, mission_count = ${stats.missions}, rep = ${rep}, updated_at = now()
+      explored_cells = ${stats.cells}, mission_count = ${stats.missions}, rep = ${rep}, streak_days = ${streak},
+      regions_claimed = (SELECT count(*)::int FROM region_claims WHERE user_id = ${me.id}), updated_at = now()
     WHERE id = ${me.id}`;
 
   return NextResponse.json({ handle, rep, cells: stats.cells, missions: stats.missions });

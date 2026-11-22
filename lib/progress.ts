@@ -14,6 +14,7 @@ import { REGION_REP, checkInTarget, regionProgress, regionQuests } from "./regio
 import { setClaimedAreas } from "./fog";
 import { onFix } from "./location";
 import type { LngLat } from "./geo";
+import { DAILY_REP, DAILY_SWEEP_REP, dailyDone, dailyQuests, dayKey, startOfDay, streakFrom } from "./daily";
 
 export { rankFor };
 import { MISSIONS } from "./missions";
@@ -74,6 +75,9 @@ type Stored = {
   districts: Record<string, number>; // claimed region (neighbourhood) name → at
   visits?: Record<string, number>; // region name → first set foot in it
   checkins?: Record<string, { place: string; at: number }>; // region quest id → place checked in at
+  dayStart?: { day: string; cells: number }; // fog cell count when today began (for "explore N blocks today")
+  dailyDone?: Record<string, number>; // `${day}|${questId}` → done at
+  activeDays?: string[]; // days with at least one daily quest done (streak)
   finds?: Record<string, number>; // collectible id → found at
   classRuns?: Record<string, number>; // `${meetingId}|${date}` → arrived on time at
 };
@@ -89,6 +93,9 @@ export type ProgressSnapshot = {
   visits: Record<string, number>;
   checkins: Record<string, { place: string; at: number }>;
   regionsClaimed: number;
+  dailyDone: Record<string, number>;
+  cellsToday: number;
+  streak: number;
   finds: Record<string, number>;
   classRuns: Record<string, number>;
   rep: number;
@@ -118,6 +125,9 @@ function ensureLoaded() {
         districts: parsed.districts ?? {},
         visits: parsed.visits ?? {},
         checkins: parsed.checkins ?? {},
+        dayStart: parsed.dayStart,
+        dailyDone: parsed.dailyDone ?? {},
+        activeDays: parsed.activeDays ?? [],
         finds: parsed.finds ?? {},
         classRuns: parsed.classRuns ?? {},
       };
@@ -141,6 +151,8 @@ function ensureLoaded() {
   syncClaimedFog();
   checkMilestones(true);
 }
+
+const FLAME = "M12 3c1 3.5 4.5 5 4.5 9.5a4.5 4.5 0 0 1-9 0c0-2 1-3.2 2-4.2.2 1.6 1 2.6 2 2.7C11 8.6 11.3 5.6 12 3Z";
 
 /** Claimed regions are fully revealed on the map (their fog lifts with a crisp border, like Mustang City). */
 function syncClaimedFog() {
@@ -190,6 +202,45 @@ function checkMilestones(silent = false) {
       });
   }
   if (claimedNow) syncClaimedFog();
+
+  // Daily quests + streak (lib/daily.ts).
+  const day = dayKey();
+  const fogCount = getFogSnapshot().count;
+  if (data.dayStart?.day !== day) {
+    data.dayStart = { day, cells: fogCount };
+    changed = true;
+  }
+  const dailyInput = {
+    since: startOfDay(),
+    cellsToday: Math.max(0, fogCount - data.dayStart.cells),
+    checkins: data.checkins ?? {},
+    visits: data.visits ?? {},
+    completions: data.completions,
+    claims: data.districts,
+  };
+  const quests = dailyQuests(day);
+  for (const q of quests) {
+    const key = `${day}|${q.id}`;
+    if (data.dailyDone?.[key] || !dailyDone(q.id, dailyInput)) continue;
+    data.dailyDone = { ...(data.dailyDone ?? {}), [key]: Date.now() };
+    changed = true;
+    const doneToday = quests.filter((x) => data.dailyDone?.[`${day}|${x.id}`]).length;
+    if (!silent)
+      celebrate({
+        id: `daily-${key}`,
+        kind: "daily",
+        title: q.title,
+        subtitle: doneToday === quests.length ? `All 3 dailies done · +${DAILY_REP + DAILY_SWEEP_REP} Rep` : `Daily quest ${doneToday}/3 · +${DAILY_REP} Rep`,
+        color: "#2EE6D6",
+        glyph: "M5 12.5l4.5 4.5L19 7.5",
+      });
+    if (!(data.activeDays ?? []).includes(day)) {
+      data.activeDays = [...(data.activeDays ?? []), day].slice(-120);
+      const streak = streakFrom(data.activeDays);
+      if (!silent && streak >= 2)
+        celebrate({ id: `streak-${day}`, kind: "streak", title: `${streak}-day streak`, subtitle: "Come back tomorrow to keep it going.", color: "#FF8A3D", glyph: FLAME });
+    }
+  }
   if (changed) save(false);
 }
 
@@ -226,7 +277,10 @@ export function getSnapshot(): ProgressSnapshot {
     const districtRep = Object.keys(data.districts).length * REGION_REP;
     const findRep = Object.keys(data.finds ?? {}).length * COLLECTIBLE_REP;
     const classRep = Object.keys(data.classRuns ?? {}).length * CLASS_RUN_REP;
-    const rep = fog.rep + missionRep + data.demoRep + districtRep + findRep + classRep;
+    const dailyKeys = Object.keys(data.dailyDone ?? {});
+    const sweptDays = Object.values(dailyKeys.reduce<Record<string, number>>((m, k) => ((m[k.split("|")[0]] = (m[k.split("|")[0]] ?? 0) + 1), m), {})).filter((n) => n >= 3).length;
+    const dailyRep = dailyKeys.length * DAILY_REP + sweptDays * DAILY_SWEEP_REP;
+    const rep = fog.rep + missionRep + data.demoRep + districtRep + findRep + classRep + dailyRep;
     snapshot = {
       completions: data.completions,
       profile: data.profile,
@@ -238,6 +292,9 @@ export function getSnapshot(): ProgressSnapshot {
       visits: data.visits ?? {},
       checkins: data.checkins ?? {},
       regionsClaimed: Object.keys(data.districts).length,
+      dailyDone: data.dailyDone ?? {},
+      cellsToday: Math.max(0, fog.count - (data.dayStart?.day === dayKey() ? data.dayStart.cells : fog.count)),
+      streak: streakFrom(data.activeDays ?? []),
       finds: data.finds ?? {},
       classRuns: data.classRuns ?? {},
       rep,
@@ -259,6 +316,9 @@ const SERVER: ProgressSnapshot = {
   visits: {},
   checkins: {},
   regionsClaimed: 0,
+  dailyDone: {},
+  cellsToday: 0,
+  streak: 0,
   finds: {},
   classRuns: {},
   rep: 0,
@@ -303,7 +363,7 @@ export const unlockLabel = (id: EmblemId) => {
 /** Dev/demo only: forget completions. */
 export function resetProgress() {
   ensureLoaded();
-  data = { ...data, completions: {}, demoRep: 0, finds: {}, districts: {}, visits: {}, checkins: {} };
+  data = { ...data, completions: {}, demoRep: 0, finds: {}, districts: {}, visits: {}, checkins: {}, dailyDone: {}, activeDays: [], dayStart: undefined };
   syncClaimedFog();
   save();
 }
