@@ -1,6 +1,7 @@
 "use client";
 
 import TagsSection from "./profile/TagsSection";
+import { RANK_PERKS } from "@/lib/rank";
 import CollectiblesSection from "./profile/CollectiblesSection";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { getServerSnapshot, getSnapshot, subscribe } from "@/lib/progress";
@@ -127,6 +128,11 @@ export default function ProfilePanel({
           <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/10">
             <div className="h-full rounded-full bg-gradient-to-r from-pink to-gold" style={{ width: `${toNext * 100}%` }} />
           </div>
+          {nextRank && RANK_PERKS[nextRank.name] && (
+            <p className="mt-1.5 text-[12px] text-ink/60">
+              <span className="font-semibold text-ink/80">{nextRank.name} unlocks:</span> {RANK_PERKS[nextRank.name].join(" · ")}
+            </p>
+          )}
         </div>
         {!profile.faculty && (
           <p className="mt-3 text-[12px] text-ink/60">Pick your faculty so your Rep counts in the turf war.</p>

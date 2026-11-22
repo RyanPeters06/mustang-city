@@ -18,9 +18,10 @@ export default function Hud({ visible = true }: { visible?: boolean }) {
       className={`ui-chrome pointer-events-none absolute inset-x-0 top-0 z-20 px-4 transition-all duration-700 ${visible ? "" : "-translate-y-4 opacity-0"}`}
       style={{ paddingTop: "calc(var(--safe-top) + 8px)" }}
     >
-      <div className="glass pointer-events-auto relative flex items-center gap-2.5 overflow-hidden rounded-[18px] px-3 py-1.5">
+      {/* Rank perks: Made gets a gold-trimmed HUD, Legend a glowing title (lib/rank.ts RANK_PERKS) */}
+      <div className={`glass pointer-events-auto relative flex items-center gap-2.5 overflow-hidden rounded-[18px] px-3 py-1.5 ${rank === "Made" || rank === "Legend of Forest State" ? "ring-1 ring-gold/50" : ""}`}>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[10px] font-bold tracking-[0.14em] whitespace-nowrap text-gold uppercase">
+          <p className={`truncate text-[10px] font-bold tracking-[0.14em] whitespace-nowrap text-gold uppercase ${rank === "Legend of Forest State" ? "drop-shadow-[0_0_6px_rgba(255,200,87,0.9)]" : ""}`}>
             {rank}
             {streak > 0 && (
               <span className="ml-1.5 inline-flex items-center gap-0.5 text-orange" aria-label={`${streak}-day streak`}>
