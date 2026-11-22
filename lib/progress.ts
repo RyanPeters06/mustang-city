@@ -18,6 +18,7 @@ import { DAILY_REP, DAILY_SWEEP_REP, dailyDone, dailyQuests, dayKey, startOfDay,
 import { SIDE_REP, regionSideQuests, sideQuestCheck } from "./sideQuests";
 import { LOOT_REP, bagSize, rollLoot, stashValue, type LootItem } from "./loot";
 import { inCampusArea } from "./fog";
+import { SURPRISE_REP, surpriseAt } from "./surprise";
 
 export { rankFor };
 import { MISSIONS } from "./missions";
@@ -87,6 +88,7 @@ type Stored = {
   sideDone?: Record<string, number>; // region side quest id → done at
   bag?: LootItem[]; // carried loot (not yet banked)
   stash?: LootItem[]; // banked at Mustang City: counts toward Rep
+  surprises?: Record<string, number>; // surprise blip id (`${day}:${i}`) → reached at
   finds?: Record<string, number>; // collectible id → found at
   classRuns?: Record<string, number>; // `${meetingId}|${date}` → arrived on time at
 };
@@ -107,6 +109,7 @@ export type ProgressSnapshot = {
   bag: LootItem[];
   stash: LootItem[];
   bagSize: number;
+  surprises: Record<string, number>;
   cellsToday: number;
   streak: number;
   finds: Record<string, number>;
@@ -144,6 +147,7 @@ function ensureLoaded() {
         sideDone: parsed.sideDone ?? {},
         bag: parsed.bag ?? [],
         stash: parsed.stash ?? [],
+        surprises: parsed.surprises ?? {},
         finds: parsed.finds ?? {},
         classRuns: parsed.classRuns ?? {},
       };
@@ -173,6 +177,14 @@ function ensureLoaded() {
   onFix((fix) => {
     // Stash: walking onto campus (Mustang City) banks everything in the bag.
     if ((data.bag ?? []).length && inCampusArea(fix.lngLat[1], fix.lngLat[0])) bankBag();
+    // Surprise blips: reaching one today pays out once.
+    const surprise = surpriseAt(fix.lngLat);
+    if (surprise && !data.surprises?.[surprise.id]) {
+      data.surprises = { ...(data.surprises ?? {}), [surprise.id]: Date.now() };
+      celebrate({ id: `surprise-${surprise.id}`, kind: "surprise", title: `Surprise: ${surprise.name}`, subtitle: `Found before midnight · +${SURPRISE_REP} Rep`, color: "#FFC857", glyph: "M12 3l2.6 5.4 5.9.9-4.3 4.1 1 5.9L12 16.6 6.8 19.3l1-5.9L3.5 9.3l5.9-.9z" });
+      dropLoot(`surprise:${surprise.id}`, 0.15, true);
+      save();
+    }
     const region = districtAt(fix.lngLat);
     if (!region || data.visits?.[region]) return;
     data.visits = { ...(data.visits ?? {}), [region]: Date.now() };
@@ -358,7 +370,8 @@ export function getSnapshot(): ProgressSnapshot {
     const dailyRep = dailyKeys.length * DAILY_REP + sweptDays * DAILY_SWEEP_REP;
     const sideRep = Object.keys(data.sideDone ?? {}).length * SIDE_REP;
     const lootRep = stashValue(data.stash ?? []);
-    const rep = fog.rep + missionRep + data.demoRep + districtRep + findRep + classRep + dailyRep + sideRep + lootRep;
+    const surpriseRep = Object.keys(data.surprises ?? {}).length * SURPRISE_REP;
+    const rep = fog.rep + missionRep + data.demoRep + districtRep + findRep + classRep + dailyRep + sideRep + lootRep + surpriseRep;
     snapshot = {
       completions: data.completions,
       profile: data.profile,
@@ -374,6 +387,7 @@ export function getSnapshot(): ProgressSnapshot {
       sideDone: data.sideDone ?? {},
       bag: data.bag ?? [],
       stash: data.stash ?? [],
+      surprises: data.surprises ?? {},
       bagSize: bagSize(RANKS.findIndex((r) => r.name === rankFor(rep).rank)),
       cellsToday: Math.max(0, fog.count - (data.dayStart?.day === dayKey() ? data.dayStart.cells : fog.count)),
       streak: streakFrom(data.activeDays ?? []),
@@ -402,6 +416,7 @@ const SERVER: ProgressSnapshot = {
   sideDone: {},
   bag: [],
   stash: [],
+  surprises: {},
   bagSize: 6,
   cellsToday: 0,
   streak: 0,
@@ -453,7 +468,7 @@ export const unlockLabel = (id: EmblemId) => {
 /** Dev/demo only: forget completions. */
 export function resetProgress() {
   ensureLoaded();
-  data = { ...data, completions: {}, demoRep: 0, finds: {}, districts: {}, visits: {}, checkins: {}, dailyDone: {}, activeDays: [], dayStart: undefined, sideDone: {}, bag: [], stash: [] };
+  data = { ...data, completions: {}, demoRep: 0, finds: {}, districts: {}, visits: {}, checkins: {}, dailyDone: {}, activeDays: [], dayStart: undefined, sideDone: {}, bag: [], stash: [], surprises: {} };
   syncClaimedFog();
   save();
 }

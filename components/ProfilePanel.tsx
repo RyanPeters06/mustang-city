@@ -11,6 +11,7 @@ import LoreCard from "./missions/LoreCard";
 import Replays from "./profile/Replays";
 import MusicToggle from "./profile/MusicToggle";
 import StashShelf from "./profile/StashShelf";
+import CollectionSets from "./profile/CollectionSets";
 import { walkStats, WEEKLY_ACTIVE_GOAL_MIN } from "@/lib/walkStats";
 import BadgeGrid from "./profile/BadgeGrid";
 import RegionsBoard from "./districts/RegionsBoard";
@@ -189,7 +190,9 @@ export default function ProfilePanel({
             <p className="text-[12px] text-ink/60">new places</p>
           </div>
         </div>
-        <p className="mt-2 text-center text-[12px] text-ink/50">{walk.kmTotal.toFixed(1)} km walked all time</p>
+        <p className="mt-2 text-center text-[12px] text-ink/50">
+          {walk.kmTotal.toFixed(1)} km walked all time · ≈{(walk.kmTotal * 0.17).toFixed(1)} kg CO₂ saved vs driving
+        </p>
       </section>
 
       {showcase.length > 0 && (
@@ -264,6 +267,7 @@ export default function ProfilePanel({
       <CollectiblesSection snap={snap} onOpen={onOpenCollectible} />
 
       <Replays onPlay={onPlayReplay} />
+      <CollectionSets snap={snap} />
       <StashShelf snap={snap} />
       <MusicToggle />
 

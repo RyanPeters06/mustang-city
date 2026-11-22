@@ -78,7 +78,8 @@ export default function GooseCall({ enabled }: { enabled: boolean }) {
       const now = Object.keys(s.visits);
       const fresh = now.find((r) => !lastVisits.current?.has(r));
       lastVisits.current = new Set(now);
-      if (fresh && !s.districts[fresh] && !calledBefore(fresh)) setPhase((p) => p ?? { region: fresh, stage: "ringing" });
+      // Ring a few seconds after arriving, so it doesn't land on top of the arrival celebrations.
+      if (fresh && !s.districts[fresh] && !calledBefore(fresh)) setTimeout(() => setPhase((p) => p ?? { region: fresh, stage: "ringing" }), 4500);
     });
     return () => {
       unsubscribe();

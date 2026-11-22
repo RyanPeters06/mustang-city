@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { ProgressSnapshot } from "@/lib/progress";
 import { DAILY_REP, DAILY_SWEEP_REP, dailyQuests, dayKey, msToMidnight } from "@/lib/daily";
+import { SURPRISE_REP, todaysSurprises } from "@/lib/surprise";
 
 export const FLAME_PATH = "M12 3c1 3.5 4.5 5 4.5 9.5a4.5 4.5 0 0 1-9 0c0-2 1-3.2 2-4.2.2 1.6 1 2.6 2 2.7C11 8.6 11.3 5.6 12 3Z";
 
@@ -85,6 +86,18 @@ export default function DailyCard({ snap }: { snap: ProgressSnapshot }) {
       <p className="mt-2 text-[12px] text-ink/55">
         {count === 3 ? `All three done: +${DAILY_SWEEP_REP} bonus Rep earned.` : `Finish all three for +${DAILY_SWEEP_REP} bonus Rep.`}
       </p>
+      <div className="mt-3 border-t border-white/10 pt-3">
+        <p className="text-[12px] font-bold tracking-[0.14em] text-gold uppercase">Surprises today · +{SURPRISE_REP} Rep each</p>
+        <ul className="mt-1.5 space-y-1">
+          {todaysSurprises(day).map((s) => (
+            <li key={s.id} className={`flex items-baseline justify-between gap-3 text-[13px] ${snap.surprises[s.id] ? "text-ink/45 line-through" : "text-ink/80"}`}>
+              <span className="min-w-0 truncate">★ {s.name}</span>
+              <span className="shrink-0 text-[12px] text-ink/50">{s.region}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-1 text-[12px] text-ink/50">Gold stars on the map. Gone at midnight.</p>
+      </div>
     </section>
   );
 }
