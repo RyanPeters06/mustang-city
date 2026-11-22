@@ -1,0 +1,130 @@
+take a look at the prizes also, i want to max my odds of winning, and i also added best health hack to the track so let's do that too, also i am removing tiger data because it realistically does not fit, I'll use supabase: 
+
+<pasted_content id="3fba">
+Hack Western is Canada's premier student-run hackathon, bringing together hundreds of students from across North America to learn, build, and create something meaningful in just 36 hours.
+This year, at Hack Western 13, we’re celebrating exploration with our theme:
+Discover the unknown.
+From November 20-22, 2026, students of all experience levels will come together to design and develop projects across web, mobile, hardware, AI, design, sustainability, and more. Whether you're here to explore a new technology, prototype an idea you’ve been sitting on, or simply meet new people and try something new - this is your space.
+We’ll have workshops, mentors, activities, hardware access, sponsor challenges, and plenty of opportunities to learn and connect. All you need to bring is your curiosity and willingness to build.
+No matter your background or experience, you belong here - and we can’t wait to see what you discover. 🏞️
+hackwestern.com
+Requirements
+Any student who has been ACCEPTED to participate and hack at Hack Western is eligible to submit a project. Your project must follow the Rules outlined for this event - see the Rules tab for more details. Additionally:
+
+* Please add each member of your team to your project
+* Provide a short write up of your project, what it does, why you built it - tell us the story behind it!
+* (Optional) Attach images, videos, GIFs of your projects
+
+Prizes
+16 non-cash prizes
+First Place Overall
+1 winner
+Prize: Apple 11-inch iPad per winning team member
+Second Place Overall
+1 winner
+Prize: Apple Airpods Pro 3 per winning team member
+Third Place Overall
+1 winner
+Prize: Fitbit Air per winning team member
+Organizers Choice: Most Adventurous
+1 winner
+For a hack that enables others to discover the unknown.
+Prize: Arc'teryx Bird Head Toque per winning team member
+Best Health Hack by Sun Life
+1 winner
+Prize: A $100 Amazon gift card for each member of the winning team.
+Build a creative technical solution to a real health problem. In your pitch, show who it helps and what impact it could have.
+Best Use of QNX
+3 winners
+Prizes: $1,000 for the winning team and $250 each for two runners-up.
+Build an embedded system that uses AI. Your project must run on QNX OS and use at least one open-source AI module from QNX. Judges will look for a use case where real-time performance or reliability matters, a creative use of AI, and a demo running on embedded hardware. QNX has loaner Raspberry Pi 5s preloaded with QNX.
+The Canada Life Future Me Challenge
+1 winner
+Prize: A $100 Visa prepaid gift card for each member of the winning team.
+Canada Life's research (https://www.canadalife.com/investing-saving/retirement/group-retirement-savings/gen-z-retirement-planning-savings.html) found that many young Canadians are struggling to engage with long-term financial planning due to uncertainty about the world ahead. Your challenge is to design and build a digital solution that helps Gen Z take meaningful action toward their financial future through motivation, visualization, behavioral nudges, education, or innovation. Create a solution that turns uncertainty into confidence and helps young people see that the future is still worth planning for.
+Hire Your First AI Employee by TinyFish
+1 winner
+Prize: A $75 gift card and $100 in TinyFish credits per winning team member, plus a 1:1 with a TinyFish engineering lead for the team.
+Every company has jobs that live entirely in a browser: researching across dozens of sites, copying data between portals, watching pages for changes. Pick one and build the AI employee that does it end to end on the real web with TinyFish. We're judging on a real job done start to finish, an agent that holds up on live websites, smart use of TinyFish, and a demo that makes us want to hire it. Free credits at tinyfish.ai/students, docs at docs.tinyfish.ai.
+To qualify, post your demo on X or LinkedIn and tag TinyFish.
+Best Hardware Prototype by PCBWay
+1 winner
+Prize: US$50 in PCBWay manufacturing credit for the winning team.
+Build a hardware prototype that solves a real problem. Show how it works and what you’d fabricate for the next version.
+[MLH] Best Use of Gemini API
+1 winner
+MLH Swag Kits ||
+It’s time to push the boundaries of what’s possible with AI using Google Gemini. Check out the Gemini API to build AI-powered apps that make your friends say WHOA. So, what can Gemini do for your hackathon project?
+Understand language like a human and build a chatbot that gives personalized advice
+Analyze info like a supercomputer and create an app that summarizes complex research papers
+Generate creative content like code, scripts, music, and more
+Think of the possibilities… what will you build with the Google Gemini API this weekend?
+[MLH] Best Use of Entire
+1 winner
+Mini Portable Projector ||
+Entire is the Git forge for agent-human collaboration. From syncing your sessions and prompts to your Git history, to hosting code and replacing the Pull Request with Trails, Entire are reimagining code hosting and collaboration for the agent era.
+Ready to build faster with AI without burning through tokens or losing context? This challenge is all about building smarter AI workflows. To qualify, your project should leverage as many of Entire’s core capabilities (Sessions, Graph, and/or Brain) as possible.
+Your project should lean on Sessions for context and memory and entire-graph for codebase mapping:
+Sessions (Shared Memory): Save your AI agent sessions as instant checkpoints and push them to your team. Teammates or other agents can jump in instantly and pick up right where you left off with zero context loss.
+Graph (Codebase Mapping): Generate a visual map of how your codebase fits together. Using entire graph search instead of letting agents blindly search files to cut token usage by up to 71%!
+Brain (Persistent Reasoning): Combine your session data and Graph insights into persistent project knowledge. Agents can query past decisions and architectural lessons through the CLI or MCP so they don’t repeat mistakes or undo working code.
+Trails (Code review): Assign you or a teammate’s agent a task via Trail (Entire’s issue/PR combo primitive), the agent works on it, and then let your agent review the code change: does the code change match the intent? Should it merge? Let Entire Trails help you decide!
+We’re looking for teams that use Entire to create seamless human-AI collaboration, maintain clean code history, and show measurable token efficiency. Build something awesome, keep your agents on track, and show us how Entire powers your workflow!
+[MLH] Best Use of Solana
+1 winner
+Unruggable Hardware Wallets ||
+The world of development is evolving fast and Solana is leading the charge with a network built to handle all of your infrastructure needs. Forget high fees and slow confirmations, it’s time to build applications that are fast, efficient, and scalable.
+Harness Solana’s core advantages like blazing fast execution and near-zero transaction costs to make your hackathon ideas become real world projects. With Solana, the possibilities are endless.
+Create a game, social app, or consumer product that relies on instant, high-frequency transactions.
+Design a sophisticated trading, lending, or decentralized exchange (DEX).
+Build a prototype for supply chain, identity, or payments that can handle massive, real-world volume.
+Show us how you can innovate with Solana for a chance to win Unruggable Hardware Wallets for you and each member of your team!
+[MLH] Best Use of Tiger Data
+1 winner
+Stream Deck Mini ||
+Building high-performance apps under hackathon deadlines shouldn't mean spending half your weekend configuring complex databases or learning obscure query languages. Tiger Data extends PostgreSQL to give student developers an ultra-fast foundation for real-time data, time-series metrics, and complex analytics.
+Why build with Tiger Data this weekend?
+Standard SQL Power: Query massive datasets instantly using the SQL you already know, with no complex NoSQL aggregation pipelines required.
+Unified Data Stack: Store relational user profiles and high-frequency metric streams side-by-side in a single database.
+Instant Dashboards: Serve lag-free, real-time frontend charts using pre-computed Continuous Aggregates.
+90%+ Data Compression: Store millions of events on free-tier cloud instances without running out of disk space.
+Whether you’re building real-time IoT monitoring, AI-driven analytics dashboards, or financial prediction engines, show us how Tiger Data powers your project. The team that demonstrates the most innovative, impactful, and performance-driven use of Tiger Data will take home some great prizes!
+[MLH] Best Use of Vultr
+1 winner
+Assorted Prizes ||
+Vultr empowers hackers to bring their high-performance projects to life instantly; providing everything from the speed of one-click deployment and scalable cloud compute, to specialized Vultr Cloud GPUs that can power AI-driven applications. We want you to push the limits of what can be built when infrastructure is no longer the bottleneck!
+Sign up for a Vultr account today and claim your free cloud credits! Take your next hack to the cloud with Vultr for a chance to win some awesome prizes for you and your team!
+[MLH] Best Use of Auth0
+1 winner
+Wireless Headphones ||
+Auth0 wants your applications to be secure! Why spend hours building features like social sign-in, Multi-Factor Authentication, and passwordless log-in when you can enable them through Auth0 straight out of the box? You can also secure your AI applications with Auth0 for AI Agents.
+Auth0 is free to try, doesn’t require a credit card, and allows for up to 7,000 free active users and unlimited log-ins. Make your new account today and use any of the Auth0 APIs for a chance to win a pair of wireless headphones for you and each member of your team!
+[MLH] Best Domain Name from GoDaddy Registry
+1 winner
+Digital Gift Card ||
+GoDaddy Registry is giving you everything you need to be the best hacker no matter where you are. Register your domain name with GoDaddy Registry for a chance to win some amazing prizes!
+</pasted_content id="3fba">
+
+---
+
+here is another image i want to use: the idea is that this is the first thing users see when opening the app, i want a cool animation where it zooms out of the cover and you can see a bit more of the fragmented images, then it proceeds to zoom into the mustang city title bringing you into the app
+
+---
+
+heres also a better logo use this one instead so we can fit more into the cover, also change the tap to enter button, make it click anywhere to start in a gta style font
+
+---
+
+also we need a limit with how much you can zoom out, also if you zoom out to the max you can see some of the map is still showing in the distance, i need you to look for yourslef and get into it, zoom out and do a 360 and fix whatever looks bad
+
+---
+
+also when all this is done tell me what other API's you need from me
+
+---
+
+actually scrap the last mustang city logo, here is the new one i want you to use
+
+---
+
+Commit and push
