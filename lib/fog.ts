@@ -90,6 +90,17 @@ function ensureLoaded() {
     cells = new Set(defaultCells());
   }
   recompute();
+  // Another tab cleared fog (e.g. the app next to the /stage big-screen mirror): pick it up live.
+  window.addEventListener("storage", (e) => {
+    if (e.key !== STORAGE_KEY || !e.newValue) return;
+    try {
+      cells = new Set(JSON.parse(e.newValue) as string[]);
+      recompute();
+      listeners.forEach((l) => l());
+    } catch {
+      /* ignore malformed */
+    }
+  });
 }
 
 function recompute() {

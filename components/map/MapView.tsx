@@ -47,6 +47,8 @@ export type MapHandle = {
   skipIntro: () => void;
   flyToCampus: () => void;
   flyToCity: () => void;
+  /** /stage: slow cinematic orbit over Forest State (true) or stop (false). */
+  orbit: (on: boolean) => void;
   center: () => LngLat | null;
   follow: (lngLat: LngLat) => void;
   locate: (lngLat: LngLat) => void;
@@ -1330,6 +1332,7 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
     callbacks.current = { onReady, onUnavailable, onMissionTap, onBuildingTap, onTagTap, onDistrictTap, onCollectibleTap };
   });
 
+  const orbitRef = useRef(0);
   useImperativeHandle(ref, () => ({
     prepareIntro: () => {
       const map = mapRef.current;
@@ -1436,6 +1439,20 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
       );
     },
     clearBuilding: () => (mapRef.current?.getSource("building-selected") as GeoJSONSource | undefined)?.setData(EMPTY),
+    orbit: (on) => {
+      const map = mapRef.current;
+      if (!map) return;
+      cancelAnimationFrame(orbitRef.current);
+      if (!on) return;
+      let last = performance.now();
+      const spin = (now: number) => {
+        const dt = now - last;
+        last = now;
+        map.setBearing((map.getBearing() + dt * 0.004) % 360); // ~4°/s
+        orbitRef.current = requestAnimationFrame(spin);
+      };
+      orbitRef.current = requestAnimationFrame(spin);
+    },
     snapshot: () =>
       new Promise((resolve) => {
         const map = mapRef.current;

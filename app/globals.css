@@ -53,6 +53,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* /stage (big-screen mirror): the app root fills the whole display instead of the phone frame. */
+html[data-stage] .app-root {
+  --safe-top: 0px;
+  --safe-bottom: 0px;
+  width: 100% !important;
+  height: 100dvh !important;
+  aspect-ratio: auto !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
 /* Photo mode: every layer except the map and the photo overlay fades out. */
 html[data-photo] main[data-game] > *:not(.map-root):not([data-photo-keep]) {
   opacity: 0 !important;

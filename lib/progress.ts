@@ -148,6 +148,18 @@ function ensureLoaded() {
     checkMilestones();
   });
   subscribeRides(() => checkMilestones()); // bus rides feed Route 6 Regular / Every Route (also starts detection)
+  // Another tab made progress (the /stage mirror follows the app live): reload and redraw.
+  window.addEventListener("storage", (e) => {
+    if (e.key !== STORAGE_KEY || !e.newValue) return;
+    try {
+      data = { ...data, ...(JSON.parse(e.newValue) as Partial<Stored>) };
+      snapshot = null;
+      syncClaimedFog();
+      listeners.forEach((l) => l());
+    } catch {
+      /* ignore malformed */
+    }
+  });
   // Region quest "Set foot in …": the first fix inside each region.
   onFix((fix) => {
     const region = districtAt(fix.lngLat);
