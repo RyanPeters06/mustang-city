@@ -9,6 +9,7 @@ import Emblem from "./profile/Emblem";
 import ProfileEditor from "./profile/ProfileEditor";
 import LoreCard from "./missions/LoreCard";
 import Replays from "./profile/Replays";
+import MusicToggle from "./profile/MusicToggle";
 import { walkStats, WEEKLY_ACTIVE_GOAL_MIN } from "@/lib/walkStats";
 import BadgeGrid from "./profile/BadgeGrid";
 import RegionsBoard from "./districts/RegionsBoard";
@@ -262,6 +263,7 @@ export default function ProfilePanel({
       <CollectiblesSection snap={snap} onOpen={onOpenCollectible} />
 
       <Replays onPlay={onPlayReplay} />
+      <MusicToggle />
 
       <TagsSection onOpen={onOpenTag} />
 

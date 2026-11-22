@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { DiveFlash, LoadingPrompt, PosterTexture, StartPrompt, playStartSound } from "./intro/TitleFx";
 import CoverCamera, { DIVE_MS } from "./intro/CoverCamera";
+import { startMusic } from "@/lib/music";
 import { Emblem } from "./brand/Logo";
 import type { MapHandle, IntroStep } from "./map/MapView";
 import type { CoverArt } from "@/lib/brandAssets";
@@ -100,6 +101,7 @@ export default function Intro({ map, mapState, reason, onDone, cover = null }: P
     if (collage && !reduced) {
       // Arcade confirm blink + sound, then dive into the cover's Mustang City logo and hand over to the map flight.
       playStartSound(DIVE_MS);
+      startMusic(); // the start press is the gesture audio needs; the bed then loops under the game
       setPressed(true);
       await new Promise((r) => setTimeout(r, 340));
       setPhase("diving");

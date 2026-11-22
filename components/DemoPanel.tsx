@@ -2,6 +2,7 @@
 
 import { setDemoOn } from "@/lib/demo";
 import { addHeat } from "@/lib/wanted";
+import { toggleMusic } from "@/lib/music";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { DEMO_WALK, densify } from "@/lib/geo";
@@ -150,6 +151,8 @@ export default function DemoPanel({ map, selected, onPassed }: Props) {
       <button className={btn} onClick={() => ageAllCells(0)}>Refresh fog (no decay)</button>
       <button className={btn} onClick={() => setSampleTurf(!isSampleTurf())}>Sample faculty turf on/off</button>
       <button className={btn} onClick={() => setHeistSim(!getHeistSim())}>Demo heist crew on/off</button>
+      <button className={btn} onClick={() => window.dispatchEvent(new CustomEvent("mc:goose-call", { detail: "East London" }))}>The Goose calls (demo)</button>
+      <button className={btn} onClick={toggleMusic}>Music on/off</button>
       <button className={btn} onClick={() => addHeat(70)}>Wanted level +1 star (demo)</button>
       <button className={btn} onClick={() => addDemoRep(500)}>+500 Rep (demo)</button>
       <button className={btn} onClick={resetProgress}>Reset missions + demo Rep</button>

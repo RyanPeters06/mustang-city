@@ -34,6 +34,7 @@ import WeatherOverlay from "./WeatherOverlay";
 import Legend from "./Legend";
 import Onboarding from "./Onboarding";
 import NudgeChip from "./Nudge";
+import GooseCall from "./GooseCall";
 import NextClassCard from "./classrun/NextClassCard";
 import ScheduleManager from "./classrun/ScheduleManager";
 import { CLASS_RUN_REP, onClassRun, startClassRunWatch } from "@/lib/schedule";
@@ -308,6 +309,7 @@ export default function GameScreen({ cover = null }: { cover?: CoverArt }) {
       <AreaBanner />
       <ReplayBar />
       <Onboarding ready={mapState === "ready" && entered} />
+      <GooseCall enabled={mapState === "ready" && entered} />
       <InstallHint ready={mapState === "ready" && entered} />
       <Celebrations paused={passed !== null} />
       <MissionPassed info={passed} onDone={clearPassed} />
