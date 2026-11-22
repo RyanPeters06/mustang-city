@@ -1,0 +1,108 @@
+check if the images i pasted match, after i paste my api keys into the chat, tell me the exact way i need to add it into vercel
+
+godaddy is set up as mustangcity.rodeo auth0 should be good uwo only is not set up but thats fine for the demo, 
+
+<pasted_content id="3fba">
+1. Install package
+Add @supabase/server to your backend.
+Details:
+npm install @supabase/server
+On Edge Functions you can import it directly, no install needed.
+Code:
+File: Code
+```
+npm install @supabase/server
+```
+
+2. Set environment variables
+Copy these into your environment so your handler can verify users and use supabase-js.
+Details:
+.env
+SUPABASE_URL=https://lqpryglgcoiwhltsklqi.supabase.co
+SUPABASE_PUBLISHABLE_KEY=REDACTED
+SUPABASE_SECRET_KEY=REDACTED
+SUPABASE_JWKS_URL=https://lqpryglgcoiwhltsklqi.supabase.co/auth/v1/.well-known/jwks.json
+On Edge Functions these are injected automatically. For other runtimes, copy the values above. Manage keys in API Keys settings.
+
+3. Install the Supabase Server skill (optional)
+Give AI coding tools instructions for building APIs with @supabase/server.
+Code:
+File: Code
+```
+npx skills add supabase/server
+</pasted_content id="3fba">
+
+<pasted_content id="3fba">
+SUPABASE_URL=https://lqpryglgcoiwhltsklqi.supabase.co
+SUPABASE_PUBLISHABLE_KEY=REDACTED
+SUPABASE_SECRET_KEY=REDACTED
+SUPABASE_JWKS_URL=https://lqpryglgcoiwhltsklqi.supabase.co/auth/v1/.well-known/jwks.json
+</pasted_content id="3fba">
+
+---
+
+I won't bother with the health hack with sunlife it does not rly apply
+
+explore if vultr can be used here: 
+
+<pasted_content id="3fba">
+[MLH] Best Use of Vultr
+1 winner
+Assorted Prizes ||
+
+Vultr empowers hackers to bring their high-performance projects to life instantly; providing everything from the speed of one-click deployment and scalable cloud compute, to specialized Vultr Cloud GPUs that can power AI-driven applications. We want you to push the limits of what can be built when infrastructure is no longer the bottleneck!
+
+Sign up for a Vultr account today and claim your free cloud credits! Take your next hack to the cloud with Vultr for a chance to win some awesome prizes for you and your team!
+</pasted_content id="3fba">
+
+---
+
+we need the map to not allow people to swipe away from forest state, just like how video game maps in the pause menu does not allow you to keep scrolling out into infinity
+
+---
+
+what other things can we include vultr on
+
+---
+
+i got this error: A variable with the name `GEMINI_API_KEY` already exists for the target preview,production on branch undefined. A variable with the name `AUTH0_DOMAIN` already exists for the target preview,production on branch undefined. A variable with the name `AUTH0_CLIENT_ID` already exists for the target preview,production on branch undefined. A variable with the name `AUTH0_CLIENT_SECRET` already exists for the target preview,production on branch undefined. A variable with the name `AUTH0_SECRET` already exists for the target preview,production on branch undefined. A variable with the name `APP_BASE_URL` already exists for the target preview,production on branch undefined.
+
+---
+
+Not yet
+
+---
+
+before we push check if the vercel env worked if possible, also flesh out the front cover and press to start features
+
+---
+
+okay the front cover proportions are pretty bad, out mustang city logo has no background now, it can overlap i pasted some insparation for you
+
+---
+
+you nailed the cover amazing job leave it as is for now
+
+---
+
+we just need to fix the animation, record it and see for yourself and ensure the animation works right now the zooming and stuff looks off
+
+---
+
+also make it so that on every refresh we need to click to start
+
+---
+
+i think a cool animation to try would be if all the panels in the front cover all disperse outwards of the title, then we zoom into the mustang city words into the app
+
+---
+
+looks great but for the animation can we try the middle two panels disperse horizontally instead of slighly diagonally down
+
+---
+
+also at the very very beginning it still starts zoomed into the top left for some reason, it looks off
+
+---
+
+Commit and push
