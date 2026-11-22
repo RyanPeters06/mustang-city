@@ -26,7 +26,10 @@ Built in this order; each item is browser-checked, committed and pushed (secrets
 - [x] **Live big-screen mirror `/stage`** (IDEAS §1).
 - [x] **Stash & carry** (IDEAS §8) — loot from quests carried home to Mustang City.
 - [x] **Extras (part 1)** — surprise blips, collection sets, CO₂ saved.
-- [ ] **Extras (part 2)** — rank perks, O-Week mode, seasonal palette, friend fog overlap, radio news interruptions.
+- [x] **Extras (part 2)** — rank perks, O-Week mode, seasonal events (Frost City now), friend fog overlap, radio news bulletins, accessibility mode, 11 side-quest kinds.
+- [~] **Push notifications** — needs VAPID keys added to Vercel + a service worker; not started (Ryan's keys).
+- [~] **Loot challenges (multiplayer)** — needs realtime (Supabase Realtime) + accounts; not started.
+- [ ] **Heist trailer generator** — canvas + MediaRecorder share video.
 - [x] **Docs + Devpost copy refresh** — HANDOFF, PITCH, Devpost story updated for regions/dailies/competition.
 
 ## Queue

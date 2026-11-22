@@ -11,7 +11,7 @@ import { radiusScale } from "./a11y";
 
 export const SIDE_REP = 40;
 
-export type SideKind = "photo" | "bus" | "night" | "trivia" | "crawl" | "crew" | "tag";
+export type SideKind = "photo" | "bus" | "night" | "trivia" | "crawl" | "crew" | "tag" | "study" | "thrift" | "sunset" | "art";
 export type SideQuest = {
   id: string;
   region: string;
@@ -76,6 +76,22 @@ export function regionSideQuests(region: string): SideQuest[] {
       const p = pick(["park"], 4);
       return p && { id: `${region}:side:crew`, region, kind: "crew", title: "Crew meet-up", detail: `Bring a friend to ${p.n}.`, at: p.p, radius: 160, place: p.n };
     },
+    study: () => {
+      const p = pick(["cafe"], 6);
+      return p && { id: `${region}:side:study`, region, kind: "study", title: "Study session", detail: `Put in 30 minutes at ${p.n}.`, at: p.p, radius: 60, place: p.n };
+    },
+    thrift: () => {
+      const p = pick(["shop"], 7);
+      return p && { id: `${region}:side:thrift`, region, kind: "thrift", title: "Thrift find", detail: `Find something under $5 at ${p.n}.`, at: p.p, radius: 60, place: p.n };
+    },
+    sunset: () => {
+      const p = pick(["park"], 8);
+      return p && { id: `${region}:side:sunset`, region, kind: "sunset", title: "Golden hour", detail: `Catch the sunset at ${p.n}.`, at: p.p, radius: 160, place: p.n };
+    },
+    art: () => {
+      const p = pick(["culture"], 9);
+      return p && { id: `${region}:side:art`, region, kind: "art", title: "Art hunt", detail: `Find the art at ${p.n}.`, at: p.p, radius: 90, place: p.n };
+    },
     tag: () => {
       const p = pick(["shop", "food", "cafe"], 5);
       return { id: `${region}:side:tag`, region, kind: "tag", title: "Leave your mark", detail: p ? `Drop a tag near ${p.n}.` : `Drop a tag anywhere in ${region}.`, at: p?.p ?? d.label, radius: 90, place: p?.n };
@@ -83,7 +99,7 @@ export function regionSideQuests(region: string): SideQuest[] {
   };
 
   // Rotate the order per region so neighbouring boards don't look the same.
-  const order: SideKind[] = ["photo", "bus", "night", "trivia", "crawl", "crew", "tag"];
+  const order: SideKind[] = ["photo", "study", "bus", "night", "art", "trivia", "crawl", "sunset", "crew", "thrift", "tag"];
   const start = hash(region + "side") % order.length;
   const out: SideQuest[] = [];
   for (let i = 0; i < order.length && out.length < 3; i++) {
