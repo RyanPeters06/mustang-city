@@ -33,8 +33,14 @@ export default function Hud({ visible = true }: { visible?: boolean }) {
                 {streak}
               </span>
             )}
+            {bag.length > 0 && (
+              <span className={`ml-1.5 inline-flex items-center gap-0.5 ${bag.length >= bagSize ? "text-pink" : "text-ink/80"}`} aria-label={`Loot bag ${bag.length} of ${bagSize}`}>
+                <svg viewBox="0 0 24 24" className="-mt-0.5 h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M6 8h12l-1 12H7z M9 8V6a3 3 0 0 1 6 0v2" /></svg>
+                {bag.length}/{bagSize}
+              </span>
+            )}
             <WantedStars />
-            {!wanted && w.status === "live" && w.tempC !== null && (
+            {!wanted && !bag.length && w.status === "live" && w.tempC !== null && (
               <span className="text-ink/60">
                 {" "}· {Math.round(w.tempC)}°C {w.label}
               </span>
@@ -49,12 +55,6 @@ export default function Hud({ visible = true }: { visible?: boolean }) {
             )}
           </p>
         </div>
-        {bag.length > 0 && (
-          <>
-            <Stat label="Bag" value={`${bag.length}/${bagSize}`} color={bag.length >= bagSize ? "text-pink" : "text-ink"} />
-            <div className="h-6 w-px bg-white/10" />
-          </>
-        )}
         <Stat label="Rep" value={rep.toLocaleString()} color="text-gold" />
         <div className="h-6 w-px bg-white/10" />
         {/* Headline progress: regions claimed through their quests (lib/regions.ts) */}
