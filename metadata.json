@@ -1,0 +1,43 @@
+{
+  "cli_version": "0.13.4",
+  "checkpoint_id": "01M815VWRTG9Z8V3HAGGFD9MRR",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "components/GameScreen.tsx",
+    "components/LocationPrompt.tsx",
+    "components/OfflineChip.tsx",
+    "lib/celebrate.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 14,
+    "cache_creation_tokens": 6590,
+    "cache_read_tokens": 5966528,
+    "output_tokens": 5125,
+    "api_call_count": 7
+  },
+  "redaction": {
+    "replacements": 426,
+    "layers": {
+      "betterleaks": 18,
+      "connection_string": 0,
+      "credential_key": 0,
+      "credential_value": 36,
+      "credentialed_uri": 0,
+      "entropy": 377,
+      "key_context": 27,
+      "provider_token": 4,
+      "shell_stdin": 0
+    }
+  }
+}
