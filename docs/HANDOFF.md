@@ -29,6 +29,10 @@ decided and built across the build sessions, so no context is lost.
 - **Feel:** wanted-level stars (`lib/wanted.ts`), golden-job variable rewards (18%, 1.5× Rep), The Goose calls you
   (`/api/goose-call`, Gemini TTS) on first entering an unclaimed region, procedural synthwave soundtrack
   (`lib/music.ts`), coach marks (onboarding v2) and near-miss nudges, photo mode, `/stage` big-screen mirror.
+- **More (Nov 22, later):** O-Week starter chain on Missions; seasonal events (`lib/season.ts`, Frost City Nov 15 to Jan 15:
+  surprises pay double); Forest FM breaking-news bulletins on claims; crew compare shows regions + fog overlap; rank perks
+  (`RANK_PERKS`); accessibility mode (`lib/a11y.ts`: wider check-ins, larger text); 11 side-quest kinds; **reel maker**
+  (photo mode → Record reel, `lib/reel.ts`, MediaRecorder).
 - **Title screen:** layered cover (`lib/data/coverLayers.json` from `scripts/build-cover.mjs`), compositor-driven
   camera (`components/intro/CoverCamera.tsx`), press any key / tap anywhere every load, panels burst, dive into the logo.
 

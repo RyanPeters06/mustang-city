@@ -7,6 +7,8 @@ All theming stays original: "GTA 6-inspired" in public copy only — no Rockstar
 
 ---
 
+> **Nov 22:** Ryan approved everything; ticked rows below are built (see docs/BACKLOG.md "Approved Nov 22").
+
 ## 0. Ranked by hackathon win odds (Nov 21)
 
 How judges actually see the project: the Devpost video first, then ~3 minutes of live demo, often holding the phone
@@ -40,34 +42,34 @@ themselves. So ranking = (how much a judge notices it in that window) × (how li
 
 | ✓ | Idea | Why it wins | Effort | Impact |
 |---|---|---|---|---|
-| [ ] | **"Wanted level" for curiosity** — 1–5 stars that rise while you're in a fogged area for the first time and fade when you've cleared it; stars glow on the HUD | Instantly reads as the genre to every judge; zero IP (stars are generic) | S | ★★★ |
-| [ ] | **Live demo mode on the big screen** — `/stage` route: full-screen map that mirrors your phone's fog in real time while you walk the judging hall | Judges watch fog clear live as you walk up to them | M | ★★★ |
-| [ ] | **Heist trailer generator** — after a heist completes, auto-cut a 10-second vertical video (replay trace + photos + captions) via canvas + MediaRecorder, shareable | Social virality story; great demo closer | L | ★★★ |
-| [ ] | **The Goose calls you** — fake incoming-call screen (original UI) when a new mission unlocks nearby; Gemini TTS voice line | Memorable character moment, uses Gemini TTS | M | ★★★ |
+| [x] | **"Wanted level" for curiosity** — 1–5 stars that rise while you're in a fogged area for the first time and fade when you've cleared it; stars glow on the HUD | Instantly reads as the genre to every judge; zero IP (stars are generic) | S | ★★★ |
+| [x] | **Live demo mode on the big screen** — `/stage` route: full-screen map that mirrors your phone's fog in real time while you walk the judging hall | Judges watch fog clear live as you walk up to them | M | ★★★ |
+| [x] | **Heist trailer generator** — after a heist completes, auto-cut a 10-second vertical video (replay trace + photos + captions) via canvas + MediaRecorder, shareable | Social virality story; great demo closer | L | ★★★ |
+| [x] | **The Goose calls you** — fake incoming-call screen (original UI) when a new mission unlocks nearby; Gemini TTS voice line | Memorable character moment, uses Gemini TTS | M | ★★★ |
 | [ ] | **Faculty war room** — weekly turf map where each faculty's colour floods the districts it leads; Monday "turf report" card | Campus-wide competition → retention + demo beat | M | ★★ |
-| [ ] | **Mustang City Radio "news" interruptions** — when a friend unlocks a district, the radio host breaks in with a 5-second bulletin | Ties social + AI + audio together | M | ★★ |
-| [ ] | **Photo mode** — hide UI, letterbox, film grain, sunset LUT, date/location stamp; share card | People share screenshots = free marketing | S | ★★ |
-| [ ] | **Accessibility pitch** — "explore without walking" mode: wheelchair-accessible routes from City of London open data, fog clears along accessible paths | Strong impact story for judges | M | ★★ |
-| [ ] | **Sustainability track** — kilometres walked vs. driven, CO₂ saved, LTC rides counted | Fits sponsor tracks | S | ★ |
-| [ ] | **Orientation-week mode** — Western O-Week preset missions (residence → classes → food) for first-years | Real user pull at Western | S | ★★ |
+| [x] | **Mustang City Radio "news" interruptions** — when a friend unlocks a district, the radio host breaks in with a 5-second bulletin | Ties social + AI + audio together | M | ★★ |
+| [x] | **Photo mode** — hide UI, letterbox, film grain, sunset LUT, date/location stamp; share card | People share screenshots = free marketing | S | ★★ |
+| [x] | **Accessibility pitch** — "explore without walking" mode: wheelchair-accessible routes from City of London open data, fog clears along accessible paths | Strong impact story for judges | M | ★★ |
+| [x] | **Sustainability track** — kilometres walked vs. driven, CO₂ saved, LTC rides counted | Fits sponsor tracks | S | ★ |
+| [x] | **Orientation-week mode** — Western O-Week preset missions (residence → classes → food) for first-years | Real user pull at Western | S | ★★ |
 | [ ] | **Devpost assets** — 60-s trailer cut from the intro flight + replay, original synthwave bed, captions | Judges watch the video first | M | ★★★ |
 
 ## 2. Keeping players hooked (retention)
 
 | ✓ | Hook | Mechanic | Effort |
 |---|---|---|---|
-| [ ] | **Daily Job** | One rotating Goose mission per day, +2× Rep if done before midnight; streak flame on the HUD | S |
-| [ ] | **Streaks with forgiveness** | Walk-streak (any new fog per day); one "safehouse day" freeze per week so streaks don't feel punishing | S |
+| [x] | **Daily Job** | One rotating Goose mission per day, +2× Rep if done before midnight; streak flame on the HUD | S |
+| [x] | **Streaks with forgiveness** | Walk-streak (any new fog per day); one "safehouse day" freeze per week so streaks don't feel punishing | S |
 | [ ] | **Weekly reset leaderboards** | Already have weekly Rep; add Monday push "You finished #4 in Science — 120 Rep behind #3" | S |
-| [ ] | **Near-miss nudges** | "You're 3% from unlocking Old East Village" when the app opens; region card shows the closest unexplored street | S |
-| [ ] | **Collection sets** | Landmark sets (Bridges, Haunted, Film Sets, Heritage Plaques) with set-completion badges and a profile shelf | M |
+| [x] | **Near-miss nudges** | "You're 3% from unlocking Old East Village" when the app opens; region card shows the closest unexplored street | S |
+| [x] | **Collection sets** | Landmark sets (Bridges, Haunted, Film Sets, Heritage Plaques) with set-completion badges and a profile shelf | M |
 | [ ] | **Fog regrowth (opt-in)** | Cells untouched for 6 months slowly re-fog (already in Polish pack) → reason to revisit | M |
-| [ ] | **Friend fog overlap** | "You and Maya have both cleared 12% of downtown — 3% overlap" + co-op missions that need both | M |
-| [ ] | **Seasonal events** | Homecoming, Halloween (haunted Grand Theatre hunt), Winter "Frost City" palette, Grad Week Wrapped | M |
-| [ ] | **Surprise blips** | Random gold blips that exist for 2 hours (location from a seeded daily RNG) worth bonus Rep | S |
-| [ ] | **Rank perks** | Each rank unlocks something visible: HUD colours, map filters, emblem, title, radio station | S |
+| [x] | **Friend fog overlap** | "You and Maya have both cleared 12% of downtown — 3% overlap" + co-op missions that need both | M |
+| [x] | **Seasonal events** | Homecoming, Halloween (haunted Grand Theatre hunt), Winter "Frost City" palette, Grad Week Wrapped | M |
+| [x] | **Surprise blips** | Random gold blips that exist for 2 hours (location from a seeded daily RNG) worth bonus Rep | S |
+| [x] | **Rank perks** | Each rank unlocks something visible: HUD colours, map filters, emblem, title, radio station | S |
 | [ ] | **Push notifications (PWA)** | iOS 16.4+ supports web push for home-screen PWAs: daily job, friend passed you, streak at risk | M |
-| [ ] | **Variable rewards on mission pass** | Small chance of a rare "golden photo" frame or bonus Rep roll — the pass screen becomes a slot-machine moment | S |
+| [x] | **Variable rewards on mission pass** | Small chance of a rare "golden photo" frame or bonus Rep roll — the pass screen becomes a slot-machine moment | S |
 
 ## 3. Real 3D models of Western's buildings
 

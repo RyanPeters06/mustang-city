@@ -29,6 +29,11 @@ We already explore cities obsessively, just in games. Open-world games make you 
 - **Atmosphere:** an original procedural synthwave soundtrack, a comic-panel title screen that bursts apart into the map, and photo mode for postcards.
 - **Live data:** London Transit buses on the map in real time.
 - **Graduation Wrapped:** the map of your four years, at the end.
+- **Shareable reel:** a 9-second vertical video of your Forest State, recorded right on your phone, plus photo-mode postcards.
+- **Seasonal events:** like Frost City this winter, when surprises pay double.
+- **A first week that teaches itself:** an O-Week starter chain and coach marks.
+- **Breaking news:** Forest FM cuts in when someone claims a region.
+- **Accessibility mode:** wider check-ins and larger text.
 
 **Graduate knowing your city.**
 
