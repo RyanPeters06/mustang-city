@@ -36,6 +36,7 @@ import Onboarding from "./Onboarding";
 import NudgeChip from "./Nudge";
 import GooseCall from "./GooseCall";
 import PhotoMode from "./PhotoMode";
+import OfflineChip from "./OfflineChip";
 import { getA11y } from "@/lib/a11y";
 import NextClassCard from "./classrun/NextClassCard";
 import ScheduleManager from "./classrun/ScheduleManager";
@@ -224,6 +225,7 @@ export default function GameScreen({ cover = null }: { cover?: CoverArt }) {
       />
       <WeatherOverlay />
       <Hud visible={entered} />
+      <OfflineChip />
       {mapState === "ready" && entered && <NudgeChip hidden={sheetOpen} onOpenRegion={(name) => setDistrict(name)} />}
       {mapState === "ready" && entered && !sheetOpen && (
         <>
