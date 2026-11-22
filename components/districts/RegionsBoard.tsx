@@ -91,7 +91,7 @@ export default function RegionsBoard({
           {expanded ? "Show fewer" : `Show all ${sorted.length}`}
         </button>
       ) : null}
-      {mode === "all" && <p className="mt-1 text-[12px] text-ink/60">Boundaries: City of London Open Data (Planning Districts). Places: © OpenStreetMap contributors.</p>}
+      {mode === "all" && <p className="mt-1 text-[12px] text-ink/60">About this map: map © Mapbox, © OpenStreetMap contributors. Boundaries: City of London Open Data (Planning Districts). Places: © OpenStreetMap contributors.</p>}
     </section>
   );
 }

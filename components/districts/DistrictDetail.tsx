@@ -12,6 +12,7 @@ import { useLastFix } from "@/lib/useLastFix";
 import { acceptFix } from "@/lib/location";
 import { distanceM, type LngLat } from "@/lib/geo";
 import { getServerDemo, isDemoOn, subscribeDemo } from "@/lib/demo";
+import SideQuests from "./SideQuests";
 
 const noStats = () => [];
 
@@ -106,6 +107,8 @@ export default function DistrictDetail({ name, onOpenMission }: { name: string; 
           );
         })}
       </ol>
+
+      <SideQuests region={name} snap={snap} from={from} demo={demo} onTeleport={teleport} />
 
       {/* Faculty turf */}
       <div className="hud-panel flex items-center gap-3 px-4 py-3">

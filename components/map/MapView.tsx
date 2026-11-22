@@ -14,6 +14,8 @@ import { getTags, subscribeTags } from "@/lib/tags";
 import { onBusFrame, subscribeBuses } from "@/lib/buses";
 import { getTurf, subscribeTurf } from "@/lib/turf";
 import { COLLECTIBLES } from "@/lib/collectibles";
+import { questPlaces, regionQuests } from "@/lib/regions";
+import { allSideQuests } from "@/lib/sideQuests";
 import { getStaleCells, subscribeFogAge } from "@/lib/fogAge";
 import campusModels from "@/lib/data/campusModels.json";
 import { facultyColor } from "@/lib/faculty";
@@ -231,7 +233,7 @@ function frameBuilding(map: MapboxMap, ring: LngLat[]) {
 }
 
 /** Blips + labels: hidden during the intro dive so nothing pops in mid-flight, faded back in on landing. */
-const OVERLAY_SYMBOLS = ["mission-blips", "mission-area-labels", "tag-pins", "collectible-pins", "campus-labels", "district-labels", "bus-labels", "bus-dots"];
+const OVERLAY_SYMBOLS = ["mission-blips", "region-quest-blips", "mission-area-labels", "tag-pins", "collectible-pins", "campus-labels", "district-labels", "bus-labels", "bus-dots"];
 function setOverlays(map: MapboxMap, on: boolean) {
   for (const id of OVERLAY_SYMBOLS) {
     if (!map.getLayer(id)) continue;
@@ -782,6 +784,41 @@ function addGameLayers(map: MapboxMap) {
     },
   });
 
+  // --- Region quest blips: every region's quest spots, only once you zoom in (no clutter at city zoom) ---
+  for (const [id, color, glyph] of QUEST_ICONS) map.addImage(id, missionIcon(color, glyph), { pixelRatio: 2 });
+  map.addSource("region-quests", { type: "geojson", data: questBlipData() });
+  map.addLayer({
+    id: "region-quest-blips",
+    type: "symbol",
+    source: "region-quests",
+    slot: "top",
+    minzoom: QUEST_MINZOOM,
+    layout: {
+      "icon-image": ["get", "icon"],
+      "icon-size": ["interpolate", ["linear"], ["zoom"], QUEST_MINZOOM, 0.4, 16, 0.78],
+      "icon-allow-overlap": false,
+      "icon-padding": 4,
+      "symbol-sort-key": ["case", ["get", "done"], 1, 0],
+      "text-field": ["step", ["zoom"], "", 15.8, ["get", "title"]],
+      "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
+      "text-size": 10,
+      "text-offset": [0, 1.6],
+      "text-anchor": "top",
+      "text-optional": true,
+      "text-max-width": 9,
+    },
+    paint: {
+      // fade in over the first half zoom level so blips don't pop
+      "icon-opacity": ["interpolate", ["linear"], ["zoom"], QUEST_MINZOOM, 0, QUEST_MINZOOM + 0.5, ["case", ["get", "done"], 0.4, 0.95]],
+      "text-opacity": ["case", ["get", "done"], 0.5, 0.9],
+      "text-color": "#ffffff",
+      "text-halo-color": "#140a2e",
+      "text-halo-width": 1.4,
+      "text-emissive-strength": 1,
+      "icon-emissive-strength": 1,
+    },
+  });
+
   // --- LTC buses: route lines (static GTFS) + live vehicles (GTFS-realtime) ---------------
   map.addSource("bus-routes", {
     type: "geojson",
@@ -967,6 +1004,37 @@ const MISSION_ICONS: [string, string, string][] = [
 ];
 
 const TAG_GLYPH = "M5 5h14v10h-7l-4 4v-4H5z M8.5 9.5h7 M8.5 12h4";
+
+/** Region quest blips appear from this zoom (neighbourhood scale) so the city view stays clean. */
+const QUEST_MINZOOM = 12.3;
+const QUEST_ICONS: [string, string, string][] = [
+  ["q-checkin", "#ffc857", "M5 8h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z M16 9h2a2 2 0 0 1 0 4h-2"],
+  ["q-landmark", "#ffc857", "M4 20h16 M6 20V10 M18 20V10 M10 20v-6h4v6 M3 10l9-6 9 6z"],
+  ["q-photo", "#ff4f8b", "M4 8h3l2-3h6l2 3h3v11H4z M12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"],
+  ["q-bus", "#2ee6d6", "M6 4h12a2 2 0 0 1 2 2v10H4V6a2 2 0 0 1 2-2z M4 11h16 M7 19v-3 M17 19v-3"],
+  ["q-night", "#7b2ff7", "M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"],
+  ["q-trivia", "#2ee6d6", "M9 9a3 3 0 1 1 4 2.8c-.7.3-1 .9-1 1.7V15 M12 18.5v.5"],
+  ["q-crawl", "#ff8a3d", "M7 3v8 M5 3v4a2 2 0 0 0 4 0V3 M7 11v10 M16 3c-1.7 0-3 2-3 5s1.3 4 3 4v9"],
+  ["q-crew", "#ff4f8b", "M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M3 20a6 6 0 0 1 12 0 M17 11a2.5 2.5 0 1 0 0-5 M21 20a5 5 0 0 0-4-4.9"],
+  ["q-tag", "#f6efff", "M5 5h14v10h-7l-4 4v-4H5z M8.5 9.5h7 M8.5 12h4"],
+];
+
+/** Quest spots for every region: core check-in targets + signature places + side quests. */
+function questBlipData(): FeatureCollection {
+  const p = getProgress();
+  const features: Feature[] = [];
+  const add = (region: string, icon: string, at: [number, number], done: boolean, title: string) =>
+    features.push({ type: "Feature", properties: { region, icon, done, title }, geometry: { type: "Point", coordinates: at } });
+  for (const d of DISTRICTS) {
+    for (const q of regionQuests(d.name)) {
+      if (q.kind !== "checkin") continue;
+      const place = questPlaces(q, d.name, d.label)[0];
+      if (place) add(d.name, q.place ? "q-landmark" : "q-checkin", place.p, !!p.checkins[q.id], q.place ?? place.n);
+    }
+  }
+  for (const s of allSideQuests()) add(s.region, `q-${s.kind}`, s.at, !!p.sideDone[s.id], s.title);
+  return { type: "FeatureCollection", features };
+}
 
 function busData(vs: Vehicle[]): FeatureCollection {
   return {
@@ -1411,7 +1479,6 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
       });
       mapRef.current = map;
       if (process.env.NODE_ENV !== "production") (window as unknown as { __mcMap: MapboxMap }).__mcMap = map;
-      map.addControl(new mapboxgl.AttributionControl({ compact: true }), "bottom-right");
 
       // Tilt limit eases in with zoom: zoomed out, a full 70° tilt is mostly empty sky.
       const fitPitch = () => {
@@ -1477,6 +1544,7 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
           if (!map.getSource("missions")) return;
           refreshMissions(map);
           (map.getSource("collectibles") as GeoJSONSource | undefined)?.setData(collectibleData());
+          (map.getSource("region-quests") as GeoJSONSource | undefined)?.setData(questBlipData());
           const key = Object.keys(getProgress().districts).join("|");
           if (key !== districtKey) {
             districtKey = key;
@@ -1500,6 +1568,8 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
         const mission = map.queryRenderedFeatures(box, { layers: ["mission-blips", "mission-areas-fill"] })[0];
         const slug = mission?.properties?.slug;
         if (typeof slug === "string") return callbacks.current.onMissionTap(slug);
+        const questRegion = map.queryRenderedFeatures(box, { layers: ["region-quest-blips"] })[0]?.properties?.region;
+        if (typeof questRegion === "string") return callbacks.current.onDistrictTap(questRegion);
         const col = map.queryRenderedFeatures(box, { layers: ["collectible-pins"] })[0]?.properties?.id;
         if (typeof col === "string") return callbacks.current.onCollectibleTap(col);
         const tag = map.queryRenderedFeatures(box, { layers: ["tag-pins"] })[0];
@@ -1549,7 +1619,7 @@ export default function MapView({ ref, onReady, onUnavailable, onMissionTap, onB
           callbacks.current.onBuildingTap(buildingInfo(geometry, [e.lngLat.lng, e.lngLat.lat]));
         }
       });
-      for (const layer of ["mission-blips", "mission-areas-fill", "tag-pins", "campus-buildings", "mission-buildings"]) {
+      for (const layer of ["mission-blips", "mission-areas-fill", "tag-pins", "region-quest-blips", "campus-buildings", "mission-buildings"]) {
         map.on("mouseenter", layer, () => (map.getCanvas().style.cursor = "pointer"));
         map.on("mouseleave", layer, () => (map.getCanvas().style.cursor = ""));
       }

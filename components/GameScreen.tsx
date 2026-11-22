@@ -30,7 +30,6 @@ import TagDetail from "./tags/TagDetail";
 import TagComposer from "./tags/TagComposer";
 import DistrictDetail from "./districts/DistrictDetail";
 import CollectibleDetail from "./CollectibleDetail";
-import Radar from "./Radar";
 import WeatherOverlay from "./WeatherOverlay";
 import Legend from "./Legend";
 import Onboarding from "./Onboarding";
@@ -219,7 +218,6 @@ export default function GameScreen({ cover = null }: { cover?: CoverArt }) {
       />
       <WeatherOverlay />
       <Hud visible={entered} />
-      {entered && !sheetOpen && <Radar />}
       {mapState === "ready" && entered && !sheetOpen && (
         <>
           <LocationPrompt />

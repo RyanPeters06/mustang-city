@@ -15,6 +15,7 @@ import { setClaimedAreas } from "./fog";
 import { onFix } from "./location";
 import type { LngLat } from "./geo";
 import { DAILY_REP, DAILY_SWEEP_REP, dailyDone, dailyQuests, dayKey, startOfDay, streakFrom } from "./daily";
+import { SIDE_REP, regionSideQuests, sideQuestCheck } from "./sideQuests";
 
 export { rankFor };
 import { MISSIONS } from "./missions";
@@ -78,6 +79,7 @@ type Stored = {
   dayStart?: { day: string; cells: number }; // fog cell count when today began (for "explore N blocks today")
   dailyDone?: Record<string, number>; // `${day}|${questId}` → done at
   activeDays?: string[]; // days with at least one daily quest done (streak)
+  sideDone?: Record<string, number>; // region side quest id → done at
   finds?: Record<string, number>; // collectible id → found at
   classRuns?: Record<string, number>; // `${meetingId}|${date}` → arrived on time at
 };
@@ -94,6 +96,7 @@ export type ProgressSnapshot = {
   checkins: Record<string, { place: string; at: number }>;
   regionsClaimed: number;
   dailyDone: Record<string, number>;
+  sideDone: Record<string, number>;
   cellsToday: number;
   streak: number;
   finds: Record<string, number>;
@@ -128,6 +131,7 @@ function ensureLoaded() {
         dayStart: parsed.dayStart,
         dailyDone: parsed.dailyDone ?? {},
         activeDays: parsed.activeDays ?? [],
+        sideDone: parsed.sideDone ?? {},
         finds: parsed.finds ?? {},
         classRuns: parsed.classRuns ?? {},
       };
@@ -280,7 +284,8 @@ export function getSnapshot(): ProgressSnapshot {
     const dailyKeys = Object.keys(data.dailyDone ?? {});
     const sweptDays = Object.values(dailyKeys.reduce<Record<string, number>>((m, k) => ((m[k.split("|")[0]] = (m[k.split("|")[0]] ?? 0) + 1), m), {})).filter((n) => n >= 3).length;
     const dailyRep = dailyKeys.length * DAILY_REP + sweptDays * DAILY_SWEEP_REP;
-    const rep = fog.rep + missionRep + data.demoRep + districtRep + findRep + classRep + dailyRep;
+    const sideRep = Object.keys(data.sideDone ?? {}).length * SIDE_REP;
+    const rep = fog.rep + missionRep + data.demoRep + districtRep + findRep + classRep + dailyRep + sideRep;
     snapshot = {
       completions: data.completions,
       profile: data.profile,
@@ -293,6 +298,7 @@ export function getSnapshot(): ProgressSnapshot {
       checkins: data.checkins ?? {},
       regionsClaimed: Object.keys(data.districts).length,
       dailyDone: data.dailyDone ?? {},
+      sideDone: data.sideDone ?? {},
       cellsToday: Math.max(0, fog.count - (data.dayStart?.day === dayKey() ? data.dayStart.cells : fog.count)),
       streak: streakFrom(data.activeDays ?? []),
       finds: data.finds ?? {},
@@ -317,6 +323,7 @@ const SERVER: ProgressSnapshot = {
   checkins: {},
   regionsClaimed: 0,
   dailyDone: {},
+  sideDone: {},
   cellsToday: 0,
   streak: 0,
   finds: {},
@@ -363,9 +370,23 @@ export const unlockLabel = (id: EmblemId) => {
 /** Dev/demo only: forget completions. */
 export function resetProgress() {
   ensureLoaded();
-  data = { ...data, completions: {}, demoRep: 0, finds: {}, districts: {}, visits: {}, checkins: {}, dailyDone: {}, activeDays: [], dayStart: undefined };
+  data = { ...data, completions: {}, demoRep: 0, finds: {}, districts: {}, visits: {}, checkins: {}, dailyDone: {}, activeDays: [], dayStart: undefined, sideDone: {} };
   syncClaimedFog();
   save();
+}
+
+/** Complete a region side quest (lib/sideQuests.ts). Returns null on success, else the reason it can't be done yet. */
+export function completeSideQuest(region: string, id: string, at: LngLat | null, opts: { demo?: boolean; answer?: number } = {}): string | null {
+  ensureLoaded();
+  const q = regionSideQuests(region).find((x) => x.id === id);
+  if (!q) return "Unknown quest.";
+  if (data.sideDone?.[id]) return null;
+  const check = sideQuestCheck(q, at, !!data.visits?.[region], opts.demo, opts.answer);
+  if (!check.ok) return check.reason;
+  data.sideDone = { ...(data.sideDone ?? {}), [id]: Date.now() };
+  save();
+  celebrate({ id: `side-${id}`, kind: "daily", title: q.title, subtitle: `${region} side quest · +${SIDE_REP} Rep`, color: "#FF4F8B", glyph: "M12 3l2.6 5.4 5.9.9-4.3 4.1 1 5.9L12 16.6 6.8 19.3l1-5.9L3.5 9.3l5.9-.9z" });
+  return null;
 }
 
 /**
