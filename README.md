@@ -26,7 +26,7 @@ npm run db:seed     # landmark + starter missions, badges (safe to re-run)
 ## Auth0
 
 1. Create a Regular Web Application. Allowed Callback URLs: `https://<domain>/auth/callback`;
-   Allowed Logout URLs: `https://<domain>`, `https://<domain>/?denied=uwo` (add the localhost equivalents too).
+   Allowed Logout URLs: `https://<domain>` and `http://localhost:3000` (exact match, no trailing slash).
 2. Actions → Library → Create Action (Post Login) → paste `auth0/uwo-only-action.js` → Deploy → add it to the post-login trigger.
 3. Set `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_SECRET` (`openssl rand -hex 32`), `APP_BASE_URL`.
 

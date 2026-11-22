@@ -23,8 +23,12 @@ export const auth0 =
           const base = APP_BASE_URL ?? "";
           if (error) return NextResponse.redirect(new URL("/?denied=uwo", base));
           if (session && !isUwoEmail(session.user.email)) {
-            const returnTo = new URL("/?denied=uwo", base).toString();
-            return NextResponse.redirect(new URL(`/auth/logout?returnTo=${encodeURIComponent(returnTo)}`, base));
+            // Auth0 matches logout URLs exactly (query string included), so return to the bare site
+            // URL — already in "Allowed Logout URLs" — and carry the notice in a one-shot cookie.
+            const returnTo = new URL(base).origin;
+            const res = NextResponse.redirect(new URL(`/auth/logout?returnTo=${encodeURIComponent(returnTo)}`, base));
+            res.cookies.set("mc_denied", "uwo", { path: "/", maxAge: 120, sameSite: "lax" });
+            return res;
           }
           return NextResponse.redirect(new URL(ctx.returnTo ?? "/", base));
         },

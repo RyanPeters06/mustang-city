@@ -51,12 +51,15 @@ import type { FriendRow } from "@/app/api/friends/route";
 
 const TITLES: Record<Exclude<Tab, "map">, string> = { missions: "Missions", crew: "Crew", profile: "Profile" };
 
-// Deep-link params, read once: `?denied=uwo` (Auth0 callback) and `?add=<handle>` (friend QR code).
+// Deep-link params, read once: `?denied=uwo` or the one-shot `mc_denied` cookie (Auth0 callback
+// turned away a non-@uwo.ca account) and `?add=<handle>` (friend QR code).
 let paramsAtLoad: { denied: boolean; add: string | null } | undefined;
 const readParams = () => {
   if (!paramsAtLoad) {
     const p = new URLSearchParams(window.location.search);
-    paramsAtLoad = { denied: p.get("denied") === "uwo", add: p.get("add")?.toLowerCase().slice(0, 24) ?? null };
+    const deniedCookie = /(?:^|;\s*)mc_denied=uwo/.test(document.cookie);
+    if (deniedCookie) document.cookie = "mc_denied=; Max-Age=0; Path=/";
+    paramsAtLoad = { denied: deniedCookie || p.get("denied") === "uwo", add: p.get("add")?.toLowerCase().slice(0, 24) ?? null };
   }
   return paramsAtLoad;
 };
